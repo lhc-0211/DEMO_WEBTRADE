@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { IoIosArrowDown } from "react-icons/io";
 import ScaleLoader from "react-spinners/ScaleLoader";
-import ConfirmOtpModal from "../../../../components/auth/ConfirmOTPModal";
+import ConfirmOtpModal from "../../../../components/auth/ConfirmOtpModal";
 import Button from "../../../../components/common/Button";
 import InputOrderPrice from "../../../../components/inputs/InputOrderPrice";
 import InputOrderSide from "../../../../components/inputs/InputOrderSide";

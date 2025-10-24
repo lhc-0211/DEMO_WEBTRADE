@@ -18,7 +18,7 @@ import type {
   AccountProfile,
   ChangeAccountInfoForm,
 } from "../../../../types/client";
-import ConfirmOTPModal from "../../../auth/ConfirmOtpModal";
+import ConfirmOtpModal from "../../../auth/ConfirmOtpModal";
 import Button from "../../../common/Button";
 import InputField from "../../../inputs/InputField";
 
@@ -239,7 +239,7 @@ export default function ChangeAccountInfoModal({
       )}
 
       {step === 2 && (
-        <ConfirmOTPModal
+        <ConfirmOtpModal
           isOpen={true}
           onClose={() => onCloseModal()}
           onPre={() => onPreModal()}
