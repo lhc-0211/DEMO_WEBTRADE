@@ -149,7 +149,7 @@ function OrderHisTable() {
           {table.getHeaderGroups().map((headerGroup, index) => (
             <tr
               key={headerGroup.id}
-              className={index === 0 ? "mb-[10px]" : "h-10 "}
+              className={index === 0 ? "mb-2.5" : "h-10 "}
             >
               {headerGroup.headers.map((header) => {
                 const headerText = String(header.column.columnDef.header);
@@ -197,7 +197,7 @@ function OrderHisTable() {
                 switch (accessorKey) {
                   case "side":
                     customClass =
-                      value === "MUA"
+                      value === "Mua"
                         ? "text-green-400 font-semibold"
                         : "text-red-400 font-semibold";
                     break;
