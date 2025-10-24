@@ -160,7 +160,7 @@ function OrderHisTable() {
   return (
     <div className="w-full h-[448px] overflow-auto rounded-md text-text-title text-xs">
       <table className="w-full border-collapse">
-        <thead>
+        <thead className="sticky top-0 z-10 bg-background-primary">
           {/* --- Hàng đầu: nhóm header --- */}
           {table.getHeaderGroups().map((headerGroup, index) => (
             <tr
@@ -171,11 +171,11 @@ function OrderHisTable() {
                 const headerText = String(header.column.columnDef.header);
                 const groupClass =
                   headerText === "LOẠI LỆNH"
-                    ? "bg-surface text-text-title text-[10px] font-medium rounded-md h-[22px]"
+                    ? "bg-surface text-text-title text-xs font-medium rounded-md h-6"
                     : headerText === "CHI TIẾT LỆNH"
-                    ? "bg-surface text-text-title text-[10px] font-medium rounded-md h-[22px]"
+                    ? "bg-surface text-text-title text-xs font-medium rounded-md h-6"
                     : headerText === "THAO TÁC"
-                    ? "bg-surface text-text-title text-[10px] font-medium rounded-md h-[22px]"
+                    ? "bg-surface text-text-title text-xs font-medium rounded-md h-6"
                     : "";
 
                 return (
