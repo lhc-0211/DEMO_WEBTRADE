@@ -18,6 +18,7 @@ import { selectToken } from "../../../../store/slices/auth/selector";
 import { selectAccountProfile } from "../../../../store/slices/client/selector";
 import {
   selectCashBalance,
+  selectCashBalanceStatus,
   selectOrdersStatus,
   selectShareStock,
   selectShareStockStatus,
@@ -73,6 +74,9 @@ export default function NormalOrderForm() {
   const { loading: loadingShareStock } = useAppSelector(selectShareStockStatus);
   const { loading: loadingOrder, success: successOrder } =
     useAppSelector(selectOrdersStatus);
+  const { loading: loadingCashBanlance } = useAppSelector(
+    selectCashBalanceStatus
+  );
 
   const orderSymbol = watch("orderSymbol");
   const orderSymbolValue = orderSymbol?.value;
@@ -217,7 +221,7 @@ export default function NormalOrderForm() {
                     },
                   ]}
                   placeholder="Chọn tài khoản"
-                  className="!w-[200px] !h-9 !rounded-xl !text-xs"
+                  className="w-[200px]! h-9! rounded-xl! text-xs!"
                   error={fieldState.error}
                 />
                 {fieldState.error && (
@@ -243,7 +247,7 @@ export default function NormalOrderForm() {
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Tìm kiếm mã"
-                    className="!w-[160px]"
+                    className="w-40!"
                   />
                   {fieldState.error && (
                     <p className="text-red-500 text-xs mt-1">
@@ -254,7 +258,7 @@ export default function NormalOrderForm() {
               )}
             />
             {orderSymbol?.post_to && orderSymbol?.label && (
-              <div className="flex flex-col gap-[2px]">
+              <div className="flex flex-col gap-0.5">
                 <span className="text-sm font-bold text-text-title items-center">
                   ({orderSymbol?.post_to})
                 </span>{" "}
@@ -283,32 +287,39 @@ export default function NormalOrderForm() {
 
         {/* Sức mua bán và tỉ lệ kí quỹ */}
         <div className="flex flex-row items-center justify-between">
+          {/* Cột trái */}
           <div className="flex flex-col gap-1 text-xs">
-            <span className="">Sức mua </span>
-            <span>
-              {cashBalance && numberFormat(cashBalance?.cashAvaiable) + " VND"}
-            </span>
+            <span>Sức mua</span>
+            {!loadingCashBanlance && cashBalance ? (
+              <span>{numberFormat(cashBalance.cashAvaiable)} VND</span>
+            ) : (
+              <div className="h-4 w-20 bg-gray-300/40 rounded animate-pulse" />
+            )}
           </div>
-          <div className="flex flex-col gap-1 text-xs items-end">
-            <span className="text-xs">Tỉ lệ kí quỹ</span>
 
-            <span
-              className={`${
-                cashBalance?.marginratio === "1"
-                  ? "text-stock-text-purple"
-                  : "text-text-subtitle"
-              }`}
-            >
-              {cashBalance &&
-                StringToDouble(cashBalance?.marginratio) * 100 + "%"}
-            </span>
+          {/* Cột phải */}
+          <div className="flex flex-col gap-1 text-xs items-end">
+            <span>Tỉ lệ kí quỹ</span>
+            {!loadingCashBanlance && cashBalance ? (
+              <span
+                className={`${
+                  cashBalance.marginratio === "1"
+                    ? "text-stock-text-purple"
+                    : "text-text-subtitle"
+                }`}
+              >
+                {StringToDouble(cashBalance.marginratio) * 100}%
+              </span>
+            ) : (
+              <div className="h-4 w-10 bg-gray-300/40 rounded animate-pulse" />
+            )}
           </div>
         </div>
 
         {/* input khối lượng */}
         <div
-          className={`h-[88px] px-3.5 pt-2.5 pb-3 bg-input rounded-lg border border-transparent focus-within:outline-none focus-within:!border focus-within:!border-yellow-500 focus-within:!shadow-[0_0_0_2px_rgba(250,204,21,0.3)] caret-DTND-200 ${
-            errors.orderVolume?.message ? "!border !border-red-500" : ""
+          className={`h-[88px] px-3.5 pt-2.5 pb-3 bg-input rounded-lg border border-transparent focus-within:outline-none focus-within:border! focus-within:border-yellow-500! focus-within:shadow-[0_0_0_2px_rgba(250,204,21,0.3)]! caret-DTND-200 ${
+            errors.orderVolume?.message ? "border! border-red-500!" : ""
           }`}
         >
           <div className="flex flex-row items-center justify-between pb-3.5">
@@ -316,19 +327,25 @@ export default function NormalOrderForm() {
 
             {orderSide === "B" ? (
               <span className="text-xs">
-                {" "}
                 KL mua tối đa:{" "}
-                <span className="text-green-400">
-                  {cashBalance && numberFormat(cashBalance?.volumeAvaiable)}
-                </span>
+                {!loadingCashBanlance && cashBalance ? (
+                  <span className="text-green-400">
+                    {numberFormat(cashBalance.volumeAvaiable)}
+                  </span>
+                ) : (
+                  <span className="inline-block h-4 w-16 bg-gray-300/40 rounded animate-pulse align-middle" />
+                )}
               </span>
             ) : (
               <span className="text-xs">
-                {" "}
                 KL bán tối đa:{" "}
-                <span className="text-red-400">
-                  {cashBalance && numberFormat(cashBalance?.volumeAvaiable)}
-                </span>
+                {!loadingCashBanlance && cashBalance ? (
+                  <span className="text-red-400">
+                    {numberFormat(cashBalance.volumeAvaiable)}
+                  </span>
+                ) : (
+                  <span className="inline-block h-4 w-16 bg-gray-300/40 rounded animate-pulse align-middle" />
+                )}
               </span>
             )}
           </div>
@@ -346,7 +363,7 @@ export default function NormalOrderForm() {
                   step={100}
                   min={0}
                   max={9999999999999}
-                  className="!h-7 text-[20px]"
+                  className="h-7! text-[20px]"
                   required
                   {...field}
                 />
@@ -362,8 +379,8 @@ export default function NormalOrderForm() {
 
         {/* input giá */}
         <div
-          className={`h-[88px] px-3.5 pt-[10px] pb-3 bg-input rounded-lg border border-transparent focus-within:outline-none focus-within:!border focus-within:!border-yellow-500 focus-within:!shadow-[0_0_0_2px_rgba(250,204,21,0.3)] caret-DTND-200 ${
-            errors.orderPrice?.message ? "!border !border-red-500" : ""
+          className={`h-[88px] px-3.5 pt-2.5 pb-3 bg-input rounded-lg border border-transparent focus-within:outline-none focus-within:border! focus-within:border-yellow-500! focus-within:shadow-[0_0_0_2px_rgba(250,204,21,0.3)]! caret-DTND-200 ${
+            errors.orderPrice?.message ? "border! border-red-500!" : ""
           }`}
         >
           <div className="flex flex-row items-center justify-between mb-3.5">
@@ -387,7 +404,7 @@ export default function NormalOrderForm() {
                   step={0.05}
                   min={0}
                   max={1000}
-                  className="!h-7 text-[20px]"
+                  className="h-7! text-[20px]"
                   required
                   {...field}
                 />
@@ -427,7 +444,7 @@ export default function NormalOrderForm() {
             fullWidth
             type="submit"
             disabled={isSubmitting || loadingShareStock || stepOrder !== 0}
-            className="!h-10"
+            className="h-10!"
           >
             {loadingShareStock ? <ScaleLoader height={25} /> : "Đặt lệnh"}
           </Button>

@@ -15,6 +15,7 @@ import {
   selectListOrdersIndayStatus,
 } from "../../../../store/slices/place-order/selector";
 import { fetchListOrdersIndayRequest } from "../../../../store/slices/place-order/slice";
+import OrderHisTableSkeleton from "./OrderHisTableSkeleton";
 
 type Order = {
   time: string | number;
@@ -135,6 +136,10 @@ function OrderHisTable() {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
+
+  if (loading) {
+    return <OrderHisTableSkeleton />;
+  }
 
   return (
     <div className="w-full h-[448px] overflow-auto rounded-md text-text-title text-xs">
