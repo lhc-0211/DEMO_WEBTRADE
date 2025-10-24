@@ -301,3 +301,26 @@ input:-webkit-autofill {
   opacity: 0.9;
   width: 6px;
 }
+
+.orderStt_PX,
+.orderStt_PCX,
+.orderStt_PCMX .orderStt_PMX,
+.orderStt_PMCX,
+.orderStt_PWX,
+.orderStt_1,
+.orderStt_2 {
+  border-color: var(--color-red-500);
+  color: var(--color-red-500);
+}
+
+.orderStt_PW,
+.orderStt_P,
+.orderStt_0 {
+  border-color: var(--color-yellow-500);
+  color: var(--color-yellow-500);
+}
+.orderStt_PM,
+.orderStt_PCM {
+  color: var(--color-green-500);
+  border-color: var(--color-green-500);
+}

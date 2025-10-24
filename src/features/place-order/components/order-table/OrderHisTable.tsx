@@ -26,6 +26,7 @@ type Order = {
   volume: string;
   total: string;
   status: string;
+  statusId?: string;
 };
 
 const columns: ColumnDef<Order>[] = [
@@ -126,6 +127,7 @@ function OrderHisTable() {
         +item.matchedVolume,
         +item.orderVolume
       ),
+      statusId: `orderStt_${item.orderStatus}`,
     }));
 
     setTableData(tableData);
@@ -203,10 +205,7 @@ function OrderHisTable() {
                     break;
 
                   case "status":
-                    customClass =
-                      value === "Chờ khớp"
-                        ? "text-yellow-400 font-semibold"
-                        : "text-red-400 font-semibold";
+                    customClass = row.original.statusId + "";
                     break;
 
                   default:
