@@ -1,3 +1,4 @@
+import logoFull from "@/assets/imgs/logo.png";
 import { MdZoomOutMap } from "react-icons/md";
 import { useAppSelector } from "../../store/hook";
 import { selectToken } from "../../store/slices/auth/selector";
@@ -61,9 +62,7 @@ export default function Header() {
   return (
     <div className="flex items-center justify-between h-full w-full">
       <div className="flex flex-row gap-2">
-        {isEmptyObject(token) && (
-          <img src="/src/assets/imgs/logo.png" alt="logo" />
-        )}
+        {isEmptyObject(token) && <img src={logoFull} alt="logo" />}
       </div>
 
       <div className="flex flex-row gap-4 items-center">

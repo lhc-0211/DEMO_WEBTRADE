@@ -1,3 +1,5 @@
+import logoShort from "@/assets/imgs/logo-short.png";
+import logoFull from "@/assets/imgs/logo.png";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   VscLayoutActivitybarRight,
@@ -55,11 +57,7 @@ export default function Sidebar({ mode, width, changeModeSidebar }: Props) {
             <div className="h-10 mt-4 grid place-items-center">
               <motion.img
                 key={mode === "full" ? "logo-full" : "logo-mini"}
-                src={
-                  mode === "full"
-                    ? "/src/assets/imgs/logo.png"
-                    : "/src/assets/imgs/logo-short.png"
-                }
+                src={mode === "full" ? logoFull : logoShort}
                 alt="logo"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
