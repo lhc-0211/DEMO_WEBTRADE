@@ -1,0 +1,303 @@
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  color: var(--color-text-body);
+  background-color: var(--color-background-primary);
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --app-height: 100vh; /* fallback */
+  user-select: none;
+  overflow: hidden;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-slate-600) transparent;
+  outline: none;
+  transition: color 0.25s, background-color 0.25s, border-color 0.25s,
+    opacity 0.25s, outline-color 0.25s;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none !important; /* Ẩn trên Chrome, Safari */
+}
+.hide-scrollbar {
+  -ms-overflow-style: none !important; /* Ẩn trên IE và Edge */
+  scrollbar-width: none !important; /* Ẩn trên Firefox */
+}
+
+button {
+  cursor: pointer;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px var(--color-input) inset !important; /* đổi nền */
+  -webkit-text-fill-color: var(--color-text-title) !important; /* màu chữ */
+  transition: background-color 5000s ease-in-out 0s; /* ngăn nhảy màu */
+}
+
+.i,
+.UP,
+.g {
+  color: var(--color-stock-text-green) !important;
+}
+
+.UP .bg-status-index {
+  background-color: var(--color-success-darker) !important;
+}
+
+.DOWN,
+.d {
+  color: var(--color-stock-text-red) !important;
+}
+
+.DOWN .bg-status-index {
+  background-color: var(--color-error-darker) !important;
+}
+
+.e,
+.EQUAL,
+.r,
+.REF {
+  color: var(--color-stock-text-yellow) !important;
+}
+
+.EQUAL .bg-status-index {
+  background-color: var(--color-warning-darker) !important;
+}
+
+.FLOOR,
+.f {
+  color: var(--color-stock-text-blue) !important;
+}
+
+.FLOOR .bg-status-index {
+  background-color: var(--color-infomation-darker) !important;
+}
+
+.CEIL,
+.c {
+  color: var(--color-stock-text-purple) !important;
+}
+
+.CEIL .bg-status-index {
+  background-color: var(--color-features-darker) !important;
+}
+
+.loader {
+  width: 120px;
+  height: 22px;
+  border-radius: 20px;
+  color: #bd720f;
+  border: 2px solid;
+  position: relative;
+}
+.loader::before {
+  content: "";
+  position: absolute;
+  margin: 2px;
+  inset: 0 100% 0 0;
+  border-radius: inherit;
+  background: currentColor;
+  animation: l6 2s infinite;
+}
+@keyframes l6 {
+  100% {
+    inset: 0;
+  }
+}
+
+/* TODO: Animations */
+/* XUẤT HIỆN: Từ góc phải trên xuống */
+@keyframes fadeInFromTopRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+.animate-fadeInFromTopRight {
+  animation: fadeInFromTopRight 0.25s ease forwards;
+}
+
+/* MẤT ĐI: Ngược lại - từ góc phải trên */
+@keyframes fadeOutToTopRight {
+  from {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px) translateY(-10px);
+  }
+}
+
+.animate-fadeOutToTopRight {
+  animation: fadeOutToTopRight 0.2s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.25s ease forwards;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+.animate-fadeInDown {
+  animation: fadeInDown 0.2s ease-out forwards;
+}
+
+.animate-fadeOutUp {
+  animation: fadeOutUp 0.2s ease-out forwards;
+}
+/* End */
+
+/* Custom css toast */
+.Toastify__toast {
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 12px !important;
+}
+/* .Toastify__toast.Toastify__toast--warning {
+  background-color: var(--color-warning-darker) !important;
+}
+.Toastify__toast.Toastify__toast--error {
+  background-color: var(--color-error-darker) !important;
+}
+.Toastify__toast.Toastify__toast--info {
+  background-color: var(--color-infomation-darker) !important;
+}
+
+.Toastify__toast.Toastify__toast--success {
+  background-color: var(--color-success-darker) !important;
+} */
+
+.Toastify__toast-body {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 20px auto;
+  gap: 8px;
+}
+
+.Toastify__toast-body .Toastify__toast-icon {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-position: right;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 48px;
+  height: 100%;
+  width: 16px;
+  height: 16px;
+}
+
+.Toastify__progress-bar {
+  height: 2px;
+}
+
+.Toastify__toast-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.Toastify__toast {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.Toastify__close-button {
+  align-self: center;
+}
+
+.Toastify__close-button--light {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.bg-type-margin {
+  background: linear-gradient(127.72deg, #4531e0 14.81%, #ae5ef1 100.61%);
+}
+
+/**------------------------------------------------------------
+*!perfect scrollbar
+---------------------------------------------------------------*/
+
+.ps__rail-x {
+  height: 6px;
+}
+
+.ps__rail-x:hover > .ps__thumb-x,
+.ps__rail-x:focus > .ps__thumb-x,
+.ps__rail-x.ps--clicking .ps__thumb-x {
+  height: 6px;
+}
+
+.ps .ps__rail-x:hover,
+.ps .ps__rail-x:focus,
+.ps .ps__rail-x.ps--clicking {
+  opacity: 0.9;
+  height: 6px;
+}
+
+.ps__thumb-x {
+  height: 6px;
+  bottom: 0;
+}
+
+.ps__thumb-y,
+.ps__rail-y {
+  width: 0px;
+}
+
+.ps__rail-y:hover > .ps__thumb-y,
+.ps__rail-y:focus > .ps__thumb-y,
+.ps__rail-y.ps--clicking .ps__thumb-y {
+  width: 6px;
+}
+
+.ps .ps__rail-y:hover,
+.ps .ps__rail-y:focus,
+.ps .ps__rail-y.ps--clicking {
+  opacity: 0.9;
+  width: 6px;
+}
