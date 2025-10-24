@@ -14,33 +14,31 @@ export async function fetchAccountProfileAPI(): Promise<AccountProfileResponse> 
 }
 
 export const changeNicknameApi = async (
-  payload: Pick<ChangeNicknamePayload, "NICK_NAME">
+  params: Pick<ChangeNicknamePayload, "NICK_NAME">
 ): Promise<ChangeNicknameResponse> => {
   const res = await apiClient.put<ChangeNicknameResponse>(
     "/accounts/changeNickname",
-    payload
+    params
   );
   return res.data;
 };
 
 export const checkNicknameApi = async (
-  payload: Pick<ChangeNicknamePayload, "NICK_NAME">
+  params: string
 ): Promise<ChangeNicknameResponse> => {
-  const res = await apiClient.request<ChangeNicknameResponse>({
-    url: "/accounts/checkNickname",
-    method: "GET",
-    data: payload,
-  });
+  const res = await apiClient.get<ChangeNicknameResponse>(
+    `/accounts/checkNickname?nickName=${params}`
+  );
   return res.data;
 };
 
 export const fetchChangeAccInfoApi = async (
-  payload: ChangeAccountInfoPayload,
+  params: ChangeAccountInfoPayload,
   otp: string
 ): Promise<ChangeAccountInfoResponse> => {
   const res = await apiClient.put<ChangeAccountInfoResponse>(
     "/accounts/change",
-    payload,
+    params,
     {
       headers: {
         "X-Otp": otp,

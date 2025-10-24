@@ -1,22 +1,22 @@
 import clsx from "clsx";
 import { AnimatePresence, motion } from "framer-motion";
-import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { HiOutlineLightBulb } from "react-icons/hi";
 import { IoCheckmarkCircleOutline, IoClose } from "react-icons/io5";
 import Modal from "react-modal";
 import ScaleLoader from "react-spinners/ScaleLoader";
-import { usePrevious } from "../../../hooks/usePrevious";
 import { useToast } from "../../../hooks/useToast";
 import { useAppDispatch, useAppSelector } from "../../../store/hook";
 import {
   selectChangeNicknameStatus,
   selectCheckNickname,
+  selectCheckNicknameStatus,
 } from "../../../store/slices/client/selector";
 import {
   fetchAccountProfileRequest,
   fetchChangeNicknameRequest,
+  fetchCheckNicknameRequest,
   resetFetchChangeNickname,
 } from "../../../store/slices/client/slice";
 import type { AccountProfile, ChangeNicknameForm } from "../../../types/client";
@@ -70,21 +70,17 @@ export default function ChangeNicknameModal({
   const toast = useToast();
 
   const checkNickname = useAppSelector(selectCheckNickname);
-  const { loading, success } = useAppSelector(selectChangeNicknameStatus);
-  const { loading: loadingCheckNickname } = useAppSelector(
+  const { loading: loadingChangeNickname, success } = useAppSelector(
     selectChangeNicknameStatus
   );
-
-  const preCheckNickname = usePrevious(checkNickname);
+  const { loading: loadingCheckNickname } = useAppSelector(
+    selectCheckNicknameStatus
+  );
 
   useEffect(() => {
-    if (!checkNickname || _.isEqual(checkNickname, preCheckNickname)) return;
-
-    const todayFormat = formatDate(new Date(), "/", "dmy");
-    if (_diff2Date(checkNickname.C_CHANGE_DATE, todayFormat) > 90) {
-      setStep(2);
-    }
-  }, [preCheckNickname, checkNickname]);
+    if (!accountProfile || !accountProfile?.cUserName) return;
+    dispatch(fetchCheckNicknameRequest(accountProfile?.cUserName));
+  }, [dispatch, accountProfile]);
 
   useEffect(() => {
     if (!success) return;
@@ -105,7 +101,7 @@ export default function ChangeNicknameModal({
     return () => {
       dispatch(resetFetchChangeNickname());
     };
-  }, [success, dispatch]);
+  }, [success, dispatch, toast]);
 
   const onPreModal = () => {
     if (step === 2) {
@@ -126,13 +122,18 @@ export default function ChangeNicknameModal({
 
   const onSubmit = async (data: ChangeNicknameForm) => {
     if (step === 1) {
-      // await dispatch(
-      //   fetchCheckNicknameRequest({
-      //     NICK_NAME: data.nickname,
-      //   })
-      // );
+      if (!checkNickname) return;
 
-      setStep(2); // Chuyển sang bước nhập password
+      const todayFormat = formatDate(new Date(), "/", "dmy");
+      if (_diff2Date(checkNickname.cChangeDate, todayFormat) <= 0) {
+        setStep(2);
+      } else {
+        toast(
+          `Nickname đã đổi gần đây, vui lòng thử lại sau ngày ${checkNickname.cChangeDate}`,
+          "error"
+        );
+      }
+
       return;
     }
 
@@ -212,7 +213,7 @@ export default function ChangeNicknameModal({
                   <>
                     <div className="flex flex-col gap-6">
                       <div className="flex items-center gap-2 w-full">
-                        <div className="mb-[14px] text-[40px] font-medium text-text-body flex items-center justify-center">
+                        <div className="mb-3.5 text-[40px] font-medium text-text-body flex items-center justify-center">
                           @
                         </div>
                         <InputField
@@ -225,7 +226,7 @@ export default function ChangeNicknameModal({
                               message: "Nickname không hợp lệ",
                             },
                           })}
-                          className="!h-12 !bg-transparent !w-[370px]"
+                          className="h-12! bg-transparent! w-[370px]!"
                         />
                       </div>
                     </div>
@@ -289,7 +290,7 @@ export default function ChangeNicknameModal({
                           message: "Mật khẩu ít nhất 6 kí tự",
                         },
                       })}
-                      className="!h-12"
+                      className="h-12!"
                     />
                   </div>
                 )}
@@ -303,12 +304,12 @@ export default function ChangeNicknameModal({
                       isSubmitting ||
                       !noSpaces ||
                       !hasLengthAndPattern ||
-                      loading ||
+                      loadingChangeNickname ||
                       loadingCheckNickname
                     }
-                    className="!h-10"
+                    className="h-10!"
                   >
-                    {loading || loadingCheckNickname ? (
+                    {loadingChangeNickname || loadingCheckNickname ? (
                       <ScaleLoader height={25} />
                     ) : (
                       "Xác nhận"
@@ -317,7 +318,7 @@ export default function ChangeNicknameModal({
                   <Button
                     variant="close"
                     fullWidth
-                    className="!h-10"
+                    className="h-10!"
                     type="button"
                     onClick={onPreModal}
                   >

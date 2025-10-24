@@ -57,9 +57,7 @@ function* fetchAccountProfileSaga() {
   }
 }
 
-function* fetchCheckNicknameSaga(
-  action: PayloadAction<Pick<ChangeNicknamePayload, "NICK_NAME">>
-) {
+function* fetchCheckNicknameSaga(action: PayloadAction<string>) {
   try {
     const res: ChangeNicknameResponse = yield call(
       checkNicknameApi,

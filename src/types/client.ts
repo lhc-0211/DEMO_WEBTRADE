@@ -73,9 +73,9 @@ export interface ChangeNicknameResponse {
   rc: number;
   msg: string | null;
   data?: {
-    C_ACCOUNT_CODE: string;
-    C_NICK_NAME: string;
-    C_CHANGE_DATE: string;
+    cAccountCode: string;
+    cNickName: string;
+    cChangeDate: string;
   };
 }
 

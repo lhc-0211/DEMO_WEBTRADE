@@ -31,11 +31,11 @@ export async function loginApi({
 }
 
 export const fetchOtpApi = async (
-  payload: FetchOtpPayload
+  params: FetchOtpPayload
 ): Promise<FetchOtpResponse> => {
   const res = await apiClient.post<FetchOtpResponse>(
     "/auth/otp/request",
-    payload
+    params
   );
   return res.data;
 };

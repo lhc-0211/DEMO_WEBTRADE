@@ -71,10 +71,7 @@ const clientSlice = createSlice({
     },
 
     //Check nickname
-    fetchCheckNicknameRequest(
-      state,
-      action: PayloadAction<Pick<ChangeNicknamePayload, "NICK_NAME">>
-    ) {
+    fetchCheckNicknameRequest(state, action: PayloadAction<string>) {
       state.status.fetchCheckNickname = { loading: true, error: null };
       state.data.checkNickname = null;
     },
