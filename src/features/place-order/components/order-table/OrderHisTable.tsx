@@ -15,7 +15,11 @@ import {
   selectListOrdersIndayStatus,
 } from "../../../../store/slices/place-order/selector";
 import { fetchListOrdersIndayRequest } from "../../../../store/slices/place-order/slice";
-import { getOrderStatus } from "../../../../utils";
+import {
+  canDeleteOrder,
+  canEditOrder,
+  getOrderStatus,
+} from "../../../../utils";
 import OrderHisTableSkeleton from "./OrderHisTableSkeleton";
 
 type Order = {
@@ -26,7 +30,8 @@ type Order = {
   volume: string;
   total: string;
   status: string;
-  statusId?: string;
+  statusId: string;
+  matchVolume: string;
 };
 
 const columns: ColumnDef<Order>[] = [
@@ -55,8 +60,16 @@ const columns: ColumnDef<Order>[] = [
         id: "action",
         cell: ({ row }) => {
           const order = row.original;
-          const canEdit = order.status === "Chờ khớp";
-          const canCancel = order.status !== "Đã khớp";
+          const canEdit = canEditOrder(
+            order.statusId,
+            order.volume,
+            order.matchVolume
+          );
+          const canCancel = canDeleteOrder(
+            order.statusId,
+            order.volume,
+            order.matchVolume
+          );
 
           return (
             <div className="flex items-center justify-center gap-4">
@@ -127,7 +140,8 @@ function OrderHisTable() {
         +item.matchedVolume,
         +item.orderVolume
       ),
-      statusId: `orderStt_${item.orderStatus}`,
+      statusId: item.orderStatus + "",
+      matchVolume: item.matchedVolume + "",
     }));
 
     setTableData(tableData);
@@ -205,7 +219,7 @@ function OrderHisTable() {
                     break;
 
                   case "status":
-                    customClass = row.original.statusId + "";
+                    customClass = "orderStt_" + row.original.statusId;
                     break;
 
                   default:

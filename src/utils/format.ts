@@ -322,3 +322,33 @@ export function getOrderStatus(
 
   return sttCode;
 }
+
+export function canDeleteOrder(
+  ordrStatTp: string,
+  ordrQty: string | number,
+  matchedQty: string | number
+) {
+  if (ordrStatTp === "P" || ordrStatTp.endsWith("C")) return true;
+  if (
+    ordrStatTp.endsWith("M") &&
+    StringToInt(matchedQty) < StringToInt(ordrQty)
+  )
+    return true;
+
+  return false;
+}
+
+export function canEditOrder(
+  ordrStatTp: string,
+  ordrQty: string | number,
+  matchedQty: string | number
+) {
+  if (ordrStatTp === "P" || ordrStatTp.endsWith("C")) return true;
+  if (
+    ordrStatTp.endsWith("M") &&
+    StringToInt(matchedQty) < StringToInt(ordrQty)
+  )
+    return true;
+
+  return false;
+}
