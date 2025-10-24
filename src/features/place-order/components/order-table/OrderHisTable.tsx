@@ -15,6 +15,7 @@ import {
   selectListOrdersIndayStatus,
 } from "../../../../store/slices/place-order/selector";
 import { fetchListOrdersIndayRequest } from "../../../../store/slices/place-order/slice";
+import { getOrderStatus } from "../../../../utils";
 import OrderHisTableSkeleton from "./OrderHisTableSkeleton";
 
 type Order = {
@@ -120,12 +121,11 @@ function OrderHisTable() {
       price: item.orderShowPrice || item.orderPrice.toLocaleString(),
       volume: item.orderVolume.toString(),
       total: (item.orderPrice * item.orderVolume).toLocaleString(),
-      status:
-        item.orderStatus === "P"
-          ? "Chờ khớp"
-          : item.orderStatus === "M"
-          ? "Đã khớp"
-          : "Đã hủy",
+      status: getOrderStatus(
+        item.orderStatus,
+        +item.matchedVolume,
+        +item.orderVolume
+      ),
     }));
 
     setTableData(tableData);

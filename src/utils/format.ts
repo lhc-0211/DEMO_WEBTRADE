@@ -292,3 +292,33 @@ export function getRandom() {
 
   return text;
 }
+
+export function getOrderStatus(
+  sttCode: string,
+  matchVol = 0,
+  orderVol = 0,
+  quote = "Y",
+  index = "HOSE"
+) {
+  // log(sttCode, index)
+  if (sttCode === "P") {
+    return "Chờ khớp";
+  } else if (sttCode.endsWith("W")) {
+    return "Chờ hủy";
+  } else if (sttCode.endsWith("M")) {
+    if (StringToInt(matchVol) === StringToInt(orderVol)) return "Đã khớp";
+
+    return "Khớp 1 phần";
+  } else if (sttCode.endsWith("X")) {
+    if (StringToInt(matchVol) > 0) return "Khớp 1 phần, 1 phần đã hủy";
+    return "Đã hủy";
+  } else if (sttCode.endsWith("C")) {
+    if (index === "HNX" && quote === "G") return "Chờ sửa";
+    if (index === "HNX" && quote === "Y") return "Chờ khớp";
+    return "Đã sửa";
+  } else if (sttCode.indexOf("R") > 0) {
+    return "Từ chối";
+  }
+
+  return sttCode;
+}
