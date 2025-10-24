@@ -1,6 +1,8 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ApiStatus } from "../../../types";
 import type {
+  FetchCashBalanceParams,
+  FetchCashBalanceResponse,
   FetchOrdersIndayParams,
   FetchShareCodeResponse,
   FetchShareStockItem,
@@ -13,12 +15,14 @@ export interface PlaceOrderState {
     shareStockCode: FetchShareCodeResponse["data"] | null;
     listShareStock: FetchShareStockItem[] | null;
     listOrdersInday: OrderIndayItem[] | null;
+    cashBalance: FetchCashBalanceResponse["data"] | null;
   };
   status: {
     fetchShareStockCode: ApiStatus;
     fetchListShareStock: ApiStatus;
     fetchOrders: ApiStatus;
     fetchListOrdersInday: ApiStatus;
+    fetchCashBalance: ApiStatus;
   };
 }
 
@@ -27,12 +31,14 @@ const initialState: PlaceOrderState = {
     shareStockCode: null,
     listShareStock: null,
     listOrdersInday: null,
+    cashBalance: null,
   },
   status: {
     fetchShareStockCode: { loading: false, error: null },
     fetchListShareStock: { loading: false, error: null },
     fetchOrders: { loading: false, error: null, success: false },
     fetchListOrdersInday: { loading: false, error: null },
+    fetchCashBalance: { loading: false, error: null },
   },
 };
 
@@ -131,6 +137,29 @@ const placeOrderSlice = createSlice({
       };
       state.data.listOrdersInday = null;
     },
+
+    //Lấy balance
+    fetchCashBalanceRequest: (
+      state,
+      action: PayloadAction<FetchCashBalanceParams>
+    ) => {
+      state.status.fetchCashBalance = { loading: true, error: null };
+      state.data.cashBalance = null;
+    },
+    fetchCashBalanceSuccess: (
+      state,
+      action: PayloadAction<FetchCashBalanceResponse["data"]>
+    ) => {
+      state.status.fetchCashBalance = { loading: false, error: null };
+      state.data.cashBalance = action.payload;
+    },
+    fetchCashBalanceFailure: (state, action: PayloadAction<string>) => {
+      state.status.fetchCashBalance = {
+        loading: false,
+        error: action.payload,
+      };
+      state.data.cashBalance = null;
+    },
   },
 });
 
@@ -148,6 +177,9 @@ export const {
   fetchListOrdersIndayRequest,
   fetchListOrdersIndaySuccess,
   fetchListOrdersIndayFailure,
+  fetchCashBalanceRequest,
+  fetchCashBalanceSuccess,
+  fetchCashBalanceFailure,
 } = placeOrderSlice.actions;
 
 export default placeOrderSlice.reducer;

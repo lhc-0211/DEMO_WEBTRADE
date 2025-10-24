@@ -17,11 +17,13 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hook";
 import { selectToken } from "../../../../store/slices/auth/selector";
 import { selectAccountProfile } from "../../../../store/slices/client/selector";
 import {
+  selectCashBalance,
   selectOrdersStatus,
   selectShareStock,
   selectShareStockStatus,
 } from "../../../../store/slices/place-order/selector";
 import {
+  fetchCashBalanceRequest,
   fetchListOrdersIndayRequest,
   fetchOrdersRequest,
   fetchShareStockCodeRequest,
@@ -67,6 +69,7 @@ export default function NormalOrderForm() {
   const token = useAppSelector(selectToken);
   const shareStock = useAppSelector(selectShareStock);
   const accountProfile = useAppSelector(selectAccountProfile);
+  const cashBalance = useAppSelector(selectCashBalance);
   const { loading: loadingShareStock } = useAppSelector(selectShareStockStatus);
   const { loading: loadingOrder, success: successOrder } =
     useAppSelector(selectOrdersStatus);
@@ -79,6 +82,7 @@ export default function NormalOrderForm() {
   const accountCode = watch("accountOrder");
 
   const debouncedOrderSymbol = useDebounce(orderSymbolValue, 500);
+  const debouncedOrderPrice = useDebounce(orderPrice, 500);
   const debouncedOrderVolume = useDebounce(orderVolume, 500);
 
   const [stepOrder, setStepOrder] = useState<0 | 1 | 2>(0);
@@ -102,10 +106,28 @@ export default function NormalOrderForm() {
           accountCode: accountCode || "",
         })
       );
+
+      dispatch(
+        fetchCashBalanceRequest({
+          accountCode,
+          symbol: orderSymbolValue || "",
+          price: debouncedOrderPrice,
+          side: orderSide,
+        })
+      );
     };
 
     handleSuccessOrder();
-  }, [successOrder, preSucccessOrder, dispatch, toast, accountCode]);
+  }, [
+    successOrder,
+    preSucccessOrder,
+    dispatch,
+    toast,
+    accountCode,
+    orderSymbolValue,
+    debouncedOrderPrice,
+    orderSide,
+  ]);
 
   useEffect(() => {
     if (!debouncedOrderSymbol) return;
@@ -129,6 +151,21 @@ export default function NormalOrderForm() {
       setValue("accountOrder", accountProfile?.cAccountDefault);
     }
   }, [accountProfile, setValue]);
+
+  //Lấy tiền
+  useEffect(() => {
+    if (!accountCode || !orderSymbolValue || !debouncedOrderPrice || !orderSide)
+      return;
+
+    dispatch(
+      fetchCashBalanceRequest({
+        accountCode,
+        symbol: orderSymbolValue,
+        price: debouncedOrderPrice,
+        side: orderSide,
+      })
+    );
+  }, [accountCode, debouncedOrderPrice, orderSymbolValue, orderSide, dispatch]);
 
   const handleSubmitOrder = async () => {
     if (!dataSubmitOrder || !token) return;
@@ -248,18 +285,29 @@ export default function NormalOrderForm() {
         <div className="flex flex-row items-center justify-between">
           <div className="flex flex-col gap-1 text-xs">
             <span className="">Sức mua </span>
-            <span>-</span>
+            <span>
+              {cashBalance && numberFormat(cashBalance?.cashAvaiable) + " VND"}
+            </span>
           </div>
           <div className="flex flex-col gap-1 text-xs items-end">
             <span className="text-xs">Tỉ lệ kí quỹ</span>
 
-            <span className="text-stock-text-purple">-</span>
+            <span
+              className={`${
+                cashBalance?.marginratio === "1"
+                  ? "text-stock-text-purple"
+                  : "text-text-subtitle"
+              }`}
+            >
+              {cashBalance &&
+                StringToDouble(cashBalance?.marginratio) * 100 + "%"}
+            </span>
           </div>
         </div>
 
         {/* input khối lượng */}
         <div
-          className={`h-[88px] px-3.5 pt-[10px] pb-3 bg-input rounded-lg border border-transparent focus-within:outline-none focus-within:!border focus-within:!border-yellow-500 focus-within:!shadow-[0_0_0_2px_rgba(250,204,21,0.3)] caret-DTND-200 ${
+          className={`h-[88px] px-3.5 pt-2.5 pb-3 bg-input rounded-lg border border-transparent focus-within:outline-none focus-within:!border focus-within:!border-yellow-500 focus-within:!shadow-[0_0_0_2px_rgba(250,204,21,0.3)] caret-DTND-200 ${
             errors.orderVolume?.message ? "!border !border-red-500" : ""
           }`}
         >
@@ -269,12 +317,18 @@ export default function NormalOrderForm() {
             {orderSide === "B" ? (
               <span className="text-xs">
                 {" "}
-                KL mua tối đa: <span className="text-green-400">0</span>
+                KL mua tối đa:{" "}
+                <span className="text-green-400">
+                  {cashBalance && numberFormat(cashBalance?.volumeAvaiable)}
+                </span>
               </span>
             ) : (
               <span className="text-xs">
                 {" "}
-                KL bán tối đa: <span className="text-red-400">0</span>
+                KL bán tối đa:{" "}
+                <span className="text-red-400">
+                  {cashBalance && numberFormat(cashBalance?.volumeAvaiable)}
+                </span>
               </span>
             )}
           </div>

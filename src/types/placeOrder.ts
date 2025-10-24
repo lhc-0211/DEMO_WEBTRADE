@@ -153,3 +153,26 @@ export interface FetchOrdersIndayResponse {
   msg: string;
   data: OrderIndayItem[];
 }
+
+export interface FetchCashBalanceParams {
+  accountCode: string;
+  symbol: string;
+  price: string;
+  side: string;
+}
+
+export interface FetchCashBalanceResponse {
+  rc: number;
+  msg: string;
+  data: {
+    accCode: string;
+    accType: string;
+    sym: string;
+    cashAvaiable: string;
+    balance: string;
+    volumeAvaiable: string;
+    marginratio: string;
+    accName: string;
+    maxFee: string;
+  };
+}

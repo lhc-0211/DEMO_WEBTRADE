@@ -1,6 +1,7 @@
 import type { RootState } from "../..";
 import type { ApiStatus } from "../../../types";
 import type {
+  FetchCashBalanceResponse,
   FetchShareCodeResponse,
   FetchShareStockItem,
   OrderIndayItem,
@@ -27,3 +28,10 @@ export const selectListOrdersIndayStatus = (state: RootState): ApiStatus =>
 export const selectListOrdersInday = (
   state: RootState
 ): OrderIndayItem[] | null => state.placeOrder.data.listOrdersInday;
+
+export const selectCashBalance = (
+  state: RootState
+): FetchCashBalanceResponse["data"] | null => state.placeOrder.data.cashBalance;
+
+export const selectCashBalanceStatus = (state: RootState): ApiStatus =>
+  state.placeOrder.status.fetchCashBalance;

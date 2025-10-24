@@ -1,5 +1,7 @@
 import { apiClient } from "../services/apiClient";
 import type {
+  FetchCashBalanceParams,
+  FetchCashBalanceResponse,
   FetchOrdersIndayParams,
   FetchOrdersIndayResponse,
   FetchOrdersResponse,
@@ -52,5 +54,15 @@ export const fetchOrdersInday = async (
     `/orders/inday?${query.toString()}`
   );
 
+  return res.data;
+};
+
+export const fetchCashBalanceApi = async (
+  params: FetchCashBalanceParams
+): Promise<FetchCashBalanceResponse> => {
+  const res = await apiClient.post<FetchCashBalanceResponse>(
+    `/cash/balance`,
+    params
+  );
   return res.data;
 };

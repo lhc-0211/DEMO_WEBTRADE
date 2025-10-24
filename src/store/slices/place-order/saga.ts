@@ -2,6 +2,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import axios from "axios";
 import { call, put, takeLatest } from "redux-saga/effects";
 import {
+  fetchCashBalanceApi,
   fetchOrdersApi,
   fetchOrdersInday,
   fetchShareCodeApi,
@@ -9,6 +10,8 @@ import {
 } from "../../../api/placeOrder";
 import { showToast } from "../../../hooks/useToast";
 import type {
+  FetchCashBalanceParams,
+  FetchCashBalanceResponse,
   FetchOrdersIndayParams,
   FetchOrdersIndayResponse,
   FetchOrdersResponse,
@@ -17,6 +20,9 @@ import type {
   OrderActionPayload,
 } from "../../../types/placeOrder";
 import {
+  fetchCashBalanceFailure,
+  fetchCashBalanceRequest,
+  fetchCashBalanceSuccess,
   fetchListOrdersIndayFailure,
   fetchListOrdersIndayRequest,
   fetchListOrdersIndaySuccess,
@@ -149,9 +155,39 @@ function* fetchListOrdersIndaySaga(
   }
 }
 
+function* fetchCashBalanceSaga(action: PayloadAction<FetchCashBalanceParams>) {
+  try {
+    const res: FetchCashBalanceResponse = yield call(
+      fetchCashBalanceApi,
+      action.payload
+    );
+
+    if (res.rc < 1) {
+      showToast(res.msg || "Thất bại", "error");
+      put(fetchCashBalanceFailure(res.msg || "Thất bại"));
+      throw Error(res.msg || "Thất bại");
+    }
+
+    yield put(fetchCashBalanceSuccess(res.data));
+  } catch (error: unknown) {
+    let errorMessage = "Failed to fetch info index";
+
+    if (axios.isAxiosError(error)) {
+      // Nếu server trả về JSON chứa msg
+      errorMessage = error.response?.data?.msg || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    showToast(errorMessage, "error");
+    yield put(fetchCashBalanceFailure(errorMessage));
+  }
+}
+
 export default function* placeOrderSaga() {
   yield takeLatest(fetchShareStockCodeRequest, fetchShareStockCodeSaga);
   yield takeLatest(fetchListShareStockRequest, fetchListShareStockSaga);
   yield takeLatest(fetchOrdersRequest, fetchOrdersSaga);
   yield takeLatest(fetchListOrdersIndayRequest, fetchListOrdersIndaySaga);
+  yield takeLatest(fetchCashBalanceRequest, fetchCashBalanceSaga);
 }
