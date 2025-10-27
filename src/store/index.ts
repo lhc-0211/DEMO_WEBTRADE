@@ -9,6 +9,7 @@ import placeOrderSaga from "./slices/place-order/saga";
 import placeOrderSlice from "./slices/place-order/slice";
 import priceBoardSaga from "./slices/priceboard/saga";
 import priceBoardSlice from "./slices/priceboard/slice";
+import stockSlice from "./slices/stock/slice.ts";
 
 function* rootSaga() {
   yield all([priceBoardSaga(), authSaga(), clientSaga(), placeOrderSaga()]);
@@ -22,6 +23,7 @@ export const store = configureStore({
     auth: authSlice,
     client: clientSlice,
     placeOrder: placeOrderSlice,
+    stock: stockSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ thunk: false }).concat(sagaMiddleware),

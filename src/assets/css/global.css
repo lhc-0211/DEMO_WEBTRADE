@@ -41,6 +41,7 @@ input:-webkit-autofill {
 
 .i,
 .UP,
+.u,
 .g {
   color: var(--color-stock-text-green) !important;
 }
@@ -323,4 +324,25 @@ input:-webkit-autofill {
 .orderStt_PCM {
   color: var(--color-green-500);
   border-color: var(--color-green-500);
+}
+
+.flash-up {
+  background: var(--color-green-500) !important;
+  color: var(--white) !important;
+}
+.flash-down {
+  background: var(--color-red-500) !important;
+  color: var(--color-text-title) !important;
+}
+.flash-reference {
+  background: var(--color-yellow-500) !important;
+  color: var(--white) !important;
+}
+.flash-ceil {
+  background: var(--color-violet-500) !important;
+  color: var(--white) !important;
+}
+.flash-floor {
+  background: var(--color-blue-500) !important;
+  color: var(--white) !important;
 }

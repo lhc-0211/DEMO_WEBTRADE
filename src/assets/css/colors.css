@@ -190,12 +190,17 @@
 
   --color-sidebar-default: #101011;
 
-  --color-DTND-200: #e1d091;
-  --color-DTND-300: #d3a35e;
-  --color-DTND-400: #fbbf24;
-  --color-DTND-500: #bda00f;
-  --color-DTND-600: #facc15;
-  --color-DTND-1000: rgba(255, 195, 77, 0.35);
+  --color-DTND-50: #fdfbea;
+  --color-DTND-100: #f7f3c8;
+  --color-DTND-200: #eee396;
+  --color-DTND-300: #e1c85e;
+  --color-DTND-400: #d3b13a;
+  --color-DTND-500: #bda00f; /* màu chính */
+  --color-DTND-600: #a08b0b;
+  --color-DTND-700: #7c6d09;
+  --color-DTND-800: #5b5007;
+  --color-DTND-900: #3f3804;
+  --color-DTND-1000: rgba(189, 160, 15, 0.45);
 
   --color-input: #1b1f29;
 

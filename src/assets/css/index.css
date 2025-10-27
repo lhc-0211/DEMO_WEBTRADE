@@ -4,4 +4,6 @@
 @import "./stockColors.css";
 @import "./modal.css";
 @import "swiper/css";
+@import "ag-grid-community/styles/ag-grid.css";
+@import "ag-grid-community/styles/ag-theme-balham.css";
 /* @import "./font.css"; */
