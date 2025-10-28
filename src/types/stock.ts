@@ -1,4 +1,11 @@
-export type PriceCompare = "u" | "d" | "r" | "n";
+export type PriceCompare = "u" | "d" | "r" | "c" | "f";
+
+export type FlashClass =
+  | "flash-up"
+  | "flash-down"
+  | "flash-reference"
+  | "flash-ceil"
+  | "flash-floor";
 
 export type OrderBookLevel = {
   price: number;
@@ -16,7 +23,10 @@ export type TradeData = {
   price: number;
   volume: number;
   boardId: string;
+  changePct: number;
+  changeAbs: number;
   marketId: string;
+  priceCompare: PriceCompare;
   recv_ts: number;
 };
 
@@ -55,6 +65,9 @@ export type TradeMessage = {
   type: "trade";
   symbol: string;
   boardId: string;
+  changePct: number;
+  changeAbs: number;
+  priceCompare: PriceCompare;
   marketId: string;
   price: number;
   volume: number;
@@ -101,5 +114,5 @@ export type SnapshotData = {
 export type FlashResult = {
   symbol: string;
   key: string;
-  flashClass: "flash-up" | "flash-down";
+  flashClass: FlashClass;
 };

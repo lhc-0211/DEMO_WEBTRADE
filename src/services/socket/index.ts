@@ -178,11 +178,17 @@ const initSocket = (baseUrl: string) => {
         }
         case "trade": {
           const m = msg as TradeMessage;
+
+          console.log("m", m);
+
           snapshot.trade = {
             price: m.price,
             volume: m.volume,
             boardId: m.boardId,
             marketId: m.marketId,
+            changePct: m.changePct,
+            changeAbs: m.changeAbs,
+            priceCompare: m.priceCompare,
             recv_ts: m.recv_ts,
           };
           break;

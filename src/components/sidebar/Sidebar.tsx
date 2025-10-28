@@ -143,16 +143,18 @@ export default function Sidebar({ mode, width, changeModeSidebar }: Props) {
           // Chuyển mode tuần tự: full -> mini -> hidden -> full
           if (mode === "full") changeModeSidebar("mini");
           else if (mode === "mini") changeModeSidebar("hidden");
-          else changeModeSidebar("full");
+          else if (mode === "hidden") changeModeSidebar("full");
         }}
       >
-        {mode === "full" ? (
-          <VscLayoutActivitybarRight className="text-lg text-yellow-700" />
-        ) : mode === "mini" ? (
-          <VscLayoutSidebarRightOff className="text-lg text-yellow-700" />
-        ) : (
-          <VscLayoutSidebarRight className="text-lg text-yellow-700" />
-        )}
+        <div>
+          {mode === "full" ? (
+            <VscLayoutActivitybarRight className="text-lg text-yellow-700" />
+          ) : mode === "mini" ? (
+            <VscLayoutSidebarRightOff className="text-lg text-yellow-700" />
+          ) : (
+            <VscLayoutSidebarRight className="text-lg text-yellow-700" />
+          )}
+        </div>
       </motion.div>
     </div>
   );

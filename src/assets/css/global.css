@@ -308,6 +308,7 @@ input:-webkit-autofill {
 .orderStt_PCMX .orderStt_PMX,
 .orderStt_PMCX,
 .orderStt_PWX,
+.orderStt_PCWX,
 .orderStt_1,
 .orderStt_2 {
   border-color: var(--color-red-500);
@@ -316,6 +317,8 @@ input:-webkit-autofill {
 
 .orderStt_PW,
 .orderStt_P,
+.orderStt_PC,
+.orderStt_PMC,
 .orderStt_0 {
   border-color: var(--color-yellow-500);
   color: var(--color-yellow-500);

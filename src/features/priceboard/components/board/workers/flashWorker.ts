@@ -1,60 +1,12 @@
-import type { SnapshotData } from "../../../../../types";
-
-type ColumnValue = string | number | undefined;
-
-const getColumnValue = (snapshot: SnapshotData, key: string): ColumnValue => {
-  switch (key) {
-    case "lastPrice":
-      return snapshot.trade?.price;
-    case "lastVolume":
-      return snapshot.trade?.volume;
-    case "priceBuy1":
-      return snapshot.orderBook?.bids?.[0]?.price;
-    case "volumeBuy1":
-      return snapshot.orderBook?.bids?.[0]?.volume;
-    case "priceBuy2":
-      return snapshot.orderBook?.bids?.[1]?.price;
-    case "volumeBuy2":
-      return snapshot.orderBook?.bids?.[1]?.volume;
-    case "priceBuy3":
-      return snapshot.orderBook?.bids?.[2]?.price;
-    case "volumeBuy3":
-      return snapshot.orderBook?.bids?.[2]?.volume;
-    case "priceSell1":
-      return snapshot.orderBook?.asks?.[0]?.price;
-    case "volumeSell1":
-      return snapshot.orderBook?.asks?.[0]?.volume;
-    case "priceSell2":
-      return snapshot.orderBook?.asks?.[1]?.price;
-    case "volumeSell2":
-      return snapshot.orderBook?.asks?.[1]?.volume;
-    case "priceSell3":
-      return snapshot.orderBook?.asks?.[2]?.price;
-    case "volumeSell3":
-      return snapshot.orderBook?.asks?.[2]?.volume;
-    default:
-      return undefined;
-  }
-};
-
-const KEYS = [
-  "lastPrice",
-  "lastVolume",
-  "priceBuy1",
-  "volumeBuy1",
-  "priceBuy2",
-  "volumeBuy2",
-  "priceBuy3",
-  "volumeBuy3",
-  "priceSell1",
-  "volumeSell1",
-  "priceSell2",
-  "volumeSell2",
-  "priceSell3",
-  "volumeSell3",
-] as const;
-
-type FlashResult = { symbol: string; key: string; flashClass: string };
+import { KEYS_COLOR } from "../../../../../configs/headerPriceBoard";
+import type {
+  FlashClass,
+  FlashResult,
+  PriceCompare,
+  SnapshotData,
+} from "../../../../../types";
+import { StringToInt } from "../../../../../utils";
+import { getColumnValue } from "../../../../../utils/priceboard";
 
 self.onmessage = (
   e: MessageEvent<{
@@ -69,31 +21,54 @@ self.onmessage = (
   for (const { snapshot, prevSnapshot } of e.data.data) {
     if (!prevSnapshot) continue;
 
-    for (const key of KEYS) {
+    for (const key of KEYS_COLOR) {
       const newVal = getColumnValue(snapshot, key);
       const oldVal = getColumnValue(prevSnapshot, key);
-      if (newVal === oldVal || newVal == null || oldVal == null) continue;
 
-      let flashClass: string | null = null;
+      // Bỏ qua nếu null hoặc không đổi
+      if (newVal == null || oldVal == null || newVal === oldVal) continue;
 
-      if (key.includes("Price") || key === "lastPrice") {
+      let flashClass: FlashClass | null = null;
+
+      // 1. CÁC CỘT GIÁ -> dùng priceCompare
+      if (
+        key === "lastPrice" ||
+        key.startsWith("priceBuy") ||
+        key.startsWith("priceSell") ||
+        key === "change" ||
+        key === "changePc"
+      ) {
+        let cmp: PriceCompare | undefined = undefined;
+
         if (key === "lastPrice") {
-          flashClass = newVal > oldVal ? "flash-up" : "flash-down";
+          cmp = snapshot.trade?.priceCompare;
+        } else if (key === "change") {
+          cmp = snapshot.trade?.priceCompare;
+        } else if (key === "changePc") {
+          cmp = snapshot.trade?.priceCompare;
         } else if (key.startsWith("priceBuy")) {
           const idx = parseInt(key[8]) - 1;
-          const cmp = snapshot.orderBook?.bids?.[idx]?.priceCompare;
-          if (cmp === "u") flashClass = "flash-up";
-          else if (cmp === "d") flashClass = "flash-down";
+          cmp = snapshot.orderBook?.bids?.[idx]?.priceCompare;
         } else if (key.startsWith("priceSell")) {
           const idx = parseInt(key[9]) - 1;
-          const cmp = snapshot.orderBook?.asks?.[idx]?.priceCompare;
-          if (cmp === "u") flashClass = "flash-up";
-          else if (cmp === "d") flashClass = "flash-down";
+          cmp = snapshot.orderBook?.asks?.[idx]?.priceCompare;
         }
-      } else if (key.includes("Volume") || key === "lastVolume") {
-        if (typeof newVal === "number" && typeof oldVal === "number") {
-          flashClass = newVal > oldVal ? "flash-up" : "flash-down";
-        }
+
+        if (cmp === "u") flashClass = "flash-up";
+        else if (cmp === "d") flashClass = "flash-down";
+        else if (cmp === "r") flashClass = "flash-reference";
+        else if (cmp === "c") flashClass = "flash-ceil";
+        else if (cmp === "f") flashClass = "flash-floor";
+      }
+
+      // 2. CÁC CỘT KHỐI LƯỢNG -> SO SÁNH GIÁ TRỊ CŨ/MỚI
+      else if (
+        key === "lastVolume" ||
+        key.startsWith("volumeBuy") ||
+        key.startsWith("volumeSell")
+      ) {
+        flashClass =
+          StringToInt(newVal) > StringToInt(oldVal) ? "flash-up" : "flash-down";
       }
 
       if (flashClass) {
@@ -102,9 +77,5 @@ self.onmessage = (
     }
   }
 
-  if (results.length > 0) {
-    self.postMessage({ type: "flash", data: results });
-  }
+  self.postMessage({ type: "flash", data: results });
 };
-
-declare const self: Worker;

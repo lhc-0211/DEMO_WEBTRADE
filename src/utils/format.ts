@@ -354,7 +354,7 @@ export function canEditOrder(
 }
 
 export const formatPrice = (value?: number | string | null): string => {
-  if (value == null || value === "") return "-";
+  if (value == null || value === "") return "";
   const num = Number(value) / 1000; // đổi từ đồng sang nghìn đồng
   return num.toFixed(2); // ví dụ: 29400 -> 29.40
 };

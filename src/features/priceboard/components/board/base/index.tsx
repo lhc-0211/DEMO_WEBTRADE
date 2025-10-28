@@ -1,4 +1,3 @@
-// src/components/PriceBoard.tsx
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { List } from "react-virtualized";
 import type { RenderedRows } from "react-virtualized/dist/es/List";
@@ -8,7 +7,8 @@ import { selectAllSymbols } from "../../../../../store/slices/stock/selector";
 import BodyTable from "./BodyTable";
 import HeaderColumns from "./HeaderTable";
 
-const ROW_HEIGHT = 28;
+const ROW_HEIGHT = 29;
+const HEADER_HEIGHT = 58; // chiều cao header
 
 interface RowRendererParams {
   index: number;
@@ -21,31 +21,34 @@ function PriceBoard() {
   const listRef = useRef<List>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(1200);
-
-  useEffect(() => {
-    const initSymbols = ["HPG:G1:STO", "VCB:G1:STO", "MWG:G1:STO"];
-    socketClient.subscribe({ symbols: initSymbols });
-    return () => {
-      socketClient.unsubscribe({ symbols: initSymbols });
-    };
-  }, []);
+  const [listHeight, setListHeight] = useState(500);
 
   // Resize Observer
   useEffect(() => {
+    socketClient.subscribe({ groupId: "hnx30" });
+
     if (!containerRef.current) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        setContainerWidth(entry.contentRect.width);
+        const rect = entry.contentRect;
+
+        console.log(rect.height);
+
+        setContainerWidth(rect.width);
+        setListHeight(rect.height - HEADER_HEIGHT);
       }
     });
 
     resizeObserver.observe(containerRef.current);
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      socketClient.unsubscribe({ groupId: "hnx30" });
+      resizeObserver.disconnect();
+    };
   }, []);
 
-  // SỬA: Dùng RenderedRows
+  // Render rows visible
   const updateVisibleSymbols = useCallback(
     ({ startIndex, stopIndex }: RenderedRows): void => {
       const visible = symbols.slice(startIndex, stopIndex + 1);
@@ -65,12 +68,17 @@ function PriceBoard() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <HeaderColumns />
-      <div ref={containerRef} className="flex-1 overflow-hidden">
+    <div
+      className="h-[calc(var(--app-height)-289px)] flex flex-col"
+      ref={containerRef}
+    >
+      <div style={{ width: containerWidth, height: HEADER_HEIGHT }}>
+        <HeaderColumns />
+      </div>
+      <div className="flex-1 overflow-hidden">
         <List
           ref={listRef}
-          height={800}
+          height={listHeight}
           rowCount={symbols.length}
           rowHeight={ROW_HEIGHT}
           rowRenderer={rowRenderer}

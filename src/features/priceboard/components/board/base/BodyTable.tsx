@@ -1,8 +1,12 @@
+// src/components/BodyTable.tsx
 import { memo, useEffect, useMemo } from "react";
-import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
+import {
+  ALL_COLUMNS,
+  KEYS_COLOR,
+} from "../../../../../configs/headerPriceBoard";
 import { useAppSelector } from "../../../../../store/hook";
 import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
-import type { Column } from "../../../../../types";
+import type { Column, PriceCompare } from "../../../../../types";
 import { getColumnValue } from "../../../../../utils/priceboard";
 import {
   registerVisibleCell,
@@ -16,71 +20,70 @@ function BodyTable({ symbol }: { symbol: string }) {
 
   const columns = useMemo<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
-    return saved ? JSON.parse(saved) : ALL_COLUMNS;
+    try {
+      return saved ? JSON.parse(saved) : ALL_COLUMNS;
+    } catch {
+      return ALL_COLUMNS;
+    }
   }, []);
 
   const textColorClasses = useMemo(() => {
     const classes: Record<string, string> = {};
-    const keys = [
-      "lastPrice",
-      "lastVolume",
-      "priceBuy1",
-      "volumeBuy1",
-      "priceBuy2",
-      "volumeBuy2",
-      "priceBuy3",
-      "volumeBuy3",
-      "priceSell1",
-      "volumeSell1",
-      "priceSell2",
-      "volumeSell2",
-      "priceSell3",
-      "volumeSell3",
-    ] as const;
 
-    keys.forEach((key) => {
-      let cmp: string | undefined;
+    KEYS_COLOR.forEach((key) => {
+      let cmp: PriceCompare | undefined;
+
       if (key === "lastPrice") {
-        // cmp = snapshot.trade?.priceCompare;
-      } else if (key.startsWith("priceBuy"))
-        cmp = snapshot.orderBook?.bids?.[parseInt(key[8]) - 1]?.priceCompare;
-      else if (key.startsWith("priceSell"))
-        cmp = snapshot.orderBook?.asks?.[parseInt(key[9]) - 1]?.priceCompare;
-
-      console.log("cmp", cmp);
+        cmp = snapshot.trade?.priceCompare;
+      } else if (key.startsWith("priceBuy")) {
+        const idx = parseInt(key[8]) - 1;
+        cmp = snapshot.orderBook?.bids?.[idx]?.priceCompare;
+      } else if (key.startsWith("priceSell")) {
+        const idx = parseInt(key[9]) - 1;
+        cmp = snapshot.orderBook?.asks?.[idx]?.priceCompare;
+      } else if (key.startsWith("change")) {
+        cmp = snapshot.trade?.priceCompare;
+      } else if (key.startsWith("changePc")) {
+        cmp = snapshot.trade?.priceCompare;
+      } else if (key === "lastVolume") {
+        cmp = snapshot.trade?.priceCompare;
+      } else if (key.startsWith("volumeBuy")) {
+        const idx = parseInt(key[9]) - 1;
+        cmp = snapshot.orderBook?.bids?.[idx]?.priceCompare;
+      } else if (key.startsWith("volumeSell")) {
+        const idx = parseInt(key[10]) - 1;
+        cmp = snapshot.orderBook?.asks?.[idx]?.priceCompare;
+      }
 
       classes[key] = cmp || "text-text-body";
     });
+
     return classes;
   }, [snapshot]);
 
   useEffect(() => {
-    const register = (key: string, el: HTMLElement | null) => {
-      if (el) registerVisibleCell(symbol, key, el);
-    };
-
-    // Đăng ký tất cả cell
-    columns.forEach((col) => {
-      if (col.children) {
-        col.children.forEach((child) =>
-          register(
-            child.key,
-            document.querySelector(
+    const timer = setTimeout(() => {
+      columns.forEach((col) => {
+        if (col.children) {
+          col.children.forEach((child) => {
+            const el = document.querySelector<HTMLElement>(
               `[data-symbol="${symbol}"][data-key="${child.key}"]`
-            )
-          )
-        );
-      } else {
-        register(
-          col.key,
-          document.querySelector(
+            );
+            if (el) registerVisibleCell(symbol, child.key, el);
+          });
+        } else {
+          const el = document.querySelector<HTMLElement>(
             `[data-symbol="${symbol}"][data-key="${col.key}"]`
-          )
-        );
-      }
-    });
+          );
+          if (el) registerVisibleCell(symbol, col.key, el);
+        }
+      });
+    }, 0);
 
-    return () => unregisterVisibleCell(symbol);
+    return () => {
+      clearTimeout(timer);
+      unregisterVisibleCell(symbol);
+    };
   }, [symbol, columns, snapshot]);
 
   return (
@@ -116,7 +119,7 @@ function BodyTable({ symbol }: { symbol: string }) {
                 data-symbol={symbol}
                 data-key={col.key}
                 className={`flex items-center justify-center text-xs font-medium select-none h-7 transition-colors duration-300 ${
-                  textColorClasses[col.key] || "text-text-body"
+                  textColorClasses[col.key]
                 }`}
                 style={{ minWidth: col.width }}
               >
@@ -130,7 +133,7 @@ function BodyTable({ symbol }: { symbol: string }) {
                     data-symbol={symbol}
                     data-key={child.key}
                     className={`flex-1 text-center h-7 grid place-items-center transition-colors duration-300 ${
-                      textColorClasses[child.key] || "text-text-body"
+                      textColorClasses[child.key]
                     }`}
                     style={{ minWidth: child.width }}
                   >
