@@ -1,12 +1,12 @@
 // src/components/BodyTable.tsx
 import { memo, useEffect, useMemo } from "react";
-import {
-  ALL_COLUMNS,
-  KEYS_COLOR,
-} from "../../../../../configs/headerPriceBoard";
+import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
 import { useAppSelector } from "../../../../../store/hook";
-import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
-import type { Column, PriceCompare } from "../../../../../types";
+import {
+  selectColorsBySymbol,
+  selectSnapshotsBySymbols,
+} from "../../../../../store/slices/stock/selector";
+import type { Column } from "../../../../../types";
 import { getColumnValue } from "../../../../../utils/priceboard";
 import {
   registerVisibleCell,
@@ -17,6 +17,9 @@ function BodyTable({ symbol }: { symbol: string }) {
   const snapshot = useAppSelector(
     (state) => selectSnapshotsBySymbols(state, [symbol])[symbol]
   ) || { symbol };
+  const cellColors = useAppSelector((state) =>
+    selectColorsBySymbol(state, symbol)
+  );
 
   const columns = useMemo<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
@@ -26,40 +29,6 @@ function BodyTable({ symbol }: { symbol: string }) {
       return ALL_COLUMNS;
     }
   }, []);
-
-  const textColorClasses = useMemo(() => {
-    const classes: Record<string, string> = {};
-
-    KEYS_COLOR.forEach((key) => {
-      let cmp: PriceCompare | undefined;
-
-      if (key === "lastPrice") {
-        cmp = snapshot.trade?.priceCompare;
-      } else if (key.startsWith("priceBuy")) {
-        const idx = parseInt(key[8]) - 1;
-        cmp = snapshot.orderBook?.bids?.[idx]?.priceCompare;
-      } else if (key.startsWith("priceSell")) {
-        const idx = parseInt(key[9]) - 1;
-        cmp = snapshot.orderBook?.asks?.[idx]?.priceCompare;
-      } else if (key.startsWith("change")) {
-        cmp = snapshot.trade?.priceCompare;
-      } else if (key.startsWith("changePc")) {
-        cmp = snapshot.trade?.priceCompare;
-      } else if (key === "lastVolume") {
-        cmp = snapshot.trade?.priceCompare;
-      } else if (key.startsWith("volumeBuy")) {
-        const idx = parseInt(key[9]) - 1;
-        cmp = snapshot.orderBook?.bids?.[idx]?.priceCompare;
-      } else if (key.startsWith("volumeSell")) {
-        const idx = parseInt(key[10]) - 1;
-        cmp = snapshot.orderBook?.asks?.[idx]?.priceCompare;
-      }
-
-      classes[key] = cmp || "text-text-body";
-    });
-
-    return classes;
-  }, [snapshot]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -84,7 +53,20 @@ function BodyTable({ symbol }: { symbol: string }) {
       clearTimeout(timer);
       unregisterVisibleCell(symbol);
     };
-  }, [symbol, columns, snapshot]);
+  }, [symbol, columns]);
+
+  const renderCell = (key: string, value: string | number) => (
+    <div
+      data-symbol={symbol}
+      data-key={key}
+      className={`flex items-center justify-center text-xs font-medium select-none h-7 transition-colors duration-300 ${
+        cellColors[key] || "text-text-body"
+      }`}
+      style={{ minWidth: key === "symbol" ? 60 : undefined }}
+    >
+      {value}
+    </div>
+  );
 
   return (
     <div className="flex border-x border-b border-border divide-x divide-border w-full">
@@ -95,16 +77,17 @@ function BodyTable({ symbol }: { symbol: string }) {
           return (
             <div
               key={col.key}
-              className="h-7 grid place-items-center text-text-body text-xs font-medium select-none"
+              className={`h-7 grid place-items-center text-xs font-medium select-none ${
+                col.key === "symbol"
+                  ? cellColors["lastPrice"] || "text-text-body"
+                  : ""
+              }`}
               style={{ minWidth: col.width }}
             >
               <div
                 data-symbol={symbol}
                 data-key={col.key}
-                className={`flex items-center justify-center h-7 ${
-                  col.children ? "border-b border-border" : ""
-                }`}
-                style={{ minWidth: col.width }}
+                className="flex items-center justify-center h-7"
               >
                 {getColumnValue(snapshot, col.key)}
               </div>
@@ -115,29 +98,16 @@ function BodyTable({ symbol }: { symbol: string }) {
         return (
           <div key={col.key} className="flex flex-col w-full">
             {!hasChildren ? (
-              <div
-                data-symbol={symbol}
-                data-key={col.key}
-                className={`flex items-center justify-center text-xs font-medium select-none h-7 transition-colors duration-300 ${
-                  textColorClasses[col.key]
-                }`}
-                style={{ minWidth: col.width }}
-              >
-                {getColumnValue(snapshot, col.key)}
-              </div>
+              renderCell(col.key, getColumnValue(snapshot, col.key))
             ) : (
               <div className="flex divide-x divide-border text-xs font-medium select-none">
                 {col.children?.map((child) => (
                   <div
                     key={child.key}
-                    data-symbol={symbol}
-                    data-key={child.key}
-                    className={`flex-1 text-center h-7 grid place-items-center transition-colors duration-300 ${
-                      textColorClasses[child.key]
-                    }`}
+                    className="flex-1"
                     style={{ minWidth: child.width }}
                   >
-                    {getColumnValue(snapshot, child.key)}
+                    {renderCell(child.key, getColumnValue(snapshot, child.key))}
                   </div>
                 ))}
               </div>

@@ -33,8 +33,6 @@ function PriceBoard() {
       for (const entry of entries) {
         const rect = entry.contentRect;
 
-        console.log(rect.height);
-
         setContainerWidth(rect.width);
         setListHeight(rect.height - HEADER_HEIGHT);
       }
