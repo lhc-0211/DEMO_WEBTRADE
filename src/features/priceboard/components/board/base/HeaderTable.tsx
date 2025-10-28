@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ALL_COLUMNS } from "../../../../configs/headerPriceBoard";
-import type { Column } from "../../../../types";
+import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
+import type { Column } from "../../../../../types";
 
 export default function HeaderColumns() {
   const [columns, setColumns] = useState<Column[]>(() => {
@@ -62,28 +62,26 @@ export default function HeaderColumns() {
           return (
             <div key={col.key} className="flex flex-col w-full">
               {/* --- Dòng 1: cha draggable riêng --- */}
-              <div key={`${col.key}-parent`}>
-                <div
-                  className={`flex items-center justify-center text-text-body text-xs font-medium select-none bg-gray-300/50 ${
-                    hasChildren ? "border-b border-border" : ""
-                  } ${hasChildren ? "h-7" : "h-14"}`}
-                  style={{ minWidth: col.width }}
-                >
-                  {col.label}
-                </div>
+              <div
+                className={`flex items-center justify-center text-text-body text-xs font-medium select-none bg-gray-300/50 ${
+                  hasChildren ? "border-b border-border" : ""
+                } ${hasChildren ? "h-7" : "h-14"}`}
+                style={{ minWidth: col.width }}
+                key={`${col.key}-parent`}
+              >
+                {col.label}
               </div>
 
               {/* --- Dòng 2: con draggable riêng --- */}
               {hasChildren && (
                 <div className="flex divide-x divide-border text-text-body text-xs font-medium select-none ">
                   {col.children?.map((child: Column) => (
-                    <div key={child.key}>
-                      <div
-                        className="flex-1 text-center h-7 grid place-items-center bg-gray-300/50"
-                        style={{ minWidth: child.width }}
-                      >
-                        {child.label}
-                      </div>
+                    <div
+                      className="flex-1 text-center h-7 grid place-items-center bg-gray-300/50"
+                      style={{ minWidth: child.width }}
+                      key={child.key}
+                    >
+                      {child.label}
                     </div>
                   ))}
                 </div>

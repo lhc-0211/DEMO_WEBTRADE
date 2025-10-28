@@ -1,4 +1,3 @@
-// src/lib/socketClient.ts
 import axios from "axios";
 import { store } from "../../store";
 import {
@@ -6,28 +5,23 @@ import {
   resetSnapshots,
   updateSnapshots,
 } from "../../store/slices/stock/slice";
+
 import type {
   ForeignRoomMessage,
   ForeignTradeMessage,
   OrderBookMessage,
   SnapshotData,
   TradeMessage,
+  WebSocketMessage,
 } from "../../types";
 import { getOrCreateSessionId } from "../../utils";
 import { apiClient } from "../apiClient";
-
-// Union type cho tất cả message
-type WebSocketMessage =
-  | OrderBookMessage
-  | TradeMessage
-  | ForeignTradeMessage
-  | ForeignRoomMessage;
 
 type MessageHandler = (data: SnapshotData) => void;
 type SubscribeOptions = { groupId?: string; symbols?: string[] };
 
 /* --------------------------------------------------------------
-   PRIVATE STATE (closure)
+   PRIVATE STATE
    -------------------------------------------------------------- */
 let socket: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -40,210 +34,247 @@ let messageHandlers: MessageHandler[] = [];
 const snapshots: Map<string, SnapshotData> = new Map();
 let batchUpdates: SnapshotData[] = [];
 let batchTimeout: ReturnType<typeof setTimeout> | null = null;
-const BATCH_INTERVAL = 100; // ms
+const BATCH_INTERVAL = 50; // 20 lần/giây
+// Danh sách cơ sở
+let visibleSymbols = new Set<string>();
+
+const prevSnapshots: Map<string, SnapshotData> = new Map();
 
 /* --------------------------------------------------------------
-HELPERS
--------------------------------------------------------------- */
+   HELPERS
+   -------------------------------------------------------------- */
 const buildUrl = (base: string): string => {
   const sid = getOrCreateSessionId();
-  if (!sid) {
-    console.warn("No sessionId - WebSocket will not connect.");
-    return "";
-  }
-  return `${base}?sessionId=${sid}`;
+  return sid ? `${base}?sessionId=${sid}` : "";
+};
+
+const hasChanged = (a: SnapshotData, b: SnapshotData): boolean => {
+  if (a.trade?.price !== b.trade?.price) return true;
+  if (a.trade?.volume !== b.trade?.volume) return true;
+
+  const compareLevel = (i: number) => {
+    const aBid = a.orderBook?.bids?.[i],
+      bBid = b.orderBook?.bids?.[i];
+    const aAsk = a.orderBook?.asks?.[i],
+      bAsk = b.orderBook?.asks?.[i];
+    return (
+      aBid?.price !== bBid?.price ||
+      aBid?.volume !== bBid?.volume ||
+      aAsk?.price !== bAsk?.price ||
+      aAsk?.volume !== bAsk?.volume
+    );
+  };
+
+  for (let i = 0; i < 3; i++) if (compareLevel(i)) return true;
+  return false;
 };
 
 const scheduleBatchUpdate = () => {
   if (batchTimeout) return;
   batchTimeout = setTimeout(() => {
-    if (batchUpdates.length) {
-      store.dispatch(updateSnapshots(batchUpdates));
-      batchUpdates = [];
+    if (batchUpdates.length === 0) {
+      batchTimeout = null;
+      return;
     }
+
+    const changedUpdates = batchUpdates.filter((curr) => {
+      const prev = prevSnapshots.get(curr.symbol);
+      return !prev || hasChanged(curr, prev);
+    });
+
+    if (changedUpdates.length > 0) {
+      store.dispatch(updateSnapshots(changedUpdates));
+
+      if (window.flashWorker && visibleSymbols.size > 0) {
+        const visibleUpdates = changedUpdates.filter((s) =>
+          visibleSymbols.has(s.symbol)
+        );
+        if (visibleUpdates.length > 0) {
+          const batchWithPrev = visibleUpdates.map((curr) => ({
+            snapshot: curr,
+            prevSnapshot: prevSnapshots.get(curr.symbol) || null,
+          }));
+          window.flashWorker.postMessage({
+            type: "batch",
+            data: batchWithPrev,
+          });
+        }
+      }
+
+      changedUpdates.forEach((s) => {
+        prevSnapshots.set(s.symbol, {
+          symbol: s.symbol,
+          orderBook: s.orderBook
+            ? {
+                bids: s.orderBook.bids.slice(0, 3),
+                asks: s.orderBook.asks.slice(0, 3),
+                recv_ts: s.orderBook.recv_ts,
+              }
+            : undefined,
+          trade: s.trade ? { ...s.trade } : undefined,
+          foreignTrade: s.foreignTrade ? { ...s.foreignTrade } : undefined,
+          foreignRoom: s.foreignRoom ? { ...s.foreignRoom } : undefined,
+        });
+      });
+    }
+
+    batchUpdates = [];
     batchTimeout = null;
   }, BATCH_INTERVAL);
 };
 
 const closeSocket = () => {
-  if (reconnectTimer) {
-    clearTimeout(reconnectTimer);
-    reconnectTimer = null;
-  }
-  if (batchTimeout) {
-    clearTimeout(batchTimeout);
-    batchTimeout = null;
-  }
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  if (batchTimeout) clearTimeout(batchTimeout);
   if (socket) {
     try {
       socket.close();
     } catch (e) {
-      console.error("Error closing socket:", e);
+      console.error(e);
     }
     socket = null;
   }
   subscribedSymbols = [];
   snapshots.clear();
+  prevSnapshots.clear();
   batchUpdates = [];
   store.dispatch(resetSnapshots());
 };
 
 /* --------------------------------------------------------------
-CORE – tạo / khởi động lại socket
--------------------------------------------------------------- */
+   CORE – WebSocket
+   -------------------------------------------------------------- */
 const initSocket = (baseUrl: string) => {
   const url = buildUrl(baseUrl);
   if (!url) return;
 
-  closeSocket(); // đảm bảo không có socket cũ
+  closeSocket();
 
-  try {
-    socket = new WebSocket(url);
+  socket = new WebSocket(url);
 
-    socket.onopen = () => {
-      console.log("WebSocket connected:", url);
-      reconnectAttempts = 0;
-      reSubscribe();
-    };
+  socket.onopen = () => {
+    console.log("WS Connected");
+    reconnectAttempts = 0;
+    reSubscribe();
+  };
 
-    socket.onmessage = (ev) => {
-      try {
-        const msg: WebSocketMessage = JSON.parse(ev.data);
-        if (!msg.symbol || !msg.type) {
-          console.warn("Invalid message - missing symbol/type", msg);
+  socket.onmessage = (ev) => {
+    try {
+      const msg: WebSocketMessage = JSON.parse(ev.data);
+      if (!msg.symbol || !msg.type) return;
+
+      const { symbol, type } = msg;
+      const snapshot = snapshots.get(symbol) ?? { symbol };
+
+      switch (type) {
+        case "orderBook": {
+          const m = msg as OrderBookMessage;
+          snapshot.orderBook = {
+            bids: m.data.bids,
+            asks: m.data.asks,
+            recv_ts: m.recv_ts,
+          };
+          break;
+        }
+        case "trade": {
+          const m = msg as TradeMessage;
+          snapshot.trade = {
+            price: m.price,
+            volume: m.volume,
+            boardId: m.boardId,
+            marketId: m.marketId,
+            recv_ts: m.recv_ts,
+          };
+          break;
+        }
+        case "foreignTrade": {
+          const m = msg as ForeignTradeMessage;
+          snapshot.foreignTrade = {
+            foreignBuyVolume: m.foreignBuyVolume,
+            foreignSellVolume: m.foreignSellVolume,
+            foreignBuyAmount: m.foreignBuyAmount,
+            foreignSellAmount: m.foreignSellAmount,
+            foreignNetValue: m.foreignNetValue,
+            boardId: m.boardId,
+            marketId: m.marketId,
+            recv_ts: m.recv_ts,
+          };
+          break;
+        }
+        case "foreignRoom": {
+          const m = msg as ForeignRoomMessage;
+          snapshot.foreignRoom = {
+            currentRoom: m.currentRoom,
+            totalRoom: m.totalRoom,
+            marketId: m.marketId,
+            recv_ts: m.recv_ts,
+          };
+          break;
+        }
+        default:
           return;
-        }
-
-        const { symbol, type, recv_ts } = msg;
-        const snapshot = snapshots.get(symbol) ?? { symbol };
-
-        switch (type) {
-          case "orderBook":
-            snapshot.orderBook = { ...msg.data, recv_ts };
-            break;
-          case "trade": {
-            const { price, volume, boardId, marketId, recv_ts } = msg;
-            snapshot.trade = { price, volume, boardId, marketId, recv_ts };
-            break;
-          }
-          case "foreignTrade": {
-            const {
-              foreignBuyVolume,
-              foreignSellVolume,
-              foreignBuyAmount,
-              foreignSellAmount,
-              foreignNetValue,
-              boardId,
-              marketId,
-              recv_ts,
-            } = msg;
-            snapshot.foreignTrade = {
-              foreignBuyVolume,
-              foreignSellVolume,
-              foreignBuyAmount,
-              foreignSellAmount,
-              foreignNetValue,
-              boardId,
-              marketId,
-              recv_ts,
-            };
-            break;
-          }
-          case "foreignRoom": {
-            const { currentRoom, totalRoom, marketId, recv_ts } = msg;
-            snapshot.foreignRoom = {
-              currentRoom,
-              totalRoom,
-              marketId,
-              recv_ts,
-            };
-            break;
-          }
-          default:
-            console.warn("Unknown type:", type);
-            return;
-        }
-
-        snapshots.set(symbol, snapshot);
-        batchUpdates.push(snapshot);
-        scheduleBatchUpdate();
-        messageHandlers.forEach((h) => h(snapshot));
-      } catch (err) {
-        console.error("Parse error:", ev.data, err);
       }
-    };
 
-    socket.onclose = (ev) => {
-      console.warn("WebSocket closed:", ev.code, ev.reason);
-      attemptReconnect(baseUrl);
-    };
+      snapshots.set(symbol, snapshot);
+      batchUpdates.push(snapshot);
+      scheduleBatchUpdate();
+      messageHandlers.forEach((h) => h(snapshot));
+    } catch (err) {
+      console.error("Parse error:", err);
+    }
+  };
 
-    socket.onerror = (ev) => console.error("WebSocket error:", ev);
-  } catch (err) {
-    console.error("Failed to create WebSocket:", err);
-  }
+  socket.onclose = () => attemptReconnect(baseUrl);
+  socket.onerror = () => console.error("WS error");
 };
 
 /* --------------------------------------------------------------
-RECONNECT
--------------------------------------------------------------- */
+   RECONNECT & RESUBSCRIBE
+   -------------------------------------------------------------- */
 const attemptReconnect = (baseUrl: string) => {
-  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-    console.error("Max reconnect attempts reached.");
-    return;
-  }
-
+  if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) return;
   reconnectTimer = setTimeout(() => {
-    console.log(
-      `Reconnecting... (${++reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`
-    );
+    console.log(`Reconnect #${++reconnectAttempts}`);
     initSocket(baseUrl);
   }, RECONNECT_INTERVAL);
 };
 
-/* --------------------------------------------------------------
-RE-SUBSCRIBE (khi reconnect)
--------------------------------------------------------------- */
 const reSubscribe = async () => {
   if (!subscribedSymbols.length) return;
   try {
-    // await apiClient.post("/v1/priceboard/subscribe", {
     await axios.post("http://192.168.1.139:8083/v1/priceboard/subscribe", {
       type: "subscribe",
       sessionId: getOrCreateSessionId(),
       symbols: subscribedSymbols,
     });
-    console.log("Re-subscribed:", subscribedSymbols);
   } catch (e) {
     console.error("Re-subscribe failed:", e);
   }
 };
 
 /* --------------------------------------------------------------
-SUBSCRIBE / UNSUBSCRIBE (gửi qua HTTP API)
--------------------------------------------------------------- */
+   SUBSCRIBE / UNSUBSCRIBE
+   -------------------------------------------------------------- */
 const sendSubscribeRequest = async (
   type: "subscribe" | "unsubscribe",
   options: SubscribeOptions
 ) => {
   try {
-    // await apiClient.post("/v1/priceboard/subscribe", {
     await axios.post(`http://192.168.1.139:8083/v1/priceboard/${type}`, {
       type,
       sessionId: getOrCreateSessionId(),
       groupId: options.groupId,
       symbols: options.symbols,
     });
-    console.log(`${type} sent:`, options);
   } catch (e) {
-    console.error(`Failed to send ${type}:`, e);
+    console.error(`Failed to ${type}:`, e);
     throw e;
   }
 };
 
 /* --------------------------------------------------------------
-PUBLIC API
--------------------------------------------------------------- */
+   PUBLIC API
+   -------------------------------------------------------------- */
 export const socketClient = (() => {
   const baseUrl =
     import.meta.env.VITE_WS_BASE_URL || "ws://192.168.1.139:8080/events";
@@ -251,7 +282,7 @@ export const socketClient = (() => {
   initSocket(baseUrl);
 
   return {
-    subscribe: async (options: SubscribeOptions): Promise<void> => {
+    subscribe: async (options: SubscribeOptions) => {
       if (options.symbols) {
         subscribedSymbols = Array.from(
           new Set([...subscribedSymbols, ...options.symbols])
@@ -259,32 +290,30 @@ export const socketClient = (() => {
       }
       await sendSubscribeRequest("subscribe", options);
     },
-
-    unsubscribe: async (options: SubscribeOptions): Promise<void> => {
+    unsubscribe: async (options: SubscribeOptions) => {
       if (options.symbols) {
         subscribedSymbols = subscribedSymbols.filter(
           (s) => !options.symbols!.includes(s)
         );
-        options.symbols.forEach((sym) => snapshots.delete(sym));
+        options.symbols.forEach((sym) => {
+          snapshots.delete(sym);
+          prevSnapshots.delete(sym);
+        });
         store.dispatch(clearSnapshot(options.symbols));
       }
       await sendSubscribeRequest("unsubscribe", options);
     },
-
-    onMessage: (handler: MessageHandler): (() => void) => {
+    onMessage: (handler: MessageHandler) => {
       messageHandlers.push(handler);
       return () => {
         messageHandlers = messageHandlers.filter((h) => h !== handler);
       };
     },
-
-    getSnapshot: (symbol: string): SnapshotData | undefined =>
-      snapshots.get(symbol),
-
-    getAllSnapshots: (): SnapshotData[] => Array.from(snapshots.values()),
-
-    close: () => {
-      closeSocket();
+    getSnapshot: (symbol: string) => snapshots.get(symbol),
+    getAllSnapshots: () => Array.from(snapshots.values()),
+    close: () => closeSocket(),
+    setVisibleSymbols: (symbols: string[]) => {
+      visibleSymbols = new Set(symbols);
     },
   };
 })();
@@ -293,6 +322,7 @@ declare global {
   interface Window {
     socketClient: typeof socketClient;
     apiClient: typeof apiClient;
+    flashWorker?: Worker;
   }
 }
 

@@ -328,7 +328,7 @@ input:-webkit-autofill {
 
 .flash-up {
   background: var(--color-green-500) !important;
-  color: var(--white) !important;
+  color: var(--color-text-title) !important;
 }
 .flash-down {
   background: var(--color-red-500) !important;
@@ -336,13 +336,13 @@ input:-webkit-autofill {
 }
 .flash-reference {
   background: var(--color-yellow-500) !important;
-  color: var(--white) !important;
+  color: var(--color-text-title) !important;
 }
 .flash-ceil {
   background: var(--color-violet-500) !important;
-  color: var(--white) !important;
+  color: var(--color-text-title) !important;
 }
 .flash-floor {
   background: var(--color-blue-500) !important;
-  color: var(--white) !important;
+  color: var(--color-text-title) !important;
 }

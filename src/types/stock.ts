@@ -1,18 +1,26 @@
-export interface OrderBookData {
-  bids: Array<{ price: number; volume: number; priceCompare: string }>;
-  asks: Array<{ price: number; volume: number; priceCompare: string }>;
-  recv_ts: number;
-}
+export type PriceCompare = "u" | "d" | "r" | "n";
 
-export interface TradeData {
+export type OrderBookLevel = {
+  price: number;
+  volume: number;
+  priceCompare: PriceCompare;
+};
+
+export type OrderBookData = {
+  bids: OrderBookLevel[];
+  asks: OrderBookLevel[];
+  recv_ts: number;
+};
+
+export type TradeData = {
   price: number;
   volume: number;
   boardId: string;
   marketId: string;
   recv_ts: number;
-}
+};
 
-export interface ForeignTradeData {
+export type ForeignTradeData = {
   foreignBuyVolume: number;
   foreignSellVolume: number;
   foreignBuyAmount: number;
@@ -21,44 +29,29 @@ export interface ForeignTradeData {
   boardId: string;
   marketId: string;
   recv_ts: number;
-}
+};
 
-export interface ForeignRoomData {
+export type ForeignRoomData = {
   currentRoom: number;
   totalRoom: number;
   marketId: string;
   recv_ts: number;
-}
+};
 
-export interface SnapshotData {
-  symbol: string;
-  orderBook?: OrderBookData;
-  trade?: TradeData;
-  foreignTrade?: ForeignTradeData;
-  foreignRoom?: ForeignRoomData;
-  ceil?: number;
-  floor?: number;
-  ref?: number;
-  high?: number;
-  avg?: number;
-  low?: number;
-  totalVol?: number;
-}
-
-// Định nghĩa type cho các message WebSocket
-export interface OrderBookMessage {
+// WebSocket Message Types
+export type OrderBookMessage = {
   type: "orderBook";
   symbol: string;
   boardId: string;
   marketId: string;
-  data: {
-    bids: Array<{ price: number; volume: number; priceCompare: string }>;
-    asks: Array<{ price: number; volume: number; priceCompare: string }>;
-  };
   recv_ts: number;
-}
+  data: {
+    bids: OrderBookLevel[];
+    asks: OrderBookLevel[];
+  };
+};
 
-export interface TradeMessage {
+export type TradeMessage = {
   type: "trade";
   symbol: string;
   boardId: string;
@@ -66,9 +59,9 @@ export interface TradeMessage {
   price: number;
   volume: number;
   recv_ts: number;
-}
+};
 
-export interface ForeignTradeMessage {
+export type ForeignTradeMessage = {
   type: "foreignTrade";
   symbol: string;
   boardId: string;
@@ -79,13 +72,34 @@ export interface ForeignTradeMessage {
   foreignSellAmount: number;
   foreignNetValue: number;
   recv_ts: number;
-}
+};
 
-export interface ForeignRoomMessage {
+export type ForeignRoomMessage = {
   type: "foreignRoom";
   symbol: string;
   marketId: string;
   currentRoom: number;
   totalRoom: number;
   recv_ts: number;
-}
+};
+
+export type WebSocketMessage =
+  | OrderBookMessage
+  | TradeMessage
+  | ForeignTradeMessage
+  | ForeignRoomMessage;
+
+// Redux Snapshot
+export type SnapshotData = {
+  symbol: string;
+  orderBook?: OrderBookData;
+  trade?: TradeData;
+  foreignTrade?: ForeignTradeData;
+  foreignRoom?: ForeignRoomData;
+};
+
+export type FlashResult = {
+  symbol: string;
+  key: string;
+  flashClass: "flash-up" | "flash-down";
+};
