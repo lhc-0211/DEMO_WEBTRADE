@@ -23,6 +23,7 @@ import {
 import OrderHisTableSkeleton from "./OrderHisTableSkeleton";
 
 type Order = {
+  orderId: number;
   time: string | number;
   side: string;
   symbol: string;
@@ -38,6 +39,7 @@ const columns: ColumnDef<Order>[] = [
   {
     header: "LOẠI LỆNH",
     columns: [
+      { header: "Order ID", accessorKey: "orderId" },
       { header: "Thời gian đặt", accessorKey: "time" },
       { header: "Lệnh", accessorKey: "side" },
       { header: "Mã", accessorKey: "symbol" },
@@ -129,6 +131,7 @@ function OrderHisTable() {
       return;
 
     const tableData = listOrdersInday.map((item) => ({
+      orderId: item.pkFrontOrder,
       time: new Date(item.orderTime).toLocaleTimeString(), // convert timestamp -> HH:MM:SS
       side: item.side === "B" ? "Mua" : "Bán",
       symbol: item.shareCode,
