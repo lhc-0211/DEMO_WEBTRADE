@@ -3,7 +3,7 @@ import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
 import type { Column } from "../../../../../types";
 
 export default function HeaderColumns() {
-  const [columns, setColumns] = useState<Column[]>(() => {
+  const [columns] = useState<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
     if (saved) {
       try {

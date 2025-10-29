@@ -25,7 +25,16 @@ function PriceBoard() {
 
   // Resize Observer
   useEffect(() => {
-    socketClient.subscribe({ groupId: "hnx30" });
+    // socketClient.subscribe({
+    //   symbols: [
+    //     "HPG:G1:STO",
+    //     "VCB:G1:STO",
+    //     "MWG:G1:STO",
+    //     "SHB:G1:STX",
+    //     "ACB:G1:STX",
+    //     "CEO:G1:STX",
+    //   ],
+    // });
 
     if (!containerRef.current) return;
 
@@ -41,7 +50,16 @@ function PriceBoard() {
     resizeObserver.observe(containerRef.current);
 
     return () => {
-      socketClient.unsubscribe({ groupId: "hnx30" });
+      // socketClient.unsubscribe({
+      //   symbols: [
+      //     "HPG:G1:STO",
+      //     "VCB:G1:STO",
+      //     "MWG:G1:STO",
+      //     "SHB:G1:STX",
+      //     "ACB:G1:STX",
+      //     "CEO:G1:STX",
+      //   ],
+      // });
       resizeObserver.disconnect();
     };
   }, []);
@@ -73,7 +91,7 @@ function PriceBoard() {
       <div style={{ width: containerWidth, height: HEADER_HEIGHT }}>
         <HeaderColumns />
       </div>
-      <div className="flex-1 overflow-hidden">
+      <div>
         <List
           ref={listRef}
           height={listHeight}
@@ -82,6 +100,7 @@ function PriceBoard() {
           rowRenderer={rowRenderer}
           width={containerWidth}
           onRowsRendered={updateVisibleSymbols}
+          className="hide-scrollbar"
         />
       </div>
     </div>

@@ -53,20 +53,7 @@ function BodyTable({ symbol }: { symbol: string }) {
       clearTimeout(timer);
       unregisterVisibleCell(symbol);
     };
-  }, [symbol, columns]);
-
-  const renderCell = (key: string, value: string | number) => (
-    <div
-      data-symbol={symbol}
-      data-key={key}
-      className={`flex items-center justify-center text-xs font-medium select-none h-7 transition-colors duration-300 ${
-        cellColors[key] || "text-text-body"
-      }`}
-      style={{ minWidth: key === "symbol" ? 60 : undefined }}
-    >
-      {value}
-    </div>
-  );
+  }, [symbol, columns, snapshot]);
 
   return (
     <div className="flex border-x border-b border-border divide-x divide-border w-full">
@@ -77,17 +64,16 @@ function BodyTable({ symbol }: { symbol: string }) {
           return (
             <div
               key={col.key}
-              className={`h-7 grid place-items-center text-xs font-medium select-none ${
-                col.key === "symbol"
-                  ? cellColors["lastPrice"] || "text-text-body"
-                  : ""
-              }`}
+              className="h-7 grid place-items-center text-text-body text-xs font-medium"
               style={{ minWidth: col.width }}
             >
               <div
                 data-symbol={symbol}
                 data-key={col.key}
-                className="flex items-center justify-center h-7"
+                className={`flex items-center justify-center h-7 ${
+                  col.children ? "border-b border-border" : ""
+                }`}
+                style={{ minWidth: col.width }}
               >
                 {getColumnValue(snapshot, col.key)}
               </div>
@@ -98,16 +84,29 @@ function BodyTable({ symbol }: { symbol: string }) {
         return (
           <div key={col.key} className="flex flex-col w-full">
             {!hasChildren ? (
-              renderCell(col.key, getColumnValue(snapshot, col.key))
+              <div
+                data-symbol={symbol}
+                data-key={col.key}
+                className={`flex items-center justify-center text-xs font-medium h-7 transition-colors duration-300 ${
+                  cellColors[col.key] || "text-text-body"
+                }`}
+                style={{ minWidth: col.width }}
+              >
+                {getColumnValue(snapshot, col.key)}
+              </div>
             ) : (
-              <div className="flex divide-x divide-border text-xs font-medium select-none">
+              <div className="flex divide-x divide-border text-xs font-medium">
                 {col.children?.map((child) => (
                   <div
                     key={child.key}
-                    className="flex-1"
+                    data-symbol={symbol}
+                    data-key={child.key}
+                    className={`flex items-center justify-center text-xs font-medium h-7 transition-colors duration-300 ${
+                      cellColors[child.key] || "text-text-body"
+                    }`}
                     style={{ minWidth: child.width }}
                   >
-                    {renderCell(child.key, getColumnValue(snapshot, child.key))}
+                    {getColumnValue(snapshot, child.key)}
                   </div>
                 ))}
               </div>

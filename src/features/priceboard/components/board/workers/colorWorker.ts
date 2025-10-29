@@ -1,5 +1,5 @@
 import { KEYS_COLOR } from "../../../../../configs/headerPriceBoard";
-import type { SnapshotData } from "../../../../../types";
+import type { ColorDTO } from "../../../../../types";
 
 const getTextColor = (cmp: string | undefined): string => {
   switch (cmp) {
@@ -18,29 +18,39 @@ const getTextColor = (cmp: string | undefined): string => {
   }
 };
 
-self.onmessage = (e: MessageEvent<{ type: "batch"; data: SnapshotData[] }>) => {
+self.onmessage = (e: MessageEvent<{ type: "batch"; data: ColorDTO[] }>) => {
   if (e.data.type !== "batch") return;
 
   const colors: Record<string, Record<string, string>> = {};
 
-  for (const s of e.data.data) {
-    colors[s.symbol] = {};
+  for (const item of e.data.data) {
+    const { s, c, bc, ac } = item;
+    colors[s] = {};
+
     KEYS_COLOR.forEach((key) => {
       let cmp: string | undefined;
+
       if (
         key === "lastPrice" ||
         key === "lastVolume" ||
         key.includes("change")
       ) {
-        cmp = s.trade?.priceCompare;
+        cmp = c;
       } else if (key.startsWith("priceBuy")) {
         const i = parseInt(key[8]) - 1;
-        cmp = s.orderBook?.bids?.[i]?.priceCompare;
+        cmp = bc[i];
       } else if (key.startsWith("priceSell")) {
         const i = parseInt(key[9]) - 1;
-        cmp = s.orderBook?.asks?.[i]?.priceCompare;
+        cmp = ac[i];
+      } else if (key.startsWith("volumeBuy")) {
+        const i = parseInt(key[9]) - 1;
+        cmp = bc[i];
+      } else if (key.startsWith("volumeSell")) {
+        const i = parseInt(key[10]) - 1;
+        cmp = ac[i];
       }
-      colors[s.symbol][key] = getTextColor(cmp);
+
+      colors[s][key] = getTextColor(cmp);
     });
   }
 

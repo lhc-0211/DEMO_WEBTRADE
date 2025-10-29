@@ -43,7 +43,7 @@ export const getColumnValue = (
       return numberFormat(snapshot.trade?.volume, 0, "");
     case "change":
       return snapshot.trade?.changeAbs
-        ? numberFormat(snapshot.trade?.changeAbs)
+        ? formatPrice(snapshot.trade?.changeAbs)
         : "";
     case "changePc":
       return snapshot.trade?.changePct

@@ -6,6 +6,7 @@ import {
   updateSnapshots,
 } from "../../store/slices/stock/slice";
 import type {
+  ColorDTO,
   ForeignRoomMessage,
   ForeignTradeMessage,
   OrderBookMessage,
@@ -16,29 +17,32 @@ import type {
 import type { SocketClient, SubscribeOptions } from "../../types/socketClient";
 import { getOrCreateSessionId } from "../../utils";
 
-type MessageHandler = (data: SnapshotData) => void;
+// =============================================================
+// CONFIG
+// =============================================================
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_INTERVAL = 3000;
+const MAX_BATCH_SIZE = 200;
+const BATCH_CHUNK_DELAY = 10;
 
-/* --------------------------------------------------------------
-   PRIVATE STATE
-   -------------------------------------------------------------- */
+// =============================================================
+// PRIVATE STATE
+// =============================================================
 let socket: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 5;
-const RECONNECT_INTERVAL = 3000;
 
 let subscribedSymbols: string[] = [];
-let messageHandlers: MessageHandler[] = [];
-const snapshots: Map<string, SnapshotData> = new Map();
+let messageHandlers: ((data: SnapshotData) => void)[] = [];
+const snapshots = new Map<string, SnapshotData>();
 const pendingMap = new Map<string, SnapshotData>();
+const prevSnapshots = new Map<string, SnapshotData>();
+let visibleSymbols = new Set<string>();
 let rafPending = false;
 
-let visibleSymbols = new Set<string>();
-const prevSnapshots: Map<string, SnapshotData> = new Map();
-
-/* --------------------------------------------------------------
-   HELPERS
-   -------------------------------------------------------------- */
+// =============================================================
+// HELPERS
+// =============================================================
 const buildUrl = (base: string): string => {
   const sid = getOrCreateSessionId();
   return sid ? `${base}?sessionId=${sid}` : "";
@@ -48,19 +52,61 @@ const hasChanged = (a: SnapshotData, b: SnapshotData): boolean => {
   if (a.trade?.price !== b.trade?.price) return true;
   if (a.trade?.volume !== b.trade?.volume) return true;
   if (a.trade?.changePct !== b.trade?.changePct) return true;
+  if (a.trade?.priceCompare !== b.trade?.priceCompare) return true;
 
   const compareLevel = (i: number) => {
     const aBid = a.orderBook?.bids?.[i],
       bBid = b.orderBook?.bids?.[i];
     const aAsk = a.orderBook?.asks?.[i],
       bAsk = b.orderBook?.asks?.[i];
-    return aBid?.price !== bBid?.price || aAsk?.price !== bAsk?.price;
+    return (
+      aBid?.price !== bBid?.price ||
+      aBid?.priceCompare !== bBid?.priceCompare ||
+      aAsk?.price !== bAsk?.price ||
+      aAsk?.priceCompare !== bAsk?.priceCompare
+    );
   };
 
   for (let i = 0; i < 3; i++) if (compareLevel(i)) return true;
   return false;
 };
 
+const toColorDTO = (s: SnapshotData): ColorDTO => ({
+  s: s.symbol,
+  c: s.trade?.priceCompare,
+  b: s.orderBook?.bids.slice(0, 3).map((x) => x.price) || [],
+  a: s.orderBook?.asks.slice(0, 3).map((x) => x.price) || [],
+  bc: s.orderBook?.bids.slice(0, 3).map((x) => x.priceCompare) || [],
+  ac: s.orderBook?.asks.slice(0, 3).map((x) => x.priceCompare) || [],
+});
+
+const chunkArray = <T>(arr: T[], size: number): T[][] => {
+  const result: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
+};
+
+const postToWorker = <T>(worker: Worker | undefined, type: string, data: T) => {
+  if (!worker) return;
+
+  if (Array.isArray(data) && data.length > MAX_BATCH_SIZE) {
+    const chunks = chunkArray(data, MAX_BATCH_SIZE);
+    chunks.forEach((chunk, i) => {
+      setTimeout(
+        () => worker.postMessage({ type, data: chunk }),
+        i * BATCH_CHUNK_DELAY
+      );
+    });
+  } else {
+    worker.postMessage({ type, data });
+  }
+};
+
+// =============================================================
+// BATCH PROCESSING
+// =============================================================
 const processBatch = () => {
   if (pendingMap.size === 0) {
     rafPending = false;
@@ -75,47 +121,43 @@ const processBatch = () => {
     return !prev || hasChanged(curr, prev);
   });
 
-  if (changedUpdates.length > 0) {
-    store.dispatch(updateSnapshots(changedUpdates));
-
-    const visibleUpdates = changedUpdates.filter((s) =>
-      visibleSymbols.has(s.symbol)
-    );
-    if (visibleUpdates.length > 0) {
-      // Gửi cho colorWorker
-      window.colorWorker?.postMessage({
-        type: "batch",
-        data: visibleUpdates,
-      });
-
-      // Gửi cho flashWorker
-      const batchWithPrev = visibleUpdates.map((s) => ({
-        snapshot: s,
-        prevSnapshot: prevSnapshots.get(s.symbol) || null,
-      }));
-      window.flashWorker?.postMessage({
-        type: "batch",
-        data: batchWithPrev,
-      });
-    }
-
-    // Cập nhật prevSnapshots
-    changedUpdates.forEach((s) => {
-      prevSnapshots.set(s.symbol, {
-        symbol: s.symbol,
-        trade: s.trade ? { ...s.trade } : undefined,
-        foreignTrade: s.foreignTrade ? { ...s.foreignTrade } : undefined,
-        foreignRoom: s.foreignRoom ? { ...s.foreignRoom } : undefined,
-        orderBook: s.orderBook
-          ? {
-              bids: s.orderBook.bids.slice(0, 3),
-              asks: s.orderBook.asks.slice(0, 3),
-              recv_ts: s.orderBook.recv_ts,
-            }
-          : undefined,
-      });
-    });
+  if (changedUpdates.length === 0) {
+    rafPending = false;
+    return;
   }
+
+  store.dispatch(updateSnapshots(changedUpdates));
+
+  // colorWorker: toàn bộ thay đổi
+  const colorData = changedUpdates.map(toColorDTO);
+  postToWorker(window.colorWorker, "batch", colorData);
+
+  // flashWorker: chỉ visible
+  const visibleUpdates = changedUpdates.filter((s) =>
+    visibleSymbols.has(s.symbol)
+  );
+  if (visibleUpdates.length > 0) {
+    const flashData = visibleUpdates.map((s) => ({
+      snapshot: s,
+      prevSnapshot: prevSnapshots.get(s.symbol) || null,
+    }));
+    postToWorker(window.flashWorker, "batch", flashData);
+  }
+
+  // cập nhật prev
+  changedUpdates.forEach((s) => {
+    prevSnapshots.set(s.symbol, {
+      symbol: s.symbol,
+      trade: s.trade ? { ...s.trade } : undefined,
+      orderBook: s.orderBook
+        ? {
+            bids: s.orderBook.bids.slice(0, 3),
+            asks: s.orderBook.asks.slice(0, 3),
+            recv_ts: s.orderBook.recv_ts,
+          }
+        : undefined,
+    });
+  });
 
   rafPending = false;
 };
@@ -126,6 +168,9 @@ const scheduleBatchUpdate = () => {
   requestAnimationFrame(processBatch);
 };
 
+// =============================================================
+// WEBSOCKET CORE
+// =============================================================
 const closeSocket = () => {
   if (reconnectTimer) clearTimeout(reconnectTimer);
   if (socket) socket.close();
@@ -137,9 +182,6 @@ const closeSocket = () => {
   store.dispatch(resetSnapshots());
 };
 
-/* --------------------------------------------------------------
-   CORE – WebSocket
-   -------------------------------------------------------------- */
 const initSocket = (baseUrl: string) => {
   const url = buildUrl(baseUrl);
   if (!url) return;
@@ -232,9 +274,9 @@ const initSocket = (baseUrl: string) => {
   socket.onerror = () => console.error("WS error");
 };
 
-/* --------------------------------------------------------------
-   RECONNECT & RESUBSCRIBE
-   -------------------------------------------------------------- */
+// =============================================================
+// RECONNECT & RESUBSCRIBE
+// =============================================================
 const attemptReconnect = (baseUrl: string) => {
   if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) return;
   reconnectTimer = setTimeout(() => {
@@ -256,9 +298,6 @@ const reSubscribe = async () => {
   }
 };
 
-/* --------------------------------------------------------------
-   SUBSCRIBE / UNSUBSCRIBE
-   -------------------------------------------------------------- */
 const sendSubscribeRequest = async (
   type: "subscribe" | "unsubscribe",
   options: SubscribeOptions
@@ -276,9 +315,9 @@ const sendSubscribeRequest = async (
   }
 };
 
-/* --------------------------------------------------------------
-   PUBLIC API – TYPE-SAFE
-   -------------------------------------------------------------- */
+// =============================================================
+// PUBLIC API
+// =============================================================
 export const socketClient: SocketClient = (() => {
   const baseUrl =
     import.meta.env.VITE_WS_BASE_URL || "ws://192.168.1.139:8080/events";
@@ -293,6 +332,7 @@ export const socketClient: SocketClient = (() => {
       }
       await sendSubscribeRequest("subscribe", options);
     },
+
     unsubscribe: async (options: SubscribeOptions) => {
       if (options.symbols) {
         subscribedSymbols = subscribedSymbols.filter(
@@ -307,15 +347,19 @@ export const socketClient: SocketClient = (() => {
       }
       await sendSubscribeRequest("unsubscribe", options);
     },
-    onMessage: (handler: MessageHandler) => {
+
+    onMessage: (handler: (data: SnapshotData) => void) => {
       messageHandlers.push(handler);
       return () => {
         messageHandlers = messageHandlers.filter((h) => h !== handler);
       };
     },
+
     getSnapshot: (symbol: string) => snapshots.get(symbol),
     getAllSnapshots: () => Array.from(snapshots.values()),
+
     close: () => closeSocket(),
+
     setVisibleSymbols: (symbols: string[]) => {
       visibleSymbols = new Set(symbols);
     },

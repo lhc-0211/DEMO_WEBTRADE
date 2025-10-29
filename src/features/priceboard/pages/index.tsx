@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { initWorkers } from "../../../components/workers/initWorkers";
 import Board from "../components/board";
+import { MessageSimulator } from "../components/board/test/MessageSimulator";
 import MenuDashboard from "../components/menu-board";
 import SynAnalysisPriceBoard from "../components/synthetic-analysis";
 
@@ -24,6 +25,8 @@ export default function PriceBoard() {
         {/* Bảng giá */}
         <Board />
       </div>
+
+      <MessageSimulator />
     </div>
   );
 }

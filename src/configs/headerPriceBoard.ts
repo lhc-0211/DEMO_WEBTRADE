@@ -26,7 +26,7 @@ export const ALL_COLUMNS = [
       { key: "lastPrice", label: "Khớp", default: true, width: 60 },
       { key: "lastVolume", label: "KL", default: true, width: 65 },
       { key: "change", label: "+/-", default: true, width: 45 },
-      { key: "changePc", label: "%", default: true, width: 45 },
+      { key: "changePc", label: "%", default: true, width: 50 },
     ],
   },
   {
@@ -45,7 +45,7 @@ export const ALL_COLUMNS = [
   { key: "high", label: "Cao", default: false, width: 42 },
   { key: "avg", label: "TB", default: false, width: 42 },
   { key: "low", label: "Thấp", default: false, width: 42 },
-  { key: "totalVol", label: "Tổng KL", default: true, width: 90 },
+  { key: "totalVol", label: "Tổng KL", default: true, width: 87 },
   {
     key: "foreign",
     label: "GD NĐT NN",
