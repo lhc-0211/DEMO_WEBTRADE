@@ -25,16 +25,16 @@ function PriceBoard() {
 
   // Resize Observer
   useEffect(() => {
-    // socketClient.subscribe({
-    //   symbols: [
-    //     "HPG:G1:STO",
-    //     "VCB:G1:STO",
-    //     "MWG:G1:STO",
-    //     "SHB:G1:STX",
-    //     "ACB:G1:STX",
-    //     "CEO:G1:STX",
-    //   ],
-    // });
+    socketClient.subscribe({
+      symbols: [
+        "HPG:G1:STO",
+        "VCB:G1:STO",
+        "MWG:G1:STO",
+        "SHB:G1:STX",
+        "ACB:G1:STX",
+        "CEO:G1:STX",
+      ],
+    });
 
     if (!containerRef.current) return;
 
@@ -50,16 +50,16 @@ function PriceBoard() {
     resizeObserver.observe(containerRef.current);
 
     return () => {
-      // socketClient.unsubscribe({
-      //   symbols: [
-      //     "HPG:G1:STO",
-      //     "VCB:G1:STO",
-      //     "MWG:G1:STO",
-      //     "SHB:G1:STX",
-      //     "ACB:G1:STX",
-      //     "CEO:G1:STX",
-      //   ],
-      // });
+      socketClient.unsubscribe({
+        symbols: [
+          "HPG:G1:STO",
+          "VCB:G1:STO",
+          "MWG:G1:STO",
+          "SHB:G1:STX",
+          "ACB:G1:STX",
+          "CEO:G1:STX",
+        ],
+      });
       resizeObserver.disconnect();
     };
   }, []);

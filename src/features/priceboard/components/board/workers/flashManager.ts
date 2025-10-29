@@ -34,7 +34,13 @@ const applyFlash = (): void => {
     const cell = keyMap?.get(key);
     if (!cell) continue;
 
-    cell.classList.remove("flash-up", "flash-down");
+    cell.classList.remove(
+      "flash-up",
+      "flash-down",
+      "flash-ceil",
+      "flash-floor",
+      "flash-reference"
+    );
     void cell.offsetWidth;
     cell.classList.add(flashClass);
 

@@ -14,9 +14,14 @@ import {
 } from "../workers/flashManager";
 
 function BodyTable({ symbol }: { symbol: string }) {
-  const snapshot = useAppSelector(
+  const snapshotData = useAppSelector(
     (state) => selectSnapshotsBySymbols(state, [symbol])[symbol]
-  ) || { symbol };
+  );
+
+  const snapshot = useMemo(() => {
+    return snapshotData || { symbol };
+  }, [snapshotData, symbol]);
+
   const cellColors = useAppSelector((state) =>
     selectColorsBySymbol(state, symbol)
   );
@@ -64,7 +69,9 @@ function BodyTable({ symbol }: { symbol: string }) {
           return (
             <div
               key={col.key}
-              className="h-7 grid place-items-center text-text-body text-xs font-medium"
+              className={`h-7 grid place-items-center text-text-body text-xs font-medium ${
+                cellColors[col.key] || "text-text-body"
+              }`}
               style={{ minWidth: col.width }}
             >
               <div

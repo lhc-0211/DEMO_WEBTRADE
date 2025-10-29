@@ -332,21 +332,21 @@ input:-webkit-autofill {
 
 .flash-up {
   background: var(--color-green-500) !important;
-  color: var(--color-text-title) !important;
+  color: var(--color-background-primary) !important;
 }
 .flash-down {
   background: var(--color-red-500) !important;
-  color: var(--color-text-title) !important;
+  color: var(--color-background-primary) !important;
 }
 .flash-reference {
   background: var(--color-yellow-500) !important;
-  color: var(--color-text-title) !important;
+  color: var(--color-background-primary) !important;
 }
 .flash-ceil {
   background: var(--color-violet-500) !important;
-  color: var(--color-text-title) !important;
+  color: var(--color-background-primary) !important;
 }
 .flash-floor {
   background: var(--color-blue-500) !important;
-  color: var(--color-text-title) !important;
+  color: var(--color-background-primary) !important;
 }

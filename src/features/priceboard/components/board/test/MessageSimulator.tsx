@@ -1,4 +1,3 @@
-// src/components/FullFlashSimulator.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { store } from "../../../../../store";
 import { updateSnapshots } from "../../../../../store/slices/stock/slice";
@@ -33,37 +32,39 @@ export const MessageSimulator: React.FC = () => {
   const flashCount = useRef(0);
   const startTime = useRef(0);
   const intervalId = useRef<number | null>(null);
-  const prevSnapshots = useRef<Map<string, SnapshotData>>(new Map());
 
   // === SYMBOL THẬT ===
   const symbols = useRef<string[]>([]);
 
   useEffect(() => {
     const snapshots = store.getState().stock.snapshots;
-    symbols.current =
-      Object.keys(snapshots).length > 0
-        ? Object.keys(snapshots)
-        : ["AAH:G1:UPX", "VCB:STO", "FPT:HOSE"].concat(
-            Array.from(
-              { length: 1000 },
-              (_, i) => `SYM${i.toString().padStart(4, "0")}`
-            )
-          );
+    symbols.current = Object.keys(snapshots);
+    if (symbols.current.length === 0) {
+      // fallback khi bảng giá chưa có mã nào
+      symbols.current = [
+        "HPG:G1:STO",
+        "VCB:G1:STO",
+        "MWG:G1:STO",
+        "SHB:G1:STX",
+        "ACB:G1:STX",
+        "CEO:G1:STX",
+      ];
+    }
 
-    // Khởi tạo
-    const initial: any = symbols.current.slice(0, 500).map((s) => ({
+    // Khởi tạo dữ liệu ban đầu (để có base cho flash)
+    const initial: any = symbols.current.map((s) => ({
       symbol: s,
       trade: { price: 10000, volume: 100, changePct: 0, priceCompare: "r" },
     }));
     store.dispatch(updateSnapshots(initial));
-    initial.forEach((s) => prevSnapshots.current.set(s.symbol, s));
   }, []);
 
   // === TẠO SNAPSHOT + DTO + FLASH DATA ===
   const createData = (symbol: string, i: number) => {
-    const prev = prevSnapshots.current.get(symbol);
-    const base = (prev?.trade?.price || 10000) + (Math.random() - 0.5) * 200;
-    const change = base - (prev?.trade?.price || 10000);
+    const prev = store.getState().stock.snapshots[symbol];
+    const prevPrice = prev?.trade?.price || 10000;
+    const base = prevPrice + (Math.random() - 0.5) * 200;
+    const change = base - prevPrice;
     const priceCompare = change > 50 ? "u" : change < -50 ? "d" : "r";
 
     const snapshot: any = {
@@ -71,27 +72,27 @@ export const MessageSimulator: React.FC = () => {
       trade: {
         price: base,
         volume: 100 + (i % 100),
-        changePct: (change / (prev?.trade?.price || 10000)) * 100,
+        changePct: (change / prevPrice) * 100,
         priceCompare,
       },
       orderBook: {
         bids: [
           {
             price: base - 100,
-            volume: 46400,
+            volume: base - 200,
             priceCompare: change > 0 ? "r" : "d",
           },
-          { price: base - 200, volume: 787600, priceCompare: "d" },
-          { price: base - 300, volume: 74700, priceCompare: "d" },
+          { price: base - 200, volume: base - 200, priceCompare: "d" },
+          { price: base - 300, volume: base + 300, priceCompare: "d" },
         ],
         asks: [
-          { price: base + 100, volume: 133400, priceCompare: "r" },
+          { price: base + 100, volume: base - 100, priceCompare: "r" },
           {
             price: base + 200,
-            volume: 727900,
+            volume: base - 100,
             priceCompare: change > 0 ? "u" : "r",
           },
-          { price: base + 300, volume: 270900, priceCompare: "u" },
+          { price: base + 300, volume: base - 100, priceCompare: "u" },
         ],
       },
     };
@@ -106,11 +107,10 @@ export const MessageSimulator: React.FC = () => {
     };
 
     const flashData = prev ? { snapshot, prevSnapshot: prev } : null;
-
     return { snapshot, dto, flashData };
   };
 
-  // === GỌI CẢ HAI WORKER ===
+  // === GỬI TỚI WORKER ===
   const sendToWorkers = (dtos: any[], flashData: any[]) => {
     if (window.colorWorker && dtos.length > 0) {
       colorCount.current += dtos.length;
@@ -122,10 +122,11 @@ export const MessageSimulator: React.FC = () => {
     }
   };
 
-  // === GIẢ LẬP ===
+  // === BẮT ĐẦU GIẢ LẬP ===
   const start = () => {
     if (isRunning) return;
     setIsRunning(true);
+
     totalMsgs.current =
       colorCount.current =
       flashCount.current =
@@ -146,7 +147,7 @@ export const MessageSimulator: React.FC = () => {
       const batchDTOs: any[] = [];
       const batchFlash: any[] = [];
 
-      for (let i = 0; i < 83; i++) {
+      for (let i = 0; i < 80; i++) {
         const symbol =
           symbols.current[Math.floor(Math.random() * symbols.current.length)];
         const { snapshot, dto, flashData } = createData(
@@ -162,11 +163,8 @@ export const MessageSimulator: React.FC = () => {
       // Cập nhật Redux
       store.dispatch(updateSnapshots(batchSnapshots));
 
-      // GỌI CẢ HAI WORKER
+      // Gọi workers
       sendToWorkers(batchDTOs, batchFlash);
-
-      // Cập nhật prev
-      batchSnapshots.forEach((s) => prevSnapshots.current.set(s.symbol, s));
 
       const elapsed = (now - startTime.current) / 1000;
       setStats({
@@ -178,9 +176,10 @@ export const MessageSimulator: React.FC = () => {
         colorMsgs: colorCount.current,
         flashMsgs: flashCount.current,
       });
-    }, 1000 / 60);
+    }, 100); // 10 lần / giây
   };
 
+  // === DỪNG GIẢ LẬP ===
   const stop = () => {
     if (intervalId.current) clearInterval(intervalId.current);
     setIsRunning(false);
@@ -192,14 +191,17 @@ export const MessageSimulator: React.FC = () => {
     };
   }, []);
 
+  // === UI ===
   return (
-    <div className="fixed bottom-4 right-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg shadow-2xl p-5 w-80 z-50 font-mono text-xs">
+    <div className="fixed bottom-4 right-4 bg-gray-800 text-white rounded-lg shadow-2xl p-5 w-80 z-50 font-mono text-xs">
       <div className="flex justify-between items-center mb-3">
-        <h3 className="font-bold">GIẢ LẬP + FLASH</h3>
+        <h3 className="font-bold">GIẢ LẬP DỮ LIỆU + FLASH</h3>
         <button
           onClick={isRunning ? stop : start}
           className={`px-3 py-1 rounded font-bold transition ${
-            isRunning ? "bg-red-500" : "bg-green-500"
+            isRunning
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-green-500 hover:bg-green-600"
           }`}
         >
           {isRunning ? "DỪNG" : "BẮT ĐẦU"}
@@ -239,8 +241,8 @@ export const MessageSimulator: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-3 text-[10px] opacity-80">
-        Nháy màu + flash đỏ/xanh
+      <div className="mt-3 text-[10px] opacity-70">
+        Nháy màu + flash xanh/đỏ, dữ liệu cập nhật qua Redux & Worker.
       </div>
     </div>
   );

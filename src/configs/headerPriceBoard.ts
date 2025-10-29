@@ -75,4 +75,5 @@ export const KEYS_COLOR = [
   "volumeSell3",
   "change",
   "changePc",
+  "symbol",
 ] as const;

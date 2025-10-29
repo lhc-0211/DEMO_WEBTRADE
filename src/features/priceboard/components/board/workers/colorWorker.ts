@@ -1,7 +1,7 @@
 import { KEYS_COLOR } from "../../../../../configs/headerPriceBoard";
 import type { ColorDTO } from "../../../../../types";
 
-const getTextColor = (cmp: string | undefined): string => {
+const getTextColor = (cmp?: string): string => {
   switch (cmp) {
     case "u":
       return "text-green-500";
@@ -18,41 +18,78 @@ const getTextColor = (cmp: string | undefined): string => {
   }
 };
 
+// Hàng đợi để xử lý lần lượt
+let queue: ColorDTO[][] = [];
+let isProcessing = false;
+
+// Giới hạn queue tối đa để tránh đầy RAM
+const MAX_QUEUE_LENGTH = 100;
+
+function processQueue() {
+  if (isProcessing || queue.length === 0) return;
+
+  isProcessing = true;
+  const batch = queue.shift();
+  if (!batch) {
+    isProcessing = false;
+    return;
+  }
+
+  try {
+    const colors: Record<string, Record<string, string>> = {};
+
+    for (const item of batch) {
+      const { s, c, bc, ac } = item;
+      colors[s] = {};
+
+      for (const key of KEYS_COLOR) {
+        let cmp: string | undefined;
+
+        if (
+          key === "lastPrice" ||
+          key === "lastVolume" ||
+          key.includes("change") ||
+          key === "symbol"
+        ) {
+          cmp = c;
+        } else if (key.startsWith("priceBuy")) {
+          cmp = bc[parseInt(key[8]) - 1];
+        } else if (key.startsWith("priceSell")) {
+          cmp = ac[parseInt(key[9]) - 1];
+        } else if (key.startsWith("volumeBuy")) {
+          cmp = bc[parseInt(key[9]) - 1];
+        } else if (key.startsWith("volumeSell")) {
+          cmp = ac[parseInt(key[10]) - 1];
+        }
+
+        colors[s][key] = getTextColor(cmp);
+      }
+    }
+
+    // Gửi kết quả về main thread
+    self.postMessage({ type: "colors", data: colors });
+  } catch (err) {
+    console.error("[Worker] processQueue error:", err);
+  } finally {
+    isProcessing = false;
+
+    // Dọn biến tạm để giảm RAM
+    if (queue.length > 0) {
+      setTimeout(processQueue, 0);
+    }
+  }
+}
+
 self.onmessage = (e: MessageEvent<{ type: "batch"; data: ColorDTO[] }>) => {
   if (e.data.type !== "batch") return;
 
-  const colors: Record<string, Record<string, string>> = {};
+  // Thêm batch mới vào queue
+  queue.push(e.data.data);
 
-  for (const item of e.data.data) {
-    const { s, c, bc, ac } = item;
-    colors[s] = {};
-
-    KEYS_COLOR.forEach((key) => {
-      let cmp: string | undefined;
-
-      if (
-        key === "lastPrice" ||
-        key === "lastVolume" ||
-        key.includes("change")
-      ) {
-        cmp = c;
-      } else if (key.startsWith("priceBuy")) {
-        const i = parseInt(key[8]) - 1;
-        cmp = bc[i];
-      } else if (key.startsWith("priceSell")) {
-        const i = parseInt(key[9]) - 1;
-        cmp = ac[i];
-      } else if (key.startsWith("volumeBuy")) {
-        const i = parseInt(key[9]) - 1;
-        cmp = bc[i];
-      } else if (key.startsWith("volumeSell")) {
-        const i = parseInt(key[10]) - 1;
-        cmp = ac[i];
-      }
-
-      colors[s][key] = getTextColor(cmp);
-    });
+  // Nếu queue quá dài → bỏ batch cũ nhất (đã lỗi thời)
+  if (queue.length > MAX_QUEUE_LENGTH) {
+    queue = queue.slice(-MAX_QUEUE_LENGTH);
   }
 
-  self.postMessage({ type: "colors", data: colors });
+  processQueue();
 };
