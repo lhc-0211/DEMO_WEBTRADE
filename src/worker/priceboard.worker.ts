@@ -95,6 +95,12 @@ const processQueue = (): void => {
         } else if (key.startsWith("priceSell")) {
           const i = parseInt(key[9], 10) - 1;
           cmp = snapshot.orderBook?.asks?.[i]?.priceCompare;
+        } else if (key.startsWith("volumeBuy")) {
+          const i = parseInt(key[9], 10) - 1;
+          cmp = snapshot.orderBook?.bids?.[i]?.priceCompare;
+        } else if (key.startsWith("volumeSell")) {
+          const i = parseInt(key[10], 10) - 1;
+          cmp = snapshot.orderBook?.asks?.[i]?.priceCompare;
         }
         colors[symbol][key] = getTextColor(cmp);
       }
@@ -126,8 +132,6 @@ const processQueue = (): void => {
 
 self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
   const { type, data } = e.data;
-
-  console.log("e.data", e.data);
 
   if (type === "batch") {
     queue.push(...data);

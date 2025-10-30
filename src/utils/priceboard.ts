@@ -38,7 +38,7 @@ export const getColumnValue = (
       return numberFormat(snapshot.orderBook?.bids[0]?.volume, 0, "");
 
     case "lastPrice":
-      return formatPrice(snapshot.trade?.price);
+      return snapshot.trade?.price ? formatPrice(snapshot.trade?.price) : "";
     case "lastVolume":
       return numberFormat(snapshot.trade?.volume, 0, "");
     case "change":

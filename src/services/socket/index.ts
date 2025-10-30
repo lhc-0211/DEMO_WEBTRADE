@@ -144,7 +144,7 @@ const attemptReconnect = (baseUrl: string) => {
 const reSubscribe = async () => {
   if (subscribedSymbols.length === 0) return;
   try {
-    await axios.post("http://192.168.1.139:8083/v1/priceboard/subscribe", {
+    await axios.post("http://192.168.1.139:8083/v1/priceboard/subsciptions", {
       type: "subscribe",
       sessionId: getOrCreateSessionId(),
       symbols: subscribedSymbols,
@@ -159,7 +159,7 @@ const sendSubscribeRequest = async (
   action: "subscribe" | "unsubscribe",
   options: SubscribeOptions
 ) => {
-  await axios.post(`http://192.168.1.139:8083/v1/priceboard/${action}`, {
+  await axios.post(`http://192.168.1.139:8083/v1/priceboard/subsciptions`, {
     type: action,
     sessionId: getOrCreateSessionId(),
     groupId: options.groupId,

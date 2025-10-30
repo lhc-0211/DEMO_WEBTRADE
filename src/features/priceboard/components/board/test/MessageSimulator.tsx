@@ -48,31 +48,13 @@ export const MessageSimulator: React.FC = () => {
         "SHB:G1:STX",
         "ACB:G1:STX",
         "CEO:G1:STX",
-        "HPG1:G1:STO",
-        "VCB1:G1:STO",
-        "MWG1:G1:STO",
-        "SHB1:G1:STX",
-        "ACB1:G1:STX",
-        "CEO1:G1:STX",
-        "HPG2:G1:STO",
-        "VCB2:G1:STO",
-        "MWG2:G1:STO",
-        "SHB2:G1:STX",
-        "ACB2:G1:STX",
-        "CEO2:G1:STX",
-        "HPG3:G1:STO",
-        "VCB3:G1:STO",
-        "MWG3:G1:STO",
-        "SHB3:G1:STX",
-        "ACB3:G1:STX",
-        "CEO3:G1:STX",
       ];
     }
 
     // Khởi tạo dữ liệu ban đầu (để có base cho flash)
     const initial: any = symbols.current.map((s) => ({
       symbol: s,
-      trade: { price: 10000, volume: 100, changePct: 0, priceCompare: "r" },
+      trade: { price: 0, volume: 0, changePct: 0, priceCompare: "r" },
     }));
     store.dispatch(updateSnapshots(initial));
   }, []);

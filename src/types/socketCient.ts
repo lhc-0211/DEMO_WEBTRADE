@@ -5,13 +5,6 @@ export interface SubscribeOptions {
 
 export type PriceCompare = "u" | "d" | "r" | "c" | "f";
 
-export type FlashClass =
-  | "flash-up"
-  | "flash-down"
-  | "flash-reference"
-  | "flash-ceil"
-  | "flash-floor";
-
 export type OrderBookLevel = {
   price: number;
   volume: number;
@@ -114,10 +107,4 @@ export type SnapshotData = {
   trade?: TradeData;
   foreignTrade?: ForeignTradeData;
   foreignRoom?: ForeignRoomData;
-};
-
-export type FlashResult = {
-  symbol: string;
-  key: string;
-  flashClass: FlashClass;
 };
