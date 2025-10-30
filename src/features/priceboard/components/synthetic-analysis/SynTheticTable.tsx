@@ -77,9 +77,7 @@ export default function SynTheticTable() {
   const disatch = useAppDispatch();
 
   const topStockTraded = useAppSelector(selectTopStockTraded);
-  const { loading: loadingStock, error: errorStock } = useAppSelector(
-    selectTopStockTradedStatus
-  );
+  const { loading: loadingStock } = useAppSelector(selectTopStockTradedStatus);
 
   const topForeignTraded = useAppSelector(
     (state) => state.priceBoard.data.topForeignTraded

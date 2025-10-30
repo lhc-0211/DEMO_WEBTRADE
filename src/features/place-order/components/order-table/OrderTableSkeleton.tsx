@@ -1,4 +1,4 @@
-export default function OrderHisTableSkeleton() {
+export default function OrderTableSkeleton() {
   const rows = Array.from({ length: 6 });
 
   return (

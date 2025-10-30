@@ -51,8 +51,11 @@ LHC_WEBTRADE là nền tảng giao dịch chứng khoán trực tuyến:
 LHC_WEBTRADE/
 ├─ public/                # File tĩnh: favicon, manifest...
 ├─ src/
+│  ├─ api/                # Gọi API
 │  ├─ assets/             # Hình ảnh, icon, font
 │  ├─ components/         # Component tái sử dụng
+│  ├─ configs/            # Config
+│  ├─ features/           # Chức năng chính
 │  ├─ pages/              # Mỗi trang của ứng dụng
 │  ├─ layouts/            # Layout chính (AuthLayout, MainLayout)
 │  ├─ services/           # Gọi API, config axios

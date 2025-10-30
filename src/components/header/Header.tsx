@@ -59,6 +59,7 @@ export default function Header() {
       }
     }
   };
+
   return (
     <div className="flex items-center justify-between h-full w-full">
       <div className="flex flex-row gap-2">

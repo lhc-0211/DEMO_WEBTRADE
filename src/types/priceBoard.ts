@@ -111,5 +111,6 @@ export interface Column {
   key: string;
   label: string;
   width: number;
+  default: boolean;
   children?: Column[];
 }

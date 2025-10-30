@@ -117,6 +117,7 @@ export interface FetchOrdersIndayParams {
   orderStatus?: number | string;
   side?: string;
   accountCode?: string;
+  type?: string;
 }
 
 export interface OrderIndayItem {

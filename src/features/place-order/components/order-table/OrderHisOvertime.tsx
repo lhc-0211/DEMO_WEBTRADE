@@ -101,7 +101,7 @@ const columns: ColumnDef<Order>[] = [
   },
 ];
 
-function OrderHisTable() {
+function OrderHisOvertime() {
   const dispatch = useAppDispatch();
 
   const listOrdersInday = useAppSelector(selectListOrdersInday);
@@ -118,6 +118,7 @@ function OrderHisTable() {
     dispatch(
       fetchListOrdersIndayRequest({
         accountCode: accountProfile?.cAccountDefault || "",
+        type: "4",
       })
     );
   }, [accountProfile, dispatch]);
@@ -246,4 +247,4 @@ function OrderHisTable() {
   );
 }
 
-export default memo(OrderHisTable);
+export default memo(OrderHisOvertime);

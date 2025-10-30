@@ -19,6 +19,7 @@ body {
   outline: none;
   transition: color 0.25s, background-color 0.25s, border-color 0.25s,
     opacity 0.25s, outline-color 0.25s;
+  box-sizing: border-box;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -41,6 +42,7 @@ input:-webkit-autofill {
 
 .i,
 .UP,
+.u,
 .g {
   color: var(--color-stock-text-green) !important;
 }
@@ -307,6 +309,7 @@ input:-webkit-autofill {
 .orderStt_PCMX .orderStt_PMX,
 .orderStt_PMCX,
 .orderStt_PWX,
+.orderStt_PCWX,
 .orderStt_1,
 .orderStt_2 {
   border-color: var(--color-red-500);
@@ -315,6 +318,8 @@ input:-webkit-autofill {
 
 .orderStt_PW,
 .orderStt_P,
+.orderStt_PC,
+.orderStt_PMC,
 .orderStt_0 {
   border-color: var(--color-yellow-500);
   color: var(--color-yellow-500);
@@ -323,4 +328,25 @@ input:-webkit-autofill {
 .orderStt_PCM {
   color: var(--color-green-500);
   border-color: var(--color-green-500);
+}
+
+.flash-up {
+  background: var(--color-green-500) !important;
+  color: var(--color-background-primary) !important;
+}
+.flash-down {
+  background: var(--color-red-500) !important;
+  color: var(--color-background-primary) !important;
+}
+.flash-reference {
+  background: var(--color-yellow-500) !important;
+  color: var(--color-background-primary) !important;
+}
+.flash-ceil {
+  background: var(--color-violet-500) !important;
+  color: var(--color-background-primary) !important;
+}
+.flash-floor {
+  background: var(--color-blue-500) !important;
+  color: var(--color-background-primary) !important;
 }
