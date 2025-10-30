@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { store } from "../../../../../store";
 import { updateSnapshots } from "../../../../../store/slices/stock/slice";
-import type { SnapshotData } from "../../../../../types";
+import type { SnapshotData, WorkerInputMessage } from "../../../../../types";
 
 interface Stats {
   fps: number;
@@ -48,6 +48,24 @@ export const MessageSimulator: React.FC = () => {
         "SHB:G1:STX",
         "ACB:G1:STX",
         "CEO:G1:STX",
+        "HPG1:G1:STO",
+        "VCB1:G1:STO",
+        "MWG1:G1:STO",
+        "SHB1:G1:STX",
+        "ACB1:G1:STX",
+        "CEO1:G1:STX",
+        "HPG2:G1:STO",
+        "VCB2:G1:STO",
+        "MWG2:G1:STO",
+        "SHB2:G1:STX",
+        "ACB2:G1:STX",
+        "CEO2:G1:STX",
+        "HPG3:G1:STO",
+        "VCB3:G1:STO",
+        "MWG3:G1:STO",
+        "SHB3:G1:STX",
+        "ACB3:G1:STX",
+        "CEO3:G1:STX",
       ];
     }
 
@@ -111,17 +129,26 @@ export const MessageSimulator: React.FC = () => {
   };
 
   // === GỬI TỚI WORKER ===
-  const sendToWorkers = (dtos: any[], flashData: any[]) => {
-    if (window.colorWorker && dtos.length > 0) {
-      colorCount.current += dtos.length;
-      window.colorWorker.postMessage({ type: "batch", data: dtos });
-    }
-    if (window.flashWorker && flashData.length > 0) {
-      flashCount.current += flashData.length;
-      window.flashWorker.postMessage({ type: "batch", data: flashData });
+  const sendToWorker = (batch: SnapshotData[]) => {
+    const worker = (window as any).priceboardWorker;
+    if (worker && batch.length > 0) {
+      totalMsgs.current += batch.length;
+
+      const flashInBatch = batch.filter((s) => {
+        const prev = store.getState().stock.snapshots[s.symbol];
+        return prev && s.trade?.price !== prev.trade?.price;
+      }).length;
+
+      colorCount.current += batch.length;
+      flashCount.current += flashInBatch;
+
+      // GỬI 1 LẦN DUY NHẤT
+      worker.postMessage({
+        type: "batch",
+        data: batch,
+      } satisfies WorkerInputMessage);
     }
   };
-
   // === BẮT ĐẦU GIẢ LẬP ===
   const start = () => {
     if (isRunning) return;
@@ -147,7 +174,7 @@ export const MessageSimulator: React.FC = () => {
       const batchDTOs: any[] = [];
       const batchFlash: any[] = [];
 
-      for (let i = 0; i < 80; i++) {
+      for (let i = 0; i < 50; i++) {
         const symbol =
           symbols.current[Math.floor(Math.random() * symbols.current.length)];
         const { snapshot, dto, flashData } = createData(
@@ -164,7 +191,7 @@ export const MessageSimulator: React.FC = () => {
       store.dispatch(updateSnapshots(batchSnapshots));
 
       // Gọi workers
-      sendToWorkers(batchDTOs, batchFlash);
+      sendToWorker(batchSnapshots);
 
       const elapsed = (now - startTime.current) / 1000;
       setStats({

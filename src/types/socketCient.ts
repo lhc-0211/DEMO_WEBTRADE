@@ -1,3 +1,8 @@
+export interface SubscribeOptions {
+  groupId?: string;
+  symbols?: string[];
+}
+
 export type PriceCompare = "u" | "d" | "r" | "c" | "f";
 
 export type FlashClass =
@@ -16,7 +21,7 @@ export type OrderBookLevel = {
 export type OrderBookData = {
   bids: OrderBookLevel[];
   asks: OrderBookLevel[];
-  recv_ts: number;
+  recv_ts?: number;
 };
 
 export type TradeData = {

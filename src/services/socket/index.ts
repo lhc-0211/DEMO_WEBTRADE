@@ -3,189 +3,67 @@ import { store } from "../../store";
 import {
   clearSnapshot,
   resetSnapshots,
+  updateColors,
   updateSnapshots,
 } from "../../store/slices/stock/slice";
 import type {
-  ColorDTO,
-  ForeignRoomMessage,
-  ForeignTradeMessage,
-  OrderBookMessage,
   SnapshotData,
-  TradeMessage,
+  SubscribeOptions,
   WebSocketMessage,
+  WorkerInputMessage,
+  WorkerOutputMessage,
 } from "../../types";
-import type { SocketClient, SubscribeOptions } from "../../types/socketClient";
 import { getOrCreateSessionId } from "../../utils";
+import { queueFlash } from "../../worker/flashManager";
 
-// =============================================================
-// CONFIG
-// =============================================================
-const MAX_RECONNECT_ATTEMPTS = 5;
-const RECONNECT_INTERVAL = 3000;
-const MAX_BATCH_SIZE = 200;
-const BATCH_CHUNK_DELAY = 10;
+// ==================== SINGLE WORKER ====================
+const worker = new Worker(
+  new URL("../../worker/priceboard.worker.ts", import.meta.url),
+  {
+    type: "module",
+  }
+);
 
-// =============================================================
-// PRIVATE STATE
-// =============================================================
+// TYPE-SAFE: không dùng any
+worker.onmessage = (e: MessageEvent<WorkerOutputMessage>) => {
+  const { type, data } = e.data;
+  if (type !== "update") return;
+
+  const { flash, colors } = data;
+
+  Object.entries(colors).forEach(([symbol, keyColors]) => {
+    store.dispatch(updateColors({ symbol, colors: keyColors }));
+  });
+
+  if (flash.length > 0) {
+    queueFlash(flash);
+  }
+};
+
+// ==================== PUBLIC: setVisibleSymbols ====================
+const setVisibleSymbols = (symbols: string[]) => {
+  worker.postMessage({
+    type: "visible",
+    data: symbols,
+  } satisfies WorkerInputMessage);
+};
+
+// ==================== PRIVATE STATE ====================
 let socket: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 5;
+const RECONNECT_INTERVAL = 3000;
 
 let subscribedSymbols: string[] = [];
 let messageHandlers: ((data: SnapshotData) => void)[] = [];
 const snapshots = new Map<string, SnapshotData>();
-const pendingMap = new Map<string, SnapshotData>();
-const prevSnapshots = new Map<string, SnapshotData>();
-let visibleSymbols = new Set<string>();
-let rafPending = false;
+let pendingBatch: SnapshotData[] = [];
+let rafId: number | null = null;
 
-// =============================================================
-// HELPERS
-// =============================================================
-const buildUrl = (base: string): string => {
-  const sid = getOrCreateSessionId();
-  return sid ? `${base}?sessionId=${sid}` : "";
-};
-
-const hasChanged = (a: SnapshotData, b: SnapshotData): boolean => {
-  if (a.trade?.price !== b.trade?.price) return true;
-  if (a.trade?.volume !== b.trade?.volume) return true;
-  if (a.trade?.changePct !== b.trade?.changePct) return true;
-  if (a.trade?.priceCompare !== b.trade?.priceCompare) return true;
-
-  const compareLevel = (i: number) => {
-    const aBid = a.orderBook?.bids?.[i],
-      bBid = b.orderBook?.bids?.[i];
-    const aAsk = a.orderBook?.asks?.[i],
-      bAsk = b.orderBook?.asks?.[i];
-    return (
-      aBid?.price !== bBid?.price ||
-      aBid?.priceCompare !== bBid?.priceCompare ||
-      aAsk?.price !== bAsk?.price ||
-      aAsk?.priceCompare !== bAsk?.priceCompare
-    );
-  };
-
-  for (let i = 0; i < 3; i++) if (compareLevel(i)) return true;
-  return false;
-};
-
-const toColorDTO = (s: SnapshotData): ColorDTO => ({
-  s: s.symbol,
-  c: s.trade?.priceCompare,
-  b: s.orderBook?.bids.slice(0, 3).map((x) => x.price) || [],
-  a: s.orderBook?.asks.slice(0, 3).map((x) => x.price) || [],
-  bc: s.orderBook?.bids.slice(0, 3).map((x) => x.priceCompare) || [],
-  ac: s.orderBook?.asks.slice(0, 3).map((x) => x.priceCompare) || [],
-});
-
-const chunkArray = <T>(arr: T[], size: number): T[][] => {
-  const result: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) {
-    result.push(arr.slice(i, i + size));
-  }
-  return result;
-};
-
-const postToWorker = <T>(worker: Worker | undefined, type: string, data: T) => {
-  if (!worker) return;
-
-  if (Array.isArray(data) && data.length > MAX_BATCH_SIZE) {
-    const chunks = chunkArray(data, MAX_BATCH_SIZE);
-    chunks.forEach((chunk, i) => {
-      setTimeout(
-        () => worker.postMessage({ type, data: chunk }),
-        i * BATCH_CHUNK_DELAY
-      );
-    });
-  } else {
-    worker.postMessage({ type, data });
-  }
-};
-
-// =============================================================
-// BATCH PROCESSING
-// =============================================================
-const processBatch = () => {
-  if (pendingMap.size === 0) {
-    rafPending = false;
-    return;
-  }
-
-  const batchUpdates = Array.from(pendingMap.values());
-  pendingMap.clear();
-
-  const changedUpdates = batchUpdates.filter((curr) => {
-    const prev = prevSnapshots.get(curr.symbol);
-    return !prev || hasChanged(curr, prev);
-  });
-
-  if (changedUpdates.length === 0) {
-    rafPending = false;
-    return;
-  }
-
-  store.dispatch(updateSnapshots(changedUpdates));
-
-  // colorWorker: toàn bộ thay đổi
-  const colorData = changedUpdates.map(toColorDTO);
-  postToWorker(window.colorWorker, "batch", colorData);
-
-  // flashWorker: chỉ visible
-  const visibleUpdates = changedUpdates.filter((s) =>
-    visibleSymbols.has(s.symbol)
-  );
-  if (visibleUpdates.length > 0) {
-    const flashData = visibleUpdates.map((s) => ({
-      snapshot: s,
-      prevSnapshot: prevSnapshots.get(s.symbol) || null,
-    }));
-    postToWorker(window.flashWorker, "batch", flashData);
-  }
-
-  // cập nhật prev
-  changedUpdates.forEach((s) => {
-    prevSnapshots.set(s.symbol, {
-      symbol: s.symbol,
-      trade: s.trade ? { ...s.trade } : undefined,
-      orderBook: s.orderBook
-        ? {
-            bids: s.orderBook.bids.slice(0, 3),
-            asks: s.orderBook.asks.slice(0, 3),
-            recv_ts: s.orderBook.recv_ts,
-          }
-        : undefined,
-    });
-  });
-
-  rafPending = false;
-};
-
-const scheduleBatchUpdate = () => {
-  if (rafPending || pendingMap.size === 0) return;
-  rafPending = true;
-  requestAnimationFrame(processBatch);
-};
-
-// =============================================================
-// WEBSOCKET CORE
-// =============================================================
-const closeSocket = () => {
-  if (reconnectTimer) clearTimeout(reconnectTimer);
-  if (socket) socket.close();
-  socket = null;
-  subscribedSymbols = [];
-  snapshots.clear();
-  prevSnapshots.clear();
-  pendingMap.clear();
-  store.dispatch(resetSnapshots());
-};
-
+// ==================== WEBSOCKET CORE ====================
 const initSocket = (baseUrl: string) => {
-  const url = buildUrl(baseUrl);
-  if (!url) return;
-
+  const url = `${baseUrl}?sessionId=${getOrCreateSessionId()}`;
   closeSocket();
   socket = new WebSocket(url);
 
@@ -200,69 +78,32 @@ const initSocket = (baseUrl: string) => {
       const msg: WebSocketMessage = JSON.parse(ev.data);
       if (!msg.symbol || !msg.type) return;
 
-      const { symbol, type } = msg;
-      const snapshot = snapshots.get(symbol) ?? { symbol };
+      const snapshot = snapshots.get(msg.symbol) ?? { symbol: msg.symbol };
+      let shouldUpdate = false;
 
-      let shouldBatch = false;
-
-      switch (type) {
-        case "trade": {
-          const m = msg as TradeMessage;
-          snapshot.trade = {
-            price: m.price,
-            volume: m.volume,
-            boardId: m.boardId,
-            marketId: m.marketId,
-            changePct: m.changePct,
-            changeAbs: m.changeAbs,
-            priceCompare: m.priceCompare,
-            recv_ts: m.recv_ts,
-          };
-          shouldBatch = true;
+      switch (msg.type) {
+        case "trade":
+          snapshot.trade = { ...msg };
+          shouldUpdate = true;
           break;
-        }
-        case "orderBook": {
-          const m = msg as OrderBookMessage;
-          snapshot.orderBook = {
-            bids: m.data.bids,
-            asks: m.data.asks,
-            recv_ts: m.recv_ts,
-          };
-          shouldBatch = true;
+        case "orderBook":
+          snapshot.orderBook = { ...msg.data };
+          shouldUpdate = true;
           break;
-        }
-        case "foreignTrade": {
-          const m = msg as ForeignTradeMessage;
-          snapshot.foreignTrade = {
-            foreignBuyVolume: m.foreignBuyVolume,
-            foreignSellVolume: m.foreignSellVolume,
-            foreignBuyAmount: m.foreignBuyAmount,
-            foreignSellAmount: m.foreignSellAmount,
-            foreignNetValue: m.foreignNetValue,
-            boardId: m.boardId,
-            marketId: m.marketId,
-            recv_ts: m.recv_ts,
-          };
-          shouldBatch = true;
+        case "foreignTrade":
+          snapshot.foreignTrade = { ...msg };
+          shouldUpdate = true;
           break;
-        }
-        case "foreignRoom": {
-          const m = msg as ForeignRoomMessage;
-          snapshot.foreignRoom = {
-            currentRoom: m.currentRoom,
-            totalRoom: m.totalRoom,
-            marketId: m.marketId,
-            recv_ts: m.recv_ts,
-          };
-          shouldBatch = true;
+        case "foreignRoom":
+          snapshot.foreignRoom = { ...msg };
+          shouldUpdate = true;
           break;
-        }
       }
 
-      if (shouldBatch) {
-        snapshots.set(symbol, snapshot);
-        pendingMap.set(symbol, snapshot);
-        scheduleBatchUpdate();
+      if (shouldUpdate) {
+        snapshots.set(msg.symbol, snapshot);
+        pendingBatch.push(snapshot);
+        scheduleBatch();
         messageHandlers.forEach((h) => h(snapshot));
       }
     } catch (err) {
@@ -271,12 +112,27 @@ const initSocket = (baseUrl: string) => {
   };
 
   socket.onclose = () => attemptReconnect(baseUrl);
-  socket.onerror = () => console.error("WS error");
 };
 
-// =============================================================
-// RECONNECT & RESUBSCRIBE
-// =============================================================
+// ==================== BATCH PROCESSING ====================
+const scheduleBatch = () => {
+  if (rafId !== null || pendingBatch.length === 0) return;
+  rafId = requestAnimationFrame(() => {
+    const batch = [...pendingBatch];
+    pendingBatch = [];
+
+    store.dispatch(updateSnapshots(batch));
+
+    worker.postMessage({
+      type: "batch",
+      data: batch,
+    } satisfies WorkerInputMessage);
+
+    rafId = null;
+  });
+};
+
+// ==================== RECONNECT & RESUBSCRIBE ====================
 const attemptReconnect = (baseUrl: string) => {
   if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) return;
   reconnectTimer = setTimeout(() => {
@@ -286,7 +142,7 @@ const attemptReconnect = (baseUrl: string) => {
 };
 
 const reSubscribe = async () => {
-  if (!subscribedSymbols.length) return;
+  if (subscribedSymbols.length === 0) return;
   try {
     await axios.post("http://192.168.1.139:8083/v1/priceboard/subscribe", {
       type: "subscribe",
@@ -298,53 +154,62 @@ const reSubscribe = async () => {
   }
 };
 
+// ==================== SUBSCRIBE API ====================
 const sendSubscribeRequest = async (
-  type: "subscribe" | "unsubscribe",
+  action: "subscribe" | "unsubscribe",
   options: SubscribeOptions
 ) => {
-  try {
-    await axios.post(`http://192.168.1.139:8083/v1/priceboard/${type}`, {
-      type,
-      sessionId: getOrCreateSessionId(),
-      groupId: options.groupId,
-      symbols: options.symbols,
-    });
-  } catch (e) {
-    console.error(`Failed to ${type}:`, e);
-    throw e;
-  }
+  await axios.post(`http://192.168.1.139:8083/v1/priceboard/${action}`, {
+    type: action,
+    sessionId: getOrCreateSessionId(),
+    groupId: options.groupId,
+    symbols: options.symbols,
+  });
 };
 
-// =============================================================
-// PUBLIC API
-// =============================================================
-export const socketClient: SocketClient = (() => {
+// ==================== CLEANUP ====================
+const closeSocket = () => {
+  if (reconnectTimer) clearTimeout(reconnectTimer);
+  if (socket) socket.close();
+
+  socket = null;
+  subscribedSymbols = [];
+  snapshots.clear();
+  pendingBatch = [];
+  store.dispatch(resetSnapshots());
+
+  const allSymbols = Array.from(snapshots.keys());
+  worker.postMessage({
+    type: "clear",
+    data: allSymbols,
+  } satisfies WorkerInputMessage);
+};
+
+// ==================== PUBLIC API ====================
+export const socketClient = (() => {
   const baseUrl =
     import.meta.env.VITE_WS_BASE_URL || "ws://192.168.1.139:8080/events";
   initSocket(baseUrl);
 
   return {
     subscribe: async (options: SubscribeOptions) => {
-      if (options.symbols) {
-        subscribedSymbols = Array.from(
-          new Set([...subscribedSymbols, ...options.symbols])
-        );
-      }
+      subscribedSymbols = Array.from(
+        new Set([...subscribedSymbols, ...(options.symbols ?? [])])
+      );
       await sendSubscribeRequest("subscribe", options);
     },
 
     unsubscribe: async (options: SubscribeOptions) => {
-      if (options.symbols) {
-        subscribedSymbols = subscribedSymbols.filter(
-          (s) => !options.symbols!.includes(s)
-        );
-        options.symbols.forEach((sym) => {
-          snapshots.delete(sym);
-          prevSnapshots.delete(sym);
-          pendingMap.delete(sym);
-        });
-        store.dispatch(clearSnapshot(options.symbols));
-      }
+      const symbols = options.symbols ?? [];
+      subscribedSymbols = subscribedSymbols.filter((s) => !symbols.includes(s));
+      symbols.forEach((sym) => {
+        snapshots.delete(sym);
+        worker.postMessage({
+          type: "clear",
+          data: [sym],
+        } satisfies WorkerInputMessage);
+      });
+      store.dispatch(clearSnapshot(symbols));
       await sendSubscribeRequest("unsubscribe", options);
     },
 
@@ -359,11 +224,8 @@ export const socketClient: SocketClient = (() => {
     getAllSnapshots: () => Array.from(snapshots.values()),
 
     close: () => closeSocket(),
-
-    setVisibleSymbols: (symbols: string[]) => {
-      visibleSymbols = new Set(symbols);
-    },
+    setVisibleSymbols,
   };
 })();
 
-window.socketClient = socketClient;
+window.priceboardWorker = worker;

@@ -1,5 +1,4 @@
-// src/components/BodyTable.tsx
-import { memo, useEffect, useMemo } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
 import { useAppSelector } from "../../../../../store/hook";
 import {
@@ -11,15 +10,19 @@ import { getColumnValue } from "../../../../../utils/priceboard";
 import {
   registerVisibleCell,
   unregisterVisibleCell,
-} from "../workers/flashManager";
+} from "../../../../../worker/flashManager";
 
-function BodyTable({ symbol }: { symbol: string }) {
+interface BodyTableProps {
+  symbol: string;
+}
+
+function BodyTable({ symbol }: BodyTableProps) {
   const snapshotData = useAppSelector(
     (state) => selectSnapshotsBySymbols(state, [symbol])[symbol]
   );
 
   const snapshot = useMemo(() => {
-    return snapshotData || { symbol };
+    return snapshotData ?? { symbol };
   }, [snapshotData, symbol]);
 
   const cellColors = useAppSelector((state) =>
@@ -35,30 +38,51 @@ function BodyTable({ symbol }: { symbol: string }) {
     }
   }, []);
 
+  // Ref để cache DOM elements
+  const cellRefs = useRef<Map<string, HTMLElement>>(new Map());
+
+  // === REGISTER CELLS ===
   useEffect(() => {
-    const timer = setTimeout(() => {
-      columns.forEach((col) => {
-        if (col.children) {
-          col.children.forEach((child) => {
-            const el = document.querySelector<HTMLElement>(
-              `[data-symbol="${symbol}"][data-key="${child.key}"]`
-            );
-            if (el) registerVisibleCell(symbol, child.key, el);
-          });
-        } else {
-          const el = document.querySelector<HTMLElement>(
-            `[data-symbol="${symbol}"][data-key="${col.key}"]`
-          );
-          if (el) registerVisibleCell(symbol, col.key, el);
-        }
-      });
-    }, 0);
+    const registerCell = (key: string) => {
+      const selector = `[data-symbol="${symbol}"][data-key="${key}"]`;
+      const el = document.querySelector<HTMLElement>(selector);
+      if (el) {
+        cellRefs.current.set(key, el);
+        registerVisibleCell(symbol, key, el);
+      }
+    };
+
+    columns.forEach((col) => {
+      if (col.children) {
+        col.children.forEach((child) => registerCell(child.key));
+      } else {
+        registerCell(col.key);
+      }
+    });
 
     return () => {
-      clearTimeout(timer);
+      cellRefs.current.clear();
       unregisterVisibleCell(symbol);
     };
-  }, [symbol, columns, snapshot]);
+  }, [symbol, columns]);
+
+  // === RENDER CELL ===
+  const renderCell = (key: string, width?: number) => {
+    const value = getColumnValue(snapshot, key);
+    const colorClass = cellColors[key] ?? "text-text-body";
+
+    return (
+      <div
+        key={key}
+        data-symbol={symbol}
+        data-key={key}
+        className={`flex items-center justify-center text-xs font-medium h-7 transition-colors duration-300 ${colorClass}`}
+        style={{ minWidth: width }}
+      >
+        {value}
+      </div>
+    );
+  };
 
   return (
     <div className="flex border-x border-b border-border divide-x divide-border w-full">
@@ -69,8 +93,8 @@ function BodyTable({ symbol }: { symbol: string }) {
           return (
             <div
               key={col.key}
-              className={`h-7 grid place-items-center text-text-body text-xs font-medium ${
-                cellColors[col.key] || "text-text-body"
+              className={`h-7 grid place-items-center text-xs font-medium ${
+                cellColors[col.key] ?? "text-text-body"
               }`}
               style={{ minWidth: col.width }}
             >
@@ -78,7 +102,7 @@ function BodyTable({ symbol }: { symbol: string }) {
                 data-symbol={symbol}
                 data-key={col.key}
                 className={`flex items-center justify-center h-7 ${
-                  col.children ? "border-b border-border" : ""
+                  hasChildren ? "border-b border-border" : ""
                 }`}
                 style={{ minWidth: col.width }}
               >
@@ -91,31 +115,12 @@ function BodyTable({ symbol }: { symbol: string }) {
         return (
           <div key={col.key} className="flex flex-col w-full">
             {!hasChildren ? (
-              <div
-                data-symbol={symbol}
-                data-key={col.key}
-                className={`flex items-center justify-center text-xs font-medium h-7 transition-colors duration-300 ${
-                  cellColors[col.key] || "text-text-body"
-                }`}
-                style={{ minWidth: col.width }}
-              >
-                {getColumnValue(snapshot, col.key)}
-              </div>
+              renderCell(col.key, col.width)
             ) : (
               <div className="flex divide-x divide-border text-xs font-medium">
-                {col.children?.map((child) => (
-                  <div
-                    key={child.key}
-                    data-symbol={symbol}
-                    data-key={child.key}
-                    className={`flex items-center justify-center text-xs font-medium h-7 transition-colors duration-300 ${
-                      cellColors[child.key] || "text-text-body"
-                    }`}
-                    style={{ minWidth: child.width }}
-                  >
-                    {getColumnValue(snapshot, child.key)}
-                  </div>
-                ))}
+                {col.children?.map((child) =>
+                  renderCell(child.key, child.width)
+                )}
               </div>
             )}
           </div>

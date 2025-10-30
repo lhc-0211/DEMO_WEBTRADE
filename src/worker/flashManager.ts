@@ -1,6 +1,8 @@
-import type { FlashResult } from "../../../../../types";
+import type { FlashResult } from "../types";
 
 const visibleCells = new Map<string, Map<string, HTMLElement>>();
+const pendingFlashes = new Map<string, FlashResult>();
+let rafId: number | null = null;
 
 export const registerVisibleCell = (
   symbol: string,
@@ -9,7 +11,7 @@ export const registerVisibleCell = (
 ): void => {
   let keyMap = visibleCells.get(symbol);
   if (!keyMap) {
-    keyMap = new Map<string, HTMLElement>();
+    keyMap = new Map();
     visibleCells.set(symbol, keyMap);
   }
   keyMap.set(key, el);
@@ -25,13 +27,9 @@ export const unregisterVisibleCell = (symbol: string, key?: string): void => {
   }
 };
 
-let rafId: number | null = null;
-const flashQueue: FlashResult[] = [];
-
 const applyFlash = (): void => {
-  for (const { symbol, key, flashClass } of flashQueue) {
-    const keyMap = visibleCells.get(symbol);
-    const cell = keyMap?.get(key);
+  for (const { symbol, key, flashClass } of pendingFlashes.values()) {
+    const cell = visibleCells.get(symbol)?.get(key);
     if (!cell) continue;
 
     cell.classList.remove(
@@ -45,16 +43,20 @@ const applyFlash = (): void => {
     cell.classList.add(flashClass);
 
     setTimeout(() => {
-      cell.classList.remove(flashClass);
+      if (cell.isConnected) cell.classList.remove(flashClass);
     }, 300);
   }
 
-  flashQueue.length = 0;
+  pendingFlashes.clear();
   rafId = null;
 };
 
 export const queueFlash = (results: readonly FlashResult[]): void => {
-  flashQueue.push(...results);
+  for (const result of results) {
+    const id = `${result.symbol}:${result.key}`;
+    pendingFlashes.set(id, result);
+  }
+
   if (rafId === null) {
     rafId = requestAnimationFrame(applyFlash);
   }
