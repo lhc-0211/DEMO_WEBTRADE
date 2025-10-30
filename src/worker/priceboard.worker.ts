@@ -86,7 +86,9 @@ const processQueue = (): void => {
       for (const key of KEYS_COLOR) {
         let cmp: string | undefined;
         if (
-          ["lastPrice", "change", "changePercent"].some((k) => key.includes(k))
+          ["lastPrice", "change", "changePercent", "lastVolume"].some((k) =>
+            key.includes(k)
+          )
         ) {
           cmp = snapshot.trade?.priceCompare;
         } else if (key.startsWith("priceBuy")) {

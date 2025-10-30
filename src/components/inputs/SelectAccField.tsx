@@ -71,7 +71,7 @@ const SelectAccount: React.FC<Props> = ({
         className={`h-full flex items-center justify-between gap-1 px-3 rounded-2xl border cursor-pointer text-text-body text-xs ${
           disabled ? "opacity-60 cursor-not-allowed" : "hover:bg-neutral-800"
         } ${showSelect ? "border-yellow-500" : "border-neutral-700"} ${
-          error ? "!border !border-red-500" : ""
+          error ? "border! border-red-500!" : ""
         }`}
         onClick={() => !disabled && setShowSelect((s) => !s)}
       >
@@ -81,7 +81,7 @@ const SelectAccount: React.FC<Props> = ({
           </span>
           {selected && (
             <span
-              className={`py-[2px] px-[6px] rounded-full text-[10px] ${getColorTypeAcc(
+              className={`py-0.5 px-1.5 rounded-full text-[10px] ${getColorTypeAcc(
                 selected.type
               )}`}
             >

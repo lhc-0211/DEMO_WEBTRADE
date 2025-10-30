@@ -7,11 +7,13 @@ export type SymbolColorMap = Record<string, CellColorMap>; // symbol: "AAA" → 
 interface StockState {
   snapshots: Record<string, SnapshotData>;
   colors: SymbolColorMap;
+  subscribedOrder: string[];
 }
 
 const initialState: StockState = {
   snapshots: {},
   colors: {},
+  subscribedOrder: [],
 };
 
 const stockSlice = createSlice({
@@ -46,10 +48,19 @@ const stockSlice = createSlice({
       state.snapshots = {};
       state.colors = {};
     },
+
+    setSubscribedOrder: (state, action: PayloadAction<string[]>) => {
+      state.subscribedOrder = action.payload;
+    },
   },
 });
 
-export const { updateSnapshots, updateColors, clearSnapshot, resetSnapshots } =
-  stockSlice.actions;
+export const {
+  updateSnapshots,
+  updateColors,
+  clearSnapshot,
+  resetSnapshots,
+  setSubscribedOrder,
+} = stockSlice.actions;
 
 export default stockSlice.reducer;

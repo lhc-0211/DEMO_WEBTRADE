@@ -6,11 +6,21 @@ import type { SnapshotData } from "../../../types";
 const selectSnapshots = (state: RootState) => state.stock.snapshots;
 const selectColors = (state: RootState) => state.stock.colors;
 
-export const selectAllSymbols = createSelector(
-  [selectSnapshots],
-  (snapshots): readonly string[] => Object.keys(snapshots)
-);
+// export const selectAllSymbols = createSelector(
+//   [selectSnapshots],
+//   (snapshots): readonly string[] => Object.keys(snapshots)
+// );
 
+export const selectAllSymbols = createSelector(
+  [
+    (state: RootState) => state.stock.snapshots,
+    (state: RootState) => state.stock.subscribedOrder,
+  ],
+  (snapshots, subscribedOrder): readonly string[] => {
+    const keys = Object.keys(snapshots);
+    return subscribedOrder.filter((sym) => keys.includes(sym));
+  }
+);
 export const selectSnapshotsBySymbols = createSelector(
   [selectSnapshots, (_: RootState, symbols: readonly string[]) => symbols],
   (snapshots, symbols): Readonly<Record<string, SnapshotData>> => {

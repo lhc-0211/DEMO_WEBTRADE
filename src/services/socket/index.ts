@@ -1,4 +1,3 @@
-import axios from "axios";
 import { store } from "../../store";
 import {
   clearSnapshot,
@@ -15,6 +14,7 @@ import type {
 } from "../../types";
 import { getOrCreateSessionId } from "../../utils";
 import { queueFlash } from "../../worker/flashManager";
+import { apiClient } from "../apiClient";
 
 // ==================== SINGLE WORKER ====================
 const worker = new Worker(
@@ -144,7 +144,8 @@ const attemptReconnect = (baseUrl: string) => {
 const reSubscribe = async () => {
   if (subscribedSymbols.length === 0) return;
   try {
-    await axios.post("http://192.168.1.139:8083/v1/priceboard/subsciptions", {
+    await apiClient.post("/priceboard/subscriptions", {
+      // await axios.post("http://192.168.1.139:8083/v1/priceboard/subsciptions", {
       type: "subscribe",
       sessionId: getOrCreateSessionId(),
       symbols: subscribedSymbols,
@@ -159,7 +160,8 @@ const sendSubscribeRequest = async (
   action: "subscribe" | "unsubscribe",
   options: SubscribeOptions
 ) => {
-  await axios.post(`http://192.168.1.139:8083/v1/priceboard/subsciptions`, {
+  await apiClient.post("/priceboard/subscriptions", {
+    // await axios.post(`http://192.168.1.139:8083/v1/priceboard/subsciptions`, {
     type: action,
     sessionId: getOrCreateSessionId(),
     groupId: options.groupId,
@@ -188,7 +190,7 @@ const closeSocket = () => {
 // ==================== PUBLIC API ====================
 export const socketClient = (() => {
   const baseUrl =
-    import.meta.env.VITE_WS_BASE_URL || "ws://192.168.1.139:8080/events";
+    import.meta.env.VITE_WS_BASE_URL || "wss://event.dtnd.vn/events";
   initSocket(baseUrl);
 
   return {

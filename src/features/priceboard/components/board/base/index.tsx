@@ -2,8 +2,9 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { List } from "react-virtualized";
 import type { RenderedRows } from "react-virtualized/dist/es/List";
 import { socketClient } from "../../../../../services/socket";
-import { useAppSelector } from "../../../../../store/hook";
+import { useAppDispatch, useAppSelector } from "../../../../../store/hook";
 import { selectAllSymbols } from "../../../../../store/slices/stock/selector";
+import { setSubscribedOrder } from "../../../../../store/slices/stock/slice";
 import BodyTable from "./BodyTable";
 import HeaderColumns from "./HeaderTable";
 
@@ -17,6 +18,8 @@ interface RowRendererParams {
 }
 
 function PriceBoard() {
+  const dispatch = useAppDispatch();
+
   const symbols = useAppSelector(selectAllSymbols);
   const listRef = useRef<List>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,15 +28,18 @@ function PriceBoard() {
 
   // Resize Observer
   useEffect(() => {
+    const list = [
+      "VCB:G1:STO",
+      "MWG:G1:STO",
+      "HPG:G1:STO",
+      "SHB:G1:STX",
+      "ACB:G1:STX",
+      "CEO:G1:STX",
+    ];
+
+    dispatch(setSubscribedOrder(list));
     socketClient.subscribe({
-      symbols: [
-        "HPG:G1:STO",
-        "VCB:G1:STO",
-        "MWG:G1:STO",
-        "SHB:G1:STX",
-        "ACB:G1:STX",
-        "CEO:G1:STX",
-      ],
+      symbols: list,
     });
 
     if (!containerRef.current) return;
@@ -52,9 +58,9 @@ function PriceBoard() {
     return () => {
       socketClient.unsubscribe({
         symbols: [
+          "MWG:G1:STO",
           "HPG:G1:STO",
           "VCB:G1:STO",
-          "MWG:G1:STO",
           "SHB:G1:STX",
           "ACB:G1:STX",
           "CEO:G1:STX",
