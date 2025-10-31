@@ -350,3 +350,28 @@ input:-webkit-autofill {
   background: var(--color-blue-500) !important;
   color: var(--color-background-primary) !important;
 }
+
+.cell {
+  transition: background-color 0.2s ease;
+}
+
+[data-flash="up"] {
+  background: var(--color-green-500) !important;
+  color: var(--color-background-primary) !important;
+}
+[data-flash="down"] {
+  background: var(--color-red-500) !important;
+  color: var(--color-background-primary) !important;
+}
+[data-flash="ceil"] {
+  background: var(--color-violet-500) !important;
+  color: var(--color-background-primary) !important;
+}
+[data-flash="floor"] {
+  background: var(--color-blue-500) !important;
+  color: var(--color-background-primary) !important;
+}
+[data-flash="ref"] {
+  background: var(--color-yellow-500) !important;
+  color: var(--color-background-primary) !important;
+}

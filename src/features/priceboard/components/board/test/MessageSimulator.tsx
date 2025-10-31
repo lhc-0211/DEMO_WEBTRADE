@@ -156,7 +156,7 @@ export const MessageSimulator: React.FC = () => {
       const batchDTOs: any[] = [];
       const batchFlash: any[] = [];
 
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 10; i++) {
         const symbol =
           symbols.current[Math.floor(Math.random() * symbols.current.length)];
         const { snapshot, dto, flashData } = createData(

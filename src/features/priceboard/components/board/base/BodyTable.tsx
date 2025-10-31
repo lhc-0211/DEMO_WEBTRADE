@@ -1,12 +1,14 @@
 import { memo, useEffect, useMemo, useRef } from "react";
 import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
 import { useAppSelector } from "../../../../../store/hook";
-import {
-  selectColorsBySymbol,
-  selectSnapshotsBySymbols,
-} from "../../../../../store/slices/stock/selector";
+import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
 import type { Column } from "../../../../../types";
 import { getColumnValue } from "../../../../../utils/priceboard";
+
+import {
+  registerVisibleCellColor,
+  unregisterVisibleCellColor,
+} from "../../../../../worker/colorManager";
 import {
   registerVisibleCell,
   unregisterVisibleCell,
@@ -17,6 +19,7 @@ interface BodyTableProps {
 }
 
 function BodyTable({ symbol }: BodyTableProps) {
+  // --- lấy snapshot từ Redux ---
   const snapshotData = useAppSelector(
     (state) => selectSnapshotsBySymbols(state, [symbol])[symbol]
   );
@@ -25,10 +28,7 @@ function BodyTable({ symbol }: BodyTableProps) {
     return snapshotData ?? { symbol };
   }, [snapshotData, symbol]);
 
-  const cellColors = useAppSelector((state) =>
-    selectColorsBySymbol(state, symbol)
-  );
-
+  // --- lấy cấu hình cột ---
   const columns = useMemo<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
     try {
@@ -38,7 +38,7 @@ function BodyTable({ symbol }: BodyTableProps) {
     }
   }, []);
 
-  // Ref để cache DOM elements
+  // --- ref để lưu cell DOM ---
   const cellRefs = useRef<Map<string, HTMLElement>>(new Map());
 
   // === REGISTER CELLS ===
@@ -48,23 +48,27 @@ function BodyTable({ symbol }: BodyTableProps) {
       const el = document.querySelector<HTMLElement>(selector);
       if (el) {
         cellRefs.current.set(key, el);
+        // đăng ký flash & color
         registerVisibleCell(symbol, key, el);
+        registerVisibleCellColor(symbol, key, el);
       }
     };
 
+    // duyệt toàn bộ column và children
     columns.forEach((col) => {
-      if (col.children) {
+      if (col.children?.length) {
         col.children.forEach((child) => registerCell(child.key));
       } else {
         registerCell(col.key);
       }
     });
 
+    // cleanup
     const refSnapshot = cellRefs.current;
-
     return () => {
       refSnapshot.clear();
       unregisterVisibleCell(symbol);
+      unregisterVisibleCellColor(symbol);
     };
   }, [symbol, columns]);
 
@@ -72,22 +76,22 @@ function BodyTable({ symbol }: BodyTableProps) {
   const renderCell = (key: string, width?: number) => {
     const value = getColumnValue(snapshot, key);
 
-    const colorClass =
+    // màu tĩnh mặc định cho các cột đặc biệt
+    const baseColorClass =
       key === "ceil"
-        ? "text-violet-500"
+        ? "c"
         : key === "floor"
-        ? "text-blue-500"
+        ? "f"
         : key === "ref"
-        ? "text-yellow-500"
-        : cellColors[key] ?? "text-text-body";
+        ? "r"
+        : "text-text-body";
 
-    // const colorClass = cellColors[key] ?? "text-text-body";
     return (
       <div
         key={key}
         data-symbol={symbol}
         data-key={key}
-        className={`flex items-center justify-center text-xs font-medium h-7 transition-colors duration-300 ${colorClass}`}
+        className={`flex items-center justify-center text-xs font-medium h-7 ${baseColorClass}`}
         style={{ minWidth: width }}
       >
         {value}
@@ -104,9 +108,7 @@ function BodyTable({ symbol }: BodyTableProps) {
           return (
             <div
               key={col.key}
-              className={`h-7 grid place-items-center text-xs font-medium ${
-                cellColors[col.key] ?? "text-text-body"
-              }`}
+              className="h-7 grid place-items-center text-xs font-medium"
               style={{ minWidth: col.width }}
             >
               <div

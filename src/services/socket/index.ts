@@ -2,7 +2,6 @@ import { store } from "../../store";
 import {
   clearSnapshot,
   resetSnapshots,
-  updateColors,
   updateSnapshots,
 } from "../../store/slices/stock/slice";
 import type {
@@ -13,6 +12,7 @@ import type {
   WorkerOutputMessage,
 } from "../../types";
 import { getOrCreateSessionId } from "../../utils";
+import { queueColors } from "../../worker/colorManager";
 import { queueFlash } from "../../worker/flashManager";
 import { apiClient } from "../apiClient";
 
@@ -28,14 +28,14 @@ worker.onmessage = (e: MessageEvent<WorkerOutputMessage>) => {
   const { type, data } = e.data;
   if (type !== "update") return;
 
-  const { flash, colors } = data;
+  const { flashes, colors } = data;
 
-  Object.entries(colors).forEach(([symbol, keyColors]) => {
-    store.dispatch(updateColors({ symbol, colors: keyColors }));
-  });
+  if (colors && Object.keys(colors).length > 0) {
+    queueColors(colors);
+  }
 
-  if (flash.length > 0) {
-    queueFlash(flash);
+  if (flashes.length > 0) {
+    queueFlash(flashes);
   }
 };
 
@@ -148,7 +148,6 @@ const reSubscribe = async () => {
   if (subscribedSymbols.length === 0) return;
   try {
     await apiClient.post("/priceboard/subscriptions", {
-      // await axios.post("http://192.168.1.139:8083/v1/priceboard/subsciptions", {
       type: "subscribe",
       sessionId: getOrCreateSessionId(),
       symbols: subscribedSymbols,
@@ -164,7 +163,6 @@ const sendSubscribeRequest = async (
   options: SubscribeOptions
 ) => {
   await apiClient.post("/priceboard/subscriptions", {
-    // await axios.post(`http://192.168.1.139:8083/v1/priceboard/subsciptions`, {
     type: action,
     sessionId: getOrCreateSessionId(),
     groupId: options.groupId,

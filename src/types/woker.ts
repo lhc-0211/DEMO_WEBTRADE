@@ -1,16 +1,9 @@
 import type { SnapshotData } from "./socketCient";
 
-export type FlashClass =
-  | "flash-up"
-  | "flash-down"
-  | "flash-ceil"
-  | "flash-floor"
-  | "flash-reference";
-
 export interface FlashResult {
   symbol: string;
   key: string;
-  flashClass: FlashClass;
+  flashClass: string | null;
 }
 
 // === INPUT: main → worker ===
@@ -23,7 +16,7 @@ export type WorkerInputMessage =
 export type WorkerOutputMessage = {
   type: "update";
   data: {
-    flash: FlashResult[];
+    flashes: FlashResult[];
     colors: Record<string, Record<string, string>>;
   };
 };
