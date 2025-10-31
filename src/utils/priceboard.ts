@@ -11,17 +11,14 @@ export const getColumnValue = (
 
     case "mark":
       return "★";
-
     case "ceil":
-      // return formatPrice(snapshot.ceil);
+      return formatPrice(snapshot.refPrices?.ceiling);
       return "";
-
     case "floor":
-      // return formatPrice(snapshot.floor);
+      return formatPrice(snapshot.refPrices?.floor);
       return "";
-
     case "ref":
-      // return formatPrice(snapshot.ref);
+      return formatPrice(snapshot.refPrices?.ref);
       return "";
 
     case "priceBuy3":

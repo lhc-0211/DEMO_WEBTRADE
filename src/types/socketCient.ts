@@ -46,6 +46,14 @@ export type ForeignRoomData = {
   recv_ts: number;
 };
 
+export type RefPricesData = {
+  symbol: string;
+  ref: number;
+  ceiling: number;
+  floor: number;
+  recv_ts: number;
+};
+
 // WebSocket Message Types
 export type OrderBookMessage = {
   type: "orderBook";
@@ -94,11 +102,21 @@ export type ForeignRoomMessage = {
   recv_ts: number;
 };
 
+export type RefPricesMessage = {
+  type: "refPrices";
+  symbol: string;
+  ref: number;
+  ceiling: number;
+  floor: number;
+  recv_ts: number;
+};
+
 export type WebSocketMessage =
   | OrderBookMessage
   | TradeMessage
   | ForeignTradeMessage
-  | ForeignRoomMessage;
+  | ForeignRoomMessage
+  | RefPricesMessage;
 
 // Redux Snapshot
 export type SnapshotData = {
@@ -107,4 +125,5 @@ export type SnapshotData = {
   trade?: TradeData;
   foreignTrade?: ForeignTradeData;
   foreignRoom?: ForeignRoomData;
+  refPrices?: RefPricesData;
 };

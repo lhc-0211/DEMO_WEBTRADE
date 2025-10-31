@@ -60,8 +60,10 @@ function BodyTable({ symbol }: BodyTableProps) {
       }
     });
 
+    const refSnapshot = cellRefs.current;
+
     return () => {
-      cellRefs.current.clear();
+      refSnapshot.clear();
       unregisterVisibleCell(symbol);
     };
   }, [symbol, columns]);
@@ -69,8 +71,17 @@ function BodyTable({ symbol }: BodyTableProps) {
   // === RENDER CELL ===
   const renderCell = (key: string, width?: number) => {
     const value = getColumnValue(snapshot, key);
-    const colorClass = cellColors[key] ?? "text-text-body";
 
+    const colorClass =
+      key === "ceil"
+        ? "text-violet-500"
+        : key === "floor"
+        ? "text-blue-500"
+        : key === "ref"
+        ? "text-yellow-500"
+        : cellColors[key] ?? "text-text-body";
+
+    // const colorClass = cellColors[key] ?? "text-text-body";
     return (
       <div
         key={key}

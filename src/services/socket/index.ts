@@ -24,7 +24,6 @@ const worker = new Worker(
   }
 );
 
-// TYPE-SAFE: không dùng any
 worker.onmessage = (e: MessageEvent<WorkerOutputMessage>) => {
   const { type, data } = e.data;
   if (type !== "update") return;
@@ -82,6 +81,10 @@ const initSocket = (baseUrl: string) => {
       let shouldUpdate = false;
 
       switch (msg.type) {
+        case "refPrices":
+          snapshot.refPrices = { ...msg };
+          shouldUpdate = true;
+          break;
         case "trade":
           snapshot.trade = { ...msg };
           shouldUpdate = true;

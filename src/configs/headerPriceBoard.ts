@@ -1,6 +1,6 @@
 // columnsConfig.ts
 export const ALL_COLUMNS = [
-  { key: "mark", label: "", default: true, width: 24 },
+  // { key: "mark", label: "", default: true, width: 24 },
   { key: "symbol", label: "CK", default: true, width: 68 },
   { key: "ceil", label: "Trần", default: true, width: 42 },
   { key: "floor", label: "Sàn", default: true, width: 42 },
