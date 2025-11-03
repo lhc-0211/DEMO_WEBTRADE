@@ -118,7 +118,7 @@ export function formatVolume10(number: string | number) {
 }
 
 export function formatVolPrice(vol: number) {
-  return vol > 1e5 ? numberFormat(vol / 1e5, 2) + "M" : formatVolume10(vol);
+  return vol > 1e6 ? numberFormat(vol / 1e6) + " M" : numberFormat(vol);
 }
 
 export function StringToDouble(pString: string | number): number {

@@ -25,7 +25,7 @@ export const ALL_COLUMNS = [
     children: [
       { key: "lastPrice", label: "Khớp", default: true, width: 60 },
       { key: "lastVolume", label: "KL", default: true, width: 65 },
-      { key: "change", label: "+/-", default: true, width: 45 },
+      { key: "change", label: "+/-", default: true, width: 50 },
       { key: "changePc", label: "%", default: true, width: 50 },
     ],
   },
@@ -45,15 +45,15 @@ export const ALL_COLUMNS = [
   { key: "high", label: "Cao", default: false, width: 42 },
   { key: "avg", label: "TB", default: false, width: 42 },
   { key: "low", label: "Thấp", default: false, width: 42 },
-  { key: "totalVol", label: "Tổng KL", default: true, width: 87 },
+  { key: "totalVol", label: "Tổng KL", default: true, width: 90 },
   {
     key: "foreign",
     label: "GD NĐT NN",
     default: false,
     children: [
-      { key: "foreignBuy", label: "Mua", default: true, width: 68 },
-      { key: "foreignSell", label: "Bán", default: true, width: 68 },
-      { key: "foreignRoom", label: "Room", default: true, width: 85 },
+      { key: "foreignBuy", label: "Mua", default: true, width: 90 },
+      { key: "foreignSell", label: "Bán", default: true, width: 90 },
+      { key: "foreignRoom", label: "Room", default: true, width: 90 },
     ],
   },
 ];

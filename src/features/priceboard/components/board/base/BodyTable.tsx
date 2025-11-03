@@ -3,7 +3,7 @@ import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
 import { useAppSelector } from "../../../../../store/hook";
 import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
 import type { Column } from "../../../../../types";
-import { getColumnValue } from "../../../../../utils/priceboard";
+import { getColumnValueCompact } from "../../../../../utils/priceboard";
 
 import {
   registerVisibleCellColor,
@@ -24,6 +24,7 @@ function BodyTable({ symbol }: BodyTableProps) {
     (state) => selectSnapshotsBySymbols(state, [symbol])[symbol]
   );
 
+  // === Nếu không có dữ liệu thì tạo rỗng để tránh crash ===
   const snapshot = useMemo(() => {
     return snapshotData ?? { symbol };
   }, [snapshotData, symbol]);
@@ -48,7 +49,6 @@ function BodyTable({ symbol }: BodyTableProps) {
       const el = document.querySelector<HTMLElement>(selector);
       if (el) {
         cellRefs.current.set(key, el);
-        // đăng ký flash & color
         registerVisibleCell(symbol, key, el);
         registerVisibleCellColor(symbol, key, el);
       }
@@ -63,7 +63,7 @@ function BodyTable({ symbol }: BodyTableProps) {
       }
     });
 
-    // cleanup
+    // cleanup khi unmount
     const refSnapshot = cellRefs.current;
     return () => {
       refSnapshot.clear();
@@ -74,9 +74,9 @@ function BodyTable({ symbol }: BodyTableProps) {
 
   // === RENDER CELL ===
   const renderCell = (key: string, width?: number) => {
-    const value = getColumnValue(snapshot, key);
+    const value = getColumnValueCompact(snapshot, key);
 
-    // màu tĩnh mặc định cho các cột đặc biệt
+    // màu tĩnh mặc định cho các cột đặc biệt (ref/ceil/floor)
     const baseColorClass =
       key === "ceil"
         ? "c"
@@ -94,7 +94,7 @@ function BodyTable({ symbol }: BodyTableProps) {
         className={`flex items-center justify-center text-xs font-medium h-7 ${baseColorClass}`}
         style={{ minWidth: width }}
       >
-        {value}
+        {value ?? ""}
       </div>
     );
   };
@@ -119,7 +119,7 @@ function BodyTable({ symbol }: BodyTableProps) {
                 }`}
                 style={{ minWidth: col.width }}
               >
-                {getColumnValue(snapshot, col.key)}
+                {getColumnValueCompact(snapshot, col.key)}
               </div>
             </div>
           );

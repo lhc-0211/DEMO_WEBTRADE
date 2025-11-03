@@ -5,9 +5,9 @@ import {
   updateSnapshots,
 } from "../../store/slices/stock/slice";
 import type {
-  SnapshotData,
+  SnapshotDataCompact,
   SubscribeOptions,
-  WebSocketMessage,
+  WebSocketMessageCompact,
   WorkerInputMessage,
   WorkerOutputMessage,
 } from "../../types";
@@ -55,9 +55,9 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_INTERVAL = 3000;
 
 let subscribedSymbols: string[] = [];
-let messageHandlers: ((data: SnapshotData) => void)[] = [];
-const snapshots = new Map<string, SnapshotData>();
-let pendingBatch: SnapshotData[] = [];
+let messageHandlers: ((data: SnapshotDataCompact) => void)[] = [];
+const snapshots = new Map<string, SnapshotDataCompact>();
+let pendingBatch: SnapshotDataCompact[] = [];
 let rafId: number | null = null;
 
 // ==================== WEBSOCKET CORE ====================
@@ -74,30 +74,31 @@ const initSocket = (baseUrl: string) => {
 
   socket.onmessage = (ev) => {
     try {
-      const msg: WebSocketMessage = JSON.parse(ev.data);
-      if (!msg.symbol || !msg.type) return;
+      // === Compact message ===
+      const msg: WebSocketMessageCompact = JSON.parse(ev.data);
+      if (!msg.symbol || !msg[1]) return;
 
       const snapshot = snapshots.get(msg.symbol) ?? { symbol: msg.symbol };
       let shouldUpdate = false;
 
-      switch (msg.type) {
-        case "refPrices":
+      switch (msg[1]) {
+        case "r": // RefPrices
           snapshot.refPrices = { ...msg };
           shouldUpdate = true;
           break;
-        case "trade":
+        case "t": // Trade
           snapshot.trade = { ...msg };
           shouldUpdate = true;
           break;
-        case "orderBook":
-          snapshot.orderBook = { ...msg.data };
+        case "ob": // OrderBook
+          snapshot.orderBook = { ...msg };
           shouldUpdate = true;
           break;
-        case "foreignTrade":
+        case "ft": // ForeignTrade
           snapshot.foreignTrade = { ...msg };
           shouldUpdate = true;
           break;
-        case "foreignRoom":
+        case "fr": // ForeignRoom
           snapshot.foreignRoom = { ...msg };
           shouldUpdate = true;
           break;
@@ -216,7 +217,7 @@ export const socketClient = (() => {
       await sendSubscribeRequest("unsubscribe", options);
     },
 
-    onMessage: (handler: (data: SnapshotData) => void) => {
+    onMessage: (handler: (data: SnapshotDataCompact) => void) => {
       messageHandlers.push(handler);
       return () => {
         messageHandlers = messageHandlers.filter((h) => h !== handler);

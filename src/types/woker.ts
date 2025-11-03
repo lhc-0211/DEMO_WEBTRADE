@@ -1,4 +1,4 @@
-import type { SnapshotData } from "./socketCient";
+import type { SnapshotDataCompact } from "./socketCient";
 
 export interface FlashResult {
   symbol: string;
@@ -6,13 +6,13 @@ export interface FlashResult {
   flashClass: string | null;
 }
 
-// === INPUT: main → worker ===
+// === INPUT: main -> worker ===
 export type WorkerInputMessage =
-  | { type: "batch"; data: SnapshotData[] }
+  | { type: "batch"; data: SnapshotDataCompact[] }
   | { type: "visible"; data: string[] }
   | { type: "clear"; data: string[] };
 
-// === OUTPUT: worker → main ===
+// === OUTPUT: worker -> main ===
 export type WorkerOutputMessage = {
   type: "update";
   data: {

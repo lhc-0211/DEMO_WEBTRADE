@@ -1,88 +1,83 @@
-import type { SnapshotData } from "../types";
-import { formatPrice, numberFormat } from "./format";
+import type { SnapshotDataCompact } from "../types";
+import { formatPrice, formatVolPrice, numberFormat } from "./format";
 
-export const getColumnValue = (
-  snapshot: SnapshotData,
-  colKey: string
-): string => {
-  switch (colKey) {
-    case "symbol":
-      return snapshot?.symbol?.split(":")[0] || "";
+export const getColumnValueCompact = (
+  snapshot: SnapshotDataCompact,
+  key: string
+) => {
+  if (!snapshot) return null;
 
-    case "mark":
-      return "★";
-    case "ceil":
-      return formatPrice(snapshot.refPrices?.ceiling);
-      return "";
-    case "floor":
-      return formatPrice(snapshot.refPrices?.floor);
-      return "";
-    case "ref":
-      return formatPrice(snapshot.refPrices?.ref);
-      return "";
+  // --- Trade ---
+  if (snapshot.trade) {
+    switch (key) {
+      case "symbol":
+        return snapshot?.symbol?.split(":")[0] || "";
 
-    case "priceBuy3":
-      return formatPrice(snapshot.orderBook?.bids[2]?.price);
-    case "volumeBuy3":
-      return numberFormat(snapshot.orderBook?.bids[2]?.volume, 0, "");
-    case "priceBuy2":
-      return formatPrice(snapshot.orderBook?.bids[1]?.price);
-    case "volumeBuy2":
-      return numberFormat(snapshot.orderBook?.bids[1]?.volume, 0, "");
-    case "priceBuy1":
-      return formatPrice(snapshot.orderBook?.bids[0]?.price);
-    case "volumeBuy1":
-      return numberFormat(snapshot.orderBook?.bids[0]?.volume, 0, "");
-
-    case "lastPrice":
-      return snapshot.trade?.price ? formatPrice(snapshot.trade?.price) : "";
-    case "lastVolume":
-      return numberFormat(snapshot.trade?.volume, 0, "");
-    case "change":
-      return snapshot.trade?.changeAbs
-        ? formatPrice(snapshot.trade?.changeAbs)
-        : "";
-    case "changePc":
-      return snapshot.trade?.changePct
-        ? numberFormat(snapshot.trade?.changePct, 2, "") + " %"
-        : "";
-
-    case "priceSell1":
-      return formatPrice(snapshot.orderBook?.asks[0]?.price);
-    case "volumeSell1":
-      return numberFormat(snapshot.orderBook?.asks[0]?.volume, 0, "");
-    case "priceSell2":
-      return formatPrice(snapshot.orderBook?.asks[1]?.price);
-    case "volumeSell2":
-      return numberFormat(snapshot.orderBook?.asks[1]?.volume, 0, "");
-    case "priceSell3":
-      return formatPrice(snapshot.orderBook?.asks[2]?.price);
-    case "volumeSell3":
-      return numberFormat(snapshot.orderBook?.asks[2]?.volume, 0, "");
-
-    case "high":
-      // return formatPrice(snapshot.high);
-      return "";
-    case "avg":
-      // return formatPrice(snapshot.avg);
-      return "";
-    case "low":
-      // return formatPrice(snapshot.low);
-      return "";
-    case "totalVol":
-      // return numberFormat(snapshot.totalVol, 0, "");
-      return "";
-
-    case "foreignBuy":
-      return numberFormat(snapshot.foreignTrade?.foreignBuyVolume, 0, "");
-    case "foreignSell":
-      return numberFormat(snapshot.foreignTrade?.foreignSellVolume, 0, "");
-
-    case "foreignRoom": {
-      return numberFormat(snapshot.foreignRoom?.totalRoom, 0, "");
+      case "lastPrice":
+        return formatPrice(snapshot.trade["8"]);
+      case "lastVolume":
+        return formatPrice(snapshot.trade["9"]);
+      case "change":
+        return formatPrice(snapshot.trade["11"]);
+      case "changePc":
+        return snapshot.trade["12"]
+          ? numberFormat(snapshot.trade["12"], 2, "") + " %"
+          : "";
     }
-
-    default:
-      return "";
   }
+
+  // --- OrderBook ---
+  if (snapshot.orderBook) {
+    const bids = snapshot.orderBook["22"]?.split("|") ?? [];
+    const asks = snapshot.orderBook["23"]?.split("|") ?? [];
+
+    if (key.startsWith("priceBuy")) {
+      const i = parseInt(key[8], 10) - 1;
+      return formatPrice(bids[i * 3]);
+    }
+    if (key.startsWith("volumeBuy")) {
+      const i = parseInt(key[9], 10) - 1;
+      return numberFormat(bids[i * 3 + 1], 0, "");
+    }
+    if (key.startsWith("priceSell")) {
+      const i = parseInt(key[9], 10) - 1;
+      return formatPrice(asks[i * 3]);
+    }
+    if (key.startsWith("volumeSell")) {
+      const i = parseInt(key[10], 10) - 1;
+      return numberFormat(asks[i * 3 + 1], 0, "");
+    }
+  }
+
+  // --- RefPrices ---
+  if (snapshot.refPrices) {
+    switch (key) {
+      case "ref":
+        return formatPrice(snapshot.refPrices["4"]);
+      case "ceil":
+        return formatPrice(snapshot.refPrices["5"]);
+      case "floor":
+        return formatPrice(snapshot.refPrices["6"]);
+    }
+  }
+
+  // --- ForeignTrade ---
+  if (snapshot.foreignTrade) {
+    switch (key) {
+      case "foreignBuy":
+        return formatVolPrice(snapshot.foreignTrade["15"]);
+      case "foreignSell":
+        return formatVolPrice(snapshot.foreignTrade["17"]);
+    }
+  }
+
+  // --- ForeignRoom ---
+  if (snapshot.foreignRoom) {
+    switch (key) {
+      case "foreignRoom":
+        return formatVolPrice(snapshot.foreignRoom["21"]);
+    }
+  }
+
+  return null;
 };

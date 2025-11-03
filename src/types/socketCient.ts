@@ -5,125 +5,89 @@ export interface SubscribeOptions {
 
 export type PriceCompare = "u" | "d" | "r" | "c" | "f";
 
-export type OrderBookLevel = {
-  price: number;
-  volume: number;
-  priceCompare: PriceCompare;
-};
-
-export type OrderBookData = {
-  bids: OrderBookLevel[];
-  asks: OrderBookLevel[];
-  recv_ts?: number;
-};
-
-export type TradeData = {
-  price: number;
-  volume: number;
-  boardId: string;
-  changePct: number;
-  changeAbs: number;
-  marketId: string;
-  priceCompare: PriceCompare;
+// --- OrderBook---
+export type OrderBookDataCompact = {
+  1: "ob"; // type
+  22: string; // bids compacted, ví dụ: "26600.0|1000.0|d|27000.0|400.0|u|..."
+  23: string; // asks compacted
   recv_ts: number;
 };
 
-export type ForeignTradeData = {
-  foreignBuyVolume: number;
-  foreignSellVolume: number;
-  foreignBuyAmount: number;
-  foreignSellAmount: number;
-  foreignNetValue: number;
-  boardId: string;
-  marketId: string;
-  recv_ts: number;
-};
-
-export type ForeignRoomData = {
-  currentRoom: number;
-  totalRoom: number;
-  marketId: string;
-  recv_ts: number;
-};
-
-export type RefPricesData = {
+export type OrderBookMessageCompact = {
+  1: "ob";
   symbol: string;
-  ref: number;
-  ceiling: number;
-  floor: number;
+  22: string;
+  23: string;
   recv_ts: number;
 };
 
-// WebSocket Message Types
-export type OrderBookMessage = {
-  type: "orderBook";
+// --- Trade---
+export type TradeDataCompact = {
+  1: "t";
   symbol: string;
-  boardId: string;
-  marketId: string;
-  recv_ts: number;
-  data: {
-    bids: OrderBookLevel[];
-    asks: OrderBookLevel[];
-  };
-};
-
-export type TradeMessage = {
-  type: "trade";
-  symbol: string;
-  boardId: string;
-  changePct: number;
-  changeAbs: number;
-  priceCompare: PriceCompare;
-  marketId: string;
-  price: number;
-  volume: number;
+  8: number; // price
+  9: number; // volume
+  10: string; // time "HH:MM:SS"
+  11: number; // changeAbs
+  12: number; // changePct
+  13: PriceCompare; // priceCompare
   recv_ts: number;
 };
 
-export type ForeignTradeMessage = {
-  type: "foreignTrade";
+export type TradeMessageCompact = TradeDataCompact;
+
+// --- ForeignTrade---
+export type ForeignTradeDataCompact = {
+  1: "ft";
   symbol: string;
-  boardId: string;
-  marketId: string;
-  foreignBuyVolume: number;
-  foreignSellVolume: number;
-  foreignBuyAmount: number;
-  foreignSellAmount: number;
-  foreignNetValue: number;
+  14: number; // foreignBuyAmount
+  15: number; // foreignBuyVolume
+  16: number; // foreignSellAmount
+  17: number; // foreignSellVolume
+  18: number; // foreignNetValue
   recv_ts: number;
 };
 
-export type ForeignRoomMessage = {
-  type: "foreignRoom";
+export type ForeignTradeMessageCompact = ForeignTradeDataCompact;
+
+// --- ForeignRoom---
+export type ForeignRoomDataCompact = {
+  1: "fr";
   symbol: string;
-  marketId: string;
-  currentRoom: number;
-  totalRoom: number;
+  19: string; // marketId
+  20: number; // currentRoom
+  21: number; // totalRoom
   recv_ts: number;
 };
 
-export type RefPricesMessage = {
-  type: "refPrices";
+export type ForeignRoomMessageCompact = ForeignRoomDataCompact;
+
+// --- RefPrices---
+export type RefPricesDataCompact = {
+  1: "r";
   symbol: string;
-  ref: number;
-  ceiling: number;
-  floor: number;
+  4: number; // ref
+  5: number; // ceil
+  6: number; // floor
   recv_ts: number;
 };
 
-export type WebSocketMessage =
-  | OrderBookMessage
-  | TradeMessage
-  | ForeignTradeMessage
-  | ForeignRoomMessage
-  | RefPricesMessage;
+export type RefPricesMessageCompact = RefPricesDataCompact;
 
-// Redux Snapshot
-export type SnapshotData = {
+// --- Snapshot---
+export type SnapshotDataCompact = {
   symbol: string;
-  orderBook?: OrderBookData;
-  trade?: TradeData;
-  foreignTrade?: ForeignTradeData;
-  foreignRoom?: ForeignRoomData;
-  refPrices?: RefPricesData;
+  orderBook?: OrderBookDataCompact;
+  trade?: TradeDataCompact;
+  foreignTrade?: ForeignTradeDataCompact;
+  foreignRoom?: ForeignRoomDataCompact;
+  refPrices?: RefPricesDataCompact;
 };
+
+// --- WebSocket Message---
+export type WebSocketMessageCompact =
+  | OrderBookMessageCompact
+  | TradeMessageCompact
+  | ForeignTradeMessageCompact
+  | ForeignRoomMessageCompact
+  | RefPricesMessageCompact;

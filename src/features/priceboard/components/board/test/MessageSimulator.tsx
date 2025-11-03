@@ -39,6 +39,7 @@ export const MessageSimulator: React.FC = () => {
   useEffect(() => {
     const snapshots = store.getState().stock.snapshots;
     symbols.current = Object.keys(snapshots);
+
     if (symbols.current.length === 0) {
       // fallback khi bảng giá chưa có mã nào
       symbols.current = [
@@ -51,49 +52,63 @@ export const MessageSimulator: React.FC = () => {
       ];
     }
 
-    // Khởi tạo dữ liệu ban đầu (để có base cho flash)
+    // Tạo dữ liệu ban đầu đúng cấu trúc mới
     const initial: any = symbols.current.map((s) => ({
       symbol: s,
-      trade: { price: 0, volume: 0, changePct: 0, priceCompare: "r" },
+      trade: {
+        "8": 0, // giá
+        "9": 0, // KL
+        "11": 0, // Giá trị
+        "12": 0, // %
+        "13": "r", // màu
+      },
+      refPrices: {
+        "4": 9500, // Tham chiếu
+        "5": 11000, // Trần
+        "6": 9000, // Sàn
+      },
     }));
+
     store.dispatch(updateSnapshots(initial));
   }, []);
 
   // === TẠO SNAPSHOT + DTO + FLASH DATA ===
   const createData = (symbol: string, i: number) => {
     const prev = store.getState().stock.snapshots[symbol];
-    const prevPrice = prev?.trade?.price || 10000;
+    const prevPrice = prev?.trade?.["8"] ?? 10000;
+
     const base = prevPrice + (Math.random() - 0.5) * 200;
     const change = base - prevPrice;
-    const priceCompare = change > 50 ? "u" : change < -50 ? "d" : "r";
+    const changePct = 1;
+    const priceCompare = change > 0 ? "u" : change < 0 ? "d" : "r";
 
     const snapshot: any = {
       symbol,
       trade: {
-        price: base,
-        volume: 100 + (i % 100),
-        changePct: (change / prevPrice) * 100,
-        priceCompare,
+        "8": Math.round(base), // giá
+        "9": 100 + (i % 100), // KL
+        "11": Math.round(base * (100 + (i % 100))), // Giá trị
+        "12": changePct,
+        "13": priceCompare,
+      },
+      foreignTrade: {
+        "1": "ft",
+        "14": Math.floor(Math.random() * 1000000),
+        "15": Math.floor(Math.random() * 100000),
+        "16": Math.floor(Math.random() * 1e8),
+        "17": Math.floor(Math.random() * 1e8),
+        "18": Math.floor(Math.random() * 1e8),
+        symbol,
+        recv_ts: Date.now(),
       },
       orderBook: {
-        bids: [
-          {
-            price: base - 100,
-            volume: base - 200,
-            priceCompare: change > 0 ? "r" : "d",
-          },
-          { price: base - 200, volume: base - 200, priceCompare: "d" },
-          { price: base - 300, volume: base + 300, priceCompare: "d" },
-        ],
-        asks: [
-          { price: base + 100, volume: base - 100, priceCompare: "r" },
-          {
-            price: base + 200,
-            volume: base - 100,
-            priceCompare: change > 0 ? "u" : "r",
-          },
-          { price: base + 300, volume: base - 100, priceCompare: "u" },
-        ],
+        "1": "ob",
+        "22": `${base - 100}|${base - 100}|r|${base - 200}|${base - 100}|d|${
+          base - 300
+        }|${base - 100}|d`,
+        "23": `${base + 100}|${base - 100}|u|${base + 200}|${base - 100}|u|${
+          base + 300
+        }|${base - 100}|u`,
       },
     };
 
@@ -111,13 +126,13 @@ export const MessageSimulator: React.FC = () => {
   };
 
   // === GỬI TỚI WORKER ===
-  const sendToWorker = (batch: SnapshotData[]) => {
+  const sendToWorker = (batch: any) => {
     const worker = (window as any).priceboardWorker;
     if (worker && batch.length > 0) {
       totalMsgs.current += batch.length;
 
       const flashInBatch = batch.filter((s) => {
-        const prev = store.getState().stock.snapshots[s.symbol];
+        const prev: any = store.getState().stock.snapshots[s.symbol];
         return prev && s.trade?.price !== prev.trade?.price;
       }).length;
 
@@ -156,7 +171,7 @@ export const MessageSimulator: React.FC = () => {
       const batchDTOs: any[] = [];
       const batchFlash: any[] = [];
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < 500; i++) {
         const symbol =
           symbols.current[Math.floor(Math.random() * symbols.current.length)];
         const { snapshot, dto, flashData } = createData(
