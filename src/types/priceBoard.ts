@@ -114,3 +114,8 @@ export interface Column {
   default: boolean;
   children?: Column[];
 }
+
+export interface ListStockByIdResponse {
+  groupId: string;
+  symbols: string[];
+}

@@ -1,27 +1,10 @@
-export const fetchInfoIndexAPI = () => {
-  // return axios.get(
-  //   "https://banggia.casc.vn/MDAProxy/getIndex?indexId=001,101,002,301"
-  // );
-  return;
-};
+import { apiClient } from "../services/apiClient";
+import type { ListStockByIdResponse } from "../types";
 
-export const fetchChartIndexAPI = (id: string) => {
-  // return axios.get(
-  //   `https://banggia.casc.vn/MDAProxy/getIndexHistories/?resolution=1&indexId=${id}`
-  // );
-  return;
-};
+export async function fetchListStockByIdAPI(
+  id: string
+): Promise<ListStockByIdResponse> {
+  const res = await apiClient.get(`/priceboard/symbols/${id}`);
 
-export const fetchTopStockTradedAPI = (id: string) => {
-  // return axios.get(
-  //   `https://banggia.casc.vn/MDAProxy/getTopStockTraded/?top=${id}`
-  // );
-  return;
-};
-
-export const fetchTopForeignTradedAPI = (id: string) => {
-  // return axios.get(
-  //   `https://banggia.casc.vn/MDAProxy/getTopForeignTraded/?top=${id}`
-  // );
-  return;
-};
+  return res.data;
+}
