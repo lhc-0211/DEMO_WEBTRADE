@@ -1,6 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { List } from "react-virtualized";
 import type { RenderedRows } from "react-virtualized/dist/es/List";
+import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts";
 import { socketClient } from "../../../../../services/socket";
 import { useAppDispatch, useAppSelector } from "../../../../../store/hook";
 import { selectAllSymbols } from "../../../../../store/slices/stock/selector";
@@ -22,7 +23,8 @@ function PriceBoard() {
 
   const symbols = useAppSelector(selectAllSymbols);
   const listRef = useRef<List>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { containerRef } = usePerfectScrollbar();
+
   const [containerWidth, setContainerWidth] = useState(1200);
   const [listHeight, setListHeight] = useState(500);
 
@@ -91,22 +93,22 @@ function PriceBoard() {
 
   return (
     <div
-      className="h-[calc(var(--app-height)-289px)] flex flex-col"
+      className="h-[calc(var(--app-height)-289px)] overflow-hidden"
       ref={containerRef}
     >
-      <div style={{ width: containerWidth, height: HEADER_HEIGHT }}>
-        <HeaderColumns />
-      </div>
-      <div>
+      <div className="min-w-[1812px] flex flex-col">
+        <div style={{ height: HEADER_HEIGHT }}>
+          <HeaderColumns />
+        </div>
+
         <List
           ref={listRef}
           height={listHeight}
           rowCount={symbols.length}
           rowHeight={ROW_HEIGHT}
           rowRenderer={rowRenderer}
-          width={containerWidth}
+          width={containerWidth < 1812 ? 1812 : containerWidth} //cố định bằng min-width để đồng bộ | containerWidth
           onRowsRendered={updateVisibleSymbols}
-          className="hide-scrollbar"
         />
       </div>
     </div>

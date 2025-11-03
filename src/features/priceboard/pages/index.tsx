@@ -19,7 +19,7 @@ export default function PriceBoard() {
         <MenuDashboard active={active} onChange={onChange} />
 
         {/* Bảng giá */}
-        <Board />
+        <Board id={active} />
       </div>
 
       {/* <MessageSimulator /> */}

@@ -13,23 +13,19 @@ let isProcessing = false;
 let visibleSymbols = new Set<string>();
 const prevSnapshots = new Map<string, SnapshotDataCompact>();
 
-// ---- Giảm khởi tạo tạm ----
-const FLASH_LIMIT = 50;
+const BATCH_LIMIT = 100;
 const CACHE_LIMIT = 300;
-
-// ==================== PROCESS QUEUE ====================
 
 const processQueue = (): void => {
   if (isProcessing || queue.length === 0) return;
   isProcessing = true;
 
-  const batch = queue.splice(0, FLASH_LIMIT);
+  const batch = queue.splice(0, BATCH_LIMIT);
   const flashResults: FlashResult[] = [];
   const colors: Record<string, Record<string, PriceCompare | "t">> = {};
 
   for (const snapshot of batch) {
     const { symbol } = snapshot;
-
     if (!visibleSymbols.has(symbol)) {
       prevSnapshots.set(symbol, snapshot);
       continue;
@@ -42,19 +38,23 @@ const processQueue = (): void => {
     }
 
     // === FLASH ===
+    const cacheNew: Record<string, string | null> = {};
+    const cacheOld: Record<string, string | null> = {};
+
     for (const key of KEYS_COLOR) {
-      const newVal = getColumnValueCompact(snapshot, key);
-      const oldVal = getColumnValueCompact(prev, key);
+      cacheNew[key] = getColumnValueCompact(snapshot, key);
+      cacheOld[key] = getColumnValueCompact(prev, key);
+    }
+
+    for (const key of KEYS_COLOR) {
+      const newVal = cacheNew[key];
+      const oldVal = cacheOld[key];
       if (newVal == null || oldVal == null || newVal === oldVal) continue;
 
       let flashClass: PriceCompare | null = null;
-
-      // Giá thay đổi thì dùng priceCompare trong trade
       if (key.includes("price") || key.includes("Price")) {
         flashClass = snapshot.trade?.[13] ?? prev.trade?.[13] ?? null;
-      }
-      // Volume thay đổi thì tự so sánh lớn hơn / nhỏ hơn
-      else if (key.includes("volume") || key.includes("Volume")) {
+      } else if (key.includes("volume") || key.includes("Volume")) {
         const n = parseInt(newVal.replace(/,/g, ""), 10);
         const o = parseInt(oldVal.replace(/,/g, ""), 10);
         if (!isNaN(n) && !isNaN(o)) flashClass = n > o ? "u" : "d";
@@ -68,39 +68,45 @@ const processQueue = (): void => {
     const tradeCmp = snapshot.trade?.[13];
     const orderBook = snapshot.orderBook;
 
+    const bids =
+      typeof orderBook?.[22] === "string"
+        ? orderBook[22].split("|")
+        : Array.isArray(orderBook?.[22])
+        ? orderBook[22]
+        : [];
+    const asks =
+      typeof orderBook?.[23] === "string"
+        ? orderBook[23].split("|")
+        : Array.isArray(orderBook?.[23])
+        ? orderBook[23]
+        : [];
+
     for (const key of KEYS_COLOR) {
-      let cmp: PriceCompare | undefined;
+      let cmp: PriceCompare | "t" = "t";
 
       if (
         ["lastPrice", "change", "changePercent", "lastVolume", "symbol"].some(
           (k) => key.includes(k)
         )
       ) {
-        cmp = tradeCmp;
+        cmp = tradeCmp ?? "t";
       } else if (orderBook) {
-        const bids = orderBook[22]?.split("|") ?? [];
-        const asks = orderBook[23]?.split("|") ?? [];
-
-        if (key.startsWith("priceBuy")) {
-          const i = parseInt(key[8], 10) - 1;
-          cmp = (bids[i * 3 + 2] as PriceCompare) || undefined;
-        } else if (key.startsWith("priceSell")) {
-          const i = parseInt(key[9], 10) - 1;
-          cmp = (asks[i * 3 + 2] as PriceCompare) || undefined;
-        } else if (key.startsWith("volumeBuy")) {
-          const i = parseInt(key[9], 10) - 1;
-          cmp = (bids[i * 3 + 2] as PriceCompare) || undefined;
-        } else if (key.startsWith("volumeSell")) {
-          const i = parseInt(key[10], 10) - 1;
-          cmp = (asks[i * 3 + 2] as PriceCompare) || undefined;
+        if (key.startsWith("priceBuy") || key.startsWith("volumeBuy")) {
+          const i = parseInt(key.slice(-1), 10) - 1;
+          cmp = (bids[i * 3 + 2] as PriceCompare) ?? "t";
+        } else if (
+          key.startsWith("priceSell") ||
+          key.startsWith("volumeSell")
+        ) {
+          const i = parseInt(key.slice(-1), 10) - 1;
+          cmp = (asks[i * 3 + 2] as PriceCompare) ?? "t";
         }
       }
 
-      colorMap[key] = cmp ?? "t";
+      colorMap[key] = cmp;
     }
 
     colors[symbol] = colorMap;
-
     prevSnapshots.set(symbol, snapshot);
   }
 
@@ -115,11 +121,8 @@ const processQueue = (): void => {
   if (queue.length > 0) queueMicrotask(processQueue);
 };
 
-// ==================== MESSAGE HANDLER ====================
-
 self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
   const { type, data } = e.data;
-
   switch (type) {
     case "batch":
       queue.push(...data);

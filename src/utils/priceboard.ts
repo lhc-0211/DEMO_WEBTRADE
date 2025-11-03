@@ -1,5 +1,10 @@
 import type { SnapshotDataCompact } from "../types";
-import { formatPrice, formatVolPrice, numberFormat } from "./format";
+import {
+  formatPrice,
+  formatVolPrice,
+  numberFormat,
+  StringToInt,
+} from "./format";
 
 export const getColumnValueCompact = (
   snapshot: SnapshotDataCompact,
@@ -18,7 +23,9 @@ export const getColumnValueCompact = (
       case "lastVolume":
         return formatPrice(snapshot.trade["9"]);
       case "change":
-        return formatPrice(snapshot.trade["11"]);
+        return snapshot.trade["11"] && snapshot.trade["11"] !== 0
+          ? formatPrice(snapshot.trade["11"])
+          : "";
       case "changePc":
         return snapshot.trade["12"]
           ? numberFormat(snapshot.trade["12"], 2, "") + " %"
@@ -37,7 +44,7 @@ export const getColumnValueCompact = (
     }
     if (key.startsWith("volumeBuy")) {
       const i = parseInt(key[9], 10) - 1;
-      return numberFormat(bids[i * 3 + 1], 0, "");
+      return formatVolPrice(StringToInt(bids[i * 3 + 1]));
     }
     if (key.startsWith("priceSell")) {
       const i = parseInt(key[9], 10) - 1;
@@ -45,7 +52,27 @@ export const getColumnValueCompact = (
     }
     if (key.startsWith("volumeSell")) {
       const i = parseInt(key[10], 10) - 1;
-      return numberFormat(asks[i * 3 + 1], 0, "");
+      return formatVolPrice(StringToInt(asks[i * 3 + 1]));
+    }
+
+    switch (key) {
+      case "high":
+        return (
+          formatPrice(String(snapshot.orderBook["24"] || "").split("|")[0]) ||
+          ""
+        );
+      case "low":
+        return (
+          formatPrice(String(snapshot.orderBook["25"] || "").split("|")[0]) ||
+          ""
+        );
+      case "avg":
+        return (
+          formatPrice(String(snapshot.orderBook["28"] || "").split("|")[0]) ||
+          ""
+        );
+      case "totalVol":
+        return formatVolPrice(snapshot.orderBook["26"]);
     }
   }
 

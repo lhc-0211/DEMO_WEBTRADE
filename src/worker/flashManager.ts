@@ -1,31 +1,5 @@
 import type { FlashResult } from "../types";
 
-const visibleCells = new Map<string, Map<string, HTMLElement>>();
-const pendingFlashes = new Map<string, FlashResult>();
-let rafId: number | null = null;
-
-// --- Quản lý cell hiển thị ---
-export const registerVisibleCell = (
-  symbol: string,
-  key: string,
-  el: HTMLElement
-): void => {
-  if (!visibleCells.has(symbol)) visibleCells.set(symbol, new Map());
-  visibleCells.get(symbol)!.set(key, el);
-};
-
-export const unregisterVisibleCell = (symbol: string, key?: string): void => {
-  if (!key) {
-    visibleCells.delete(symbol);
-    return;
-  }
-
-  const keyMap = visibleCells.get(symbol);
-  keyMap?.delete(key);
-  if (keyMap && keyMap.size === 0) visibleCells.delete(symbol);
-};
-
-// --- Map flashClass → data-flash value ---
 const FLASH_MAP: Record<string, string> = {
   u: "up",
   d: "down",
@@ -33,49 +7,77 @@ const FLASH_MAP: Record<string, string> = {
   f: "floor",
   r: "ref",
 };
+const visibleCells = new Map<string, Map<string, HTMLElement>>();
+const pendingFlashes = new Map<string, FlashResult>();
+const lastFlashTime = new Map<string, number>();
+let rafId: number | null = null;
 
-// --- Áp hiệu ứng flash ---
+const FLASH_DURATION = 400;
+const MIN_FLASH_INTERVAL = 450;
+
 const applyFlash = (): void => {
-  const updates: (() => void)[] = [];
+  const now = performance.now();
 
-  for (const { symbol, key, flashClass } of pendingFlashes.values()) {
+  for (const [cellKey, { symbol, key, flashClass }] of pendingFlashes) {
+    const lastTime = lastFlashTime.get(cellKey) || 0;
+    if (now - lastTime < MIN_FLASH_INTERVAL) continue;
+
     const cell = visibleCells.get(symbol)?.get(key);
     if (!cell) continue;
 
     const flashType = flashClass ? FLASH_MAP[flashClass] : undefined;
     if (!flashType) continue;
 
-    updates.push(() => {
-      // Nếu đang có flash cũ, xóa trước để tránh animation chồng
-      if (cell.dataset.flash) delete cell.dataset.flash;
+    cell.dataset.flash = flashType;
+    lastFlashTime.set(cellKey, now);
 
-      // Đặt flash mới
-      cell.dataset.flash = flashType;
-
-      // Xóa sau 500ms
-      setTimeout(() => {
-        if (cell.isConnected && cell.dataset.flash === flashType) {
-          delete cell.dataset.flash;
-        }
-      }, 500);
-    });
+    setTimeout(() => {
+      if (cell.isConnected && cell.dataset.flash === flashType) {
+        delete cell.dataset.flash;
+      }
+    }, FLASH_DURATION);
   }
 
   pendingFlashes.clear();
   rafId = null;
-
-  requestAnimationFrame(() => {
-    for (const fn of updates) fn();
-  });
 };
 
-// --- Hàng đợi flash ---
 export const queueFlash = (results: readonly FlashResult[]): void => {
+  const now = performance.now();
+
   for (const r of results) {
-    pendingFlashes.set(`${r.symbol}:${r.key}`, r);
+    const cellKey = `${r.symbol}:${r.key}`;
+    const lastTime = lastFlashTime.get(cellKey) || 0;
+    if (now - lastTime >= MIN_FLASH_INTERVAL) {
+      pendingFlashes.set(cellKey, r);
+    }
   }
 
-  if (rafId === null) {
+  if (rafId === null && pendingFlashes.size > 0) {
     rafId = requestAnimationFrame(applyFlash);
+  }
+};
+
+export const registerVisibleCell = (
+  symbol: string,
+  key: string,
+  el: HTMLElement
+): void => {
+  let map = visibleCells.get(symbol);
+  if (!map) {
+    map = new Map();
+    visibleCells.set(symbol, map);
+  }
+  map.set(key, el);
+};
+
+export const unregisterVisibleCell = (symbol: string, key?: string): void => {
+  if (!key) {
+    visibleCells.delete(symbol);
+    for (const k of lastFlashTime.keys()) {
+      if (k.startsWith(`${symbol}:`)) lastFlashTime.delete(k);
+    }
+  } else {
+    visibleCells.get(symbol)?.delete(key);
   }
 };

@@ -7,13 +7,13 @@ export default function OrderTableSkeleton() {
         <thead>
           <tr>
             <th colSpan={3} className="px-2 py-1">
-              <div className="h-[22px] bg-gray-300 rounded-md" />
+              <div className="h-6 bg-gray-300/40 rounded-md" />
             </th>
             <th colSpan={4} className="px-2 py-1">
-              <div className="h-[22px] bg-gray-300 rounded-md" />
+              <div className="h-6 bg-gray-300/40 rounded-md" />
             </th>
             <th colSpan={1} className="px-2 py-1">
-              <div className="h-[22px] bg-gray-300 rounded-md" />
+              <div className="h-6 bg-gray-300/40 rounded-md" />
             </th>
           </tr>
         </thead>
@@ -23,7 +23,7 @@ export default function OrderTableSkeleton() {
             <tr key={idx}>
               {Array.from({ length: 8 }).map((__, i) => (
                 <td key={i} className="px-2 py-2">
-                  <div className="h-3 w-full bg-gray-300 rounded" />
+                  <div className="h-6 w-full bg-gray-300/40 rounded" />
                 </td>
               ))}
             </tr>

@@ -330,27 +330,6 @@ input:-webkit-autofill {
   border-color: var(--color-green-500);
 }
 
-.flash-up {
-  background: var(--color-green-500) !important;
-  color: var(--color-background-primary) !important;
-}
-.flash-down {
-  background: var(--color-red-500) !important;
-  color: var(--color-background-primary) !important;
-}
-.flash-reference {
-  background: var(--color-yellow-500) !important;
-  color: var(--color-background-primary) !important;
-}
-.flash-ceil {
-  background: var(--color-violet-500) !important;
-  color: var(--color-background-primary) !important;
-}
-.flash-floor {
-  background: var(--color-blue-500) !important;
-  color: var(--color-background-primary) !important;
-}
-
 .cell {
   transition: background-color 0.2s ease;
 }

@@ -70,23 +70,27 @@ export default function MainLayout({
         <div></div>
       )}
 
-      <div className="flex flex-col gap-1 h-full px-5">
-        <div className="h-[60px] w-full">
+      <div className="flex flex-col h-full w-full overflow-hidden px-4">
+        {/* Header cố định full width */}
+        <div className="h-[60px] shrink-0 w-full relative z-10 bg-background-primary">
           <Header />
         </div>
 
-        <main className="h-[calc(var(--app-height)-60px)]">{children}</main>
+        {/* Main có thể scroll ngang */}
+        <main className="flex-1 w-full">
+          <div className="">{children}</div>
+        </main>
 
-        {/* Modal đăng nhập  */}
+        {/* Modal đăng nhập */}
         <LoginModal />
 
-        {/* Modal thông báo hết phiên đăng nhập */}
+        {/* Modal hết phiên */}
         <SessionExpiredModal />
       </div>
 
       <Tooltip
         id="global-tooltip"
-        className="!bg-gray-800 !text-white !text-[10px] lg:!text-xs !px-2 !py-1 !rounded"
+        className="bg-gray-800! text-white! text-[10px]! lg:text-xs! px-2! py-1! rounded!"
       />
 
       <ToastContainer />

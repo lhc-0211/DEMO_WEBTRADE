@@ -10,6 +10,10 @@ export type OrderBookDataCompact = {
   1: "ob"; // type
   22: string; // bids compacted, ví dụ: "26600.0|1000.0|d|27000.0|400.0|u|..."
   23: string; // asks compacted
+  24: string; // high
+  25: string; // low
+  28: string; // avg
+  26: number; // totalVol
   recv_ts: number;
 };
 

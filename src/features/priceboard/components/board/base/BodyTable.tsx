@@ -2,9 +2,8 @@ import { memo, useEffect, useMemo, useRef } from "react";
 import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
 import { useAppSelector } from "../../../../../store/hook";
 import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
-import type { Column } from "../../../../../types";
+import type { Column, SnapshotDataCompact } from "../../../../../types";
 import { getColumnValueCompact } from "../../../../../utils/priceboard";
-
 import {
   registerVisibleCellColor,
   unregisterVisibleCellColor,
@@ -14,22 +13,71 @@ import {
   unregisterVisibleCell,
 } from "../../../../../worker/flashManager";
 
+// === TÁCH CELL THÀNH COMPONENT RIÊNG ===
+interface PriceCellProps {
+  symbol: string;
+  cellKey: string;
+  width?: number;
+  snapshot: SnapshotDataCompact;
+}
+
+const PriceCell = memo(function PriceCell({
+  symbol,
+  cellKey,
+  width,
+  snapshot,
+}: PriceCellProps) {
+  const cellRef = useRef<HTMLDivElement>(null);
+  const value = getColumnValueCompact(snapshot, cellKey);
+
+  useEffect(() => {
+    if (cellRef.current) {
+      registerVisibleCell(symbol, cellKey, cellRef.current);
+      registerVisibleCellColor(symbol, cellKey, cellRef.current);
+    }
+    return () => {
+      unregisterVisibleCell(symbol, cellKey);
+      unregisterVisibleCellColor(symbol, cellKey);
+    };
+  }, [symbol, cellKey]);
+
+  const baseColorClass =
+    cellKey === "ceil"
+      ? "c"
+      : cellKey === "floor"
+      ? "f"
+      : cellKey === "ref"
+      ? "r"
+      : "text-text-body";
+
+  return (
+    <div
+      ref={cellRef}
+      data-symbol={symbol}
+      data-key={cellKey}
+      className={`flex items-center justify-center text-xs font-medium h-7 ${baseColorClass}`}
+      style={{ minWidth: width }}
+    >
+      {value ?? ""}
+    </div>
+  );
+});
+
+// === BODY TABLE ===
 interface BodyTableProps {
   symbol: string;
 }
 
 function BodyTable({ symbol }: BodyTableProps) {
-  // --- lấy snapshot từ Redux ---
   const snapshotData = useAppSelector(
     (state) => selectSnapshotsBySymbols(state, [symbol])[symbol]
   );
 
-  // === Nếu không có dữ liệu thì tạo rỗng để tránh crash ===
-  const snapshot = useMemo(() => {
-    return snapshotData ?? { symbol };
-  }, [snapshotData, symbol]);
+  const snapshot = useMemo(
+    () => snapshotData ?? { symbol },
+    [snapshotData, symbol]
+  );
 
-  // --- lấy cấu hình cột ---
   const columns = useMemo<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
     try {
@@ -39,65 +87,12 @@ function BodyTable({ symbol }: BodyTableProps) {
     }
   }, []);
 
-  // --- ref để lưu cell DOM ---
-  const cellRefs = useRef<Map<string, HTMLElement>>(new Map());
-
-  // === REGISTER CELLS ===
   useEffect(() => {
-    const registerCell = (key: string) => {
-      const selector = `[data-symbol="${symbol}"][data-key="${key}"]`;
-      const el = document.querySelector<HTMLElement>(selector);
-      if (el) {
-        cellRefs.current.set(key, el);
-        registerVisibleCell(symbol, key, el);
-        registerVisibleCellColor(symbol, key, el);
-      }
-    };
-
-    // duyệt toàn bộ column và children
-    columns.forEach((col) => {
-      if (col.children?.length) {
-        col.children.forEach((child) => registerCell(child.key));
-      } else {
-        registerCell(col.key);
-      }
-    });
-
-    // cleanup khi unmount
-    const refSnapshot = cellRefs.current;
     return () => {
-      refSnapshot.clear();
       unregisterVisibleCell(symbol);
       unregisterVisibleCellColor(symbol);
     };
-  }, [symbol, columns]);
-
-  // === RENDER CELL ===
-  const renderCell = (key: string, width?: number) => {
-    const value = getColumnValueCompact(snapshot, key);
-
-    // màu tĩnh mặc định cho các cột đặc biệt (ref/ceil/floor)
-    const baseColorClass =
-      key === "ceil"
-        ? "c"
-        : key === "floor"
-        ? "f"
-        : key === "ref"
-        ? "r"
-        : "text-text-body";
-
-    return (
-      <div
-        key={key}
-        data-symbol={symbol}
-        data-key={key}
-        className={`flex items-center justify-center text-xs font-medium h-7 ${baseColorClass}`}
-        style={{ minWidth: width }}
-      >
-        {value ?? ""}
-      </div>
-    );
-  };
+  }, [symbol]);
 
   return (
     <div className="flex border-x border-b border-border divide-x divide-border w-full">
@@ -128,12 +123,22 @@ function BodyTable({ symbol }: BodyTableProps) {
         return (
           <div key={col.key} className="flex flex-col w-full">
             {!hasChildren ? (
-              renderCell(col.key, col.width)
+              <PriceCell
+                symbol={symbol}
+                cellKey={col.key}
+                width={col.width}
+                snapshot={snapshot}
+              />
             ) : (
               <div className="flex divide-x divide-border text-xs font-medium">
-                {col.children?.map((child) =>
-                  renderCell(child.key, child.width)
-                )}
+                {col.children?.map((child) => (
+                  <PriceCell
+                    cellKey={child.key}
+                    symbol={symbol}
+                    width={child.width}
+                    snapshot={snapshot}
+                  />
+                ))}
               </div>
             )}
           </div>
