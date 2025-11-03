@@ -109,6 +109,7 @@ function PriceBoard() {
           rowRenderer={rowRenderer}
           width={containerWidth < 1812 ? 1812 : containerWidth} //cố định bằng min-width để đồng bộ | containerWidth
           onRowsRendered={updateVisibleSymbols}
+          className="hide-scrollbar"
         />
       </div>
     </div>
