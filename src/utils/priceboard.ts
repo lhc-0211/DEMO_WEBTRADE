@@ -12,12 +12,13 @@ export const getColumnValueCompact = (
 ) => {
   if (!snapshot) return null;
 
+  if (key === "symbol") {
+    return snapshot?.symbol?.split(":")[0] || "";
+  }
+
   // --- Trade ---
   if (snapshot.trade) {
     switch (key) {
-      case "symbol":
-        return snapshot?.symbol?.split(":")[0] || "";
-
       case "lastPrice":
         return formatPrice(snapshot.trade["8"]);
       case "lastVolume":

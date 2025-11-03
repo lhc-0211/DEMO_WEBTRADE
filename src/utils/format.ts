@@ -300,7 +300,6 @@ export function getOrderStatus(
   quote = "Y",
   index = "HOSE"
 ) {
-  // log(sttCode, index)
   if (sttCode === "P") {
     return "Chờ khớp";
   } else if (sttCode.endsWith("W")) {

@@ -103,7 +103,6 @@ function* fetchOrdersSaga(action: PayloadAction<OrderActionPayload>) {
 
     if (res.rc < 1) {
       showToast(res.msg || "Thất bại", "error");
-      console.log(res);
       yield put(fetchOrdersFailure(res.msg || "Thất bại"));
       throw new Error(res.msg || "Thất bại");
     }

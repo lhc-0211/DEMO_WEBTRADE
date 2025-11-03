@@ -1,21 +1,19 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { fetchListStockByIdAPI } from "../../../api/priceBoardApi";
+import { fetchListStockByIdAPI } from "../../../api";
 import type { ListStockByIdResponse } from "../../../types";
 
 export const fetchListStockById = createAsyncThunk<
-  string[],
+  ListStockByIdResponse,
   string,
   { rejectValue: string }
 >("priceBoard/fetchListStockById", async (groupId, { rejectWithValue }) => {
   try {
-    console.log("groupId", groupId);
-
     const response: ListStockByIdResponse = await fetchListStockByIdAPI(
       groupId
     );
-    return response.symbols;
+    return response;
   } catch (error) {
-    if (error instanceof Error) return rejectWithValue(error.message);
-    return rejectWithValue("Failed to fetch listStockById");
+    const message = error instanceof Error ? error.message : "Failed";
+    return rejectWithValue(message);
   }
 });

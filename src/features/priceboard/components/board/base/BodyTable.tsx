@@ -1,7 +1,9 @@
+import type {
+  DraggableAttributes,
+  DraggableSyntheticListeners,
+} from "@dnd-kit/core";
 import { memo, useEffect, useMemo, useRef } from "react";
 import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
-import { useAppSelector } from "../../../../../store/hook";
-import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
 import type { Column, SnapshotDataCompact } from "../../../../../types";
 import { getColumnValueCompact } from "../../../../../utils/priceboard";
 import {
@@ -13,7 +15,6 @@ import {
   unregisterVisibleCell,
 } from "../../../../../worker/flashManager";
 
-// === TÁCH CELL THÀNH COMPONENT RIÊNG ===
 interface PriceCellProps {
   symbol: string;
   cellKey: string;
@@ -63,21 +64,20 @@ const PriceCell = memo(function PriceCell({
   );
 });
 
-// === BODY TABLE ===
 interface BodyTableProps {
   symbol: string;
+  snapshot: SnapshotDataCompact;
+  // DnD props
+  dragListeners?: DraggableSyntheticListeners;
+  dragAttributes?: DraggableAttributes;
 }
 
-function BodyTable({ symbol }: BodyTableProps) {
-  const snapshotData = useAppSelector(
-    (state) => selectSnapshotsBySymbols(state, [symbol])[symbol]
-  );
-
-  const snapshot = useMemo(
-    () => snapshotData ?? { symbol },
-    [snapshotData, symbol]
-  );
-
+function BodyTable({
+  symbol,
+  snapshot,
+  dragListeners,
+  dragAttributes,
+}: BodyTableProps) {
   const columns = useMemo<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
     try {
@@ -99,7 +99,7 @@ function BodyTable({ symbol }: BodyTableProps) {
       {columns.map((col) => {
         const hasChildren = !!col.children?.length;
 
-        if (col.key === "mark" || col.key === "symbol") {
+        if (col.key === "symbol") {
           return (
             <div
               key={col.key}
@@ -107,19 +107,28 @@ function BodyTable({ symbol }: BodyTableProps) {
               style={{ minWidth: col.width }}
             >
               <div
-                data-symbol={symbol}
-                data-key={col.key}
-                className={`flex items-center justify-center h-7 ${
-                  hasChildren ? "border-b border-border" : ""
-                }`}
-                style={{ minWidth: col.width }}
+                className="flex items-center justify-center h-7 cursor-grab active:cursor-grabbing"
+                {...dragListeners}
+                {...dragAttributes}
               >
                 {getColumnValueCompact(snapshot, col.key)}
+                <svg
+                  className="w-4 h-4 ml-1 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
               </div>
             </div>
           );
         }
-
         return (
           <div key={col.key} className="flex flex-col w-full">
             {!hasChildren ? (
@@ -133,6 +142,7 @@ function BodyTable({ symbol }: BodyTableProps) {
               <div className="flex divide-x divide-border text-xs font-medium">
                 {col.children?.map((child) => (
                   <PriceCell
+                    key={child.key}
                     cellKey={child.key}
                     symbol={symbol}
                     width={child.width}
