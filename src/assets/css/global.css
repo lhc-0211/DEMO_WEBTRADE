@@ -331,7 +331,7 @@ input:-webkit-autofill {
 }
 
 .cell {
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
 [data-flash="up"] {

@@ -8,7 +8,7 @@ import Button from "../../../../components/common/Button";
 import InputOrderPrice from "../../../../components/inputs/InputOrderPrice";
 import InputOrderSide from "../../../../components/inputs/InputOrderSide";
 import InputOrderVolume from "../../../../components/inputs/InputOrderVolume";
-import InputSearchField from "../../../../components/inputs/InputSearchField";
+import InputSearchFieldStock from "../../../../components/inputs/InputSearchFieldStock";
 import SelectAccount from "../../../../components/inputs/SelectAccField";
 import { useDebounce } from "../../../../hooks/useDebounce";
 import { usePrevious } from "../../../../hooks/usePrevious";
@@ -243,7 +243,7 @@ export default function NormalOrderForm() {
               rules={{ required: "Vui lòng chọn mã chứng khoán" }}
               render={({ field, fieldState }) => (
                 <div>
-                  <InputSearchField
+                  <InputSearchFieldStock
                     value={field.value}
                     onChange={field.onChange}
                     placeholder="Tìm kiếm mã"

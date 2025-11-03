@@ -97,10 +97,7 @@ const SelectAccount: React.FC<Props> = ({
       </div>
 
       {showSelect && (
-        <ul
-          className="absolute left-0 top-full mt-1 w-full z-20 bg-dark-blue rounded-lg border border-none shadow-lg animate-fadeInDown"
-          ref={showRef}
-        >
+        <ul className="absolute left-0 top-full mt-1 w-full z-20 bg-dark-blue rounded-lg border border-none shadow-lg animate-fadeInDown">
           <div className="max-h-60 overflow-y-auto custom-scrollbar p-2">
             {opts.map((item) => (
               <li
@@ -109,12 +106,12 @@ const SelectAccount: React.FC<Props> = ({
                 className={`px-3 mt-1 py-2 rounded-md cursor-pointer flex items-center gap-3 text-text-body text-xs ${
                   value === item.accCode
                     ? "bg-DTND-500"
-                    : "hover:bg-DTND-500 hover:translate-x-[2px]"
+                    : "hover:bg-DTND-500 hover:translate-x-0.5"
                 } ${item.isDisable ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 <span>TK-{item.accCode}</span>
                 <span
-                  className={`py-[2px] px-[6px] rounded-full text-[10px] ${getColorTypeAcc(
+                  className={`py-0.5 px-1.5 rounded-full text-[10px] ${getColorTypeAcc(
                     item.type
                   )}`}
                 >

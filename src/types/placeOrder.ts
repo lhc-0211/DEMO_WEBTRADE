@@ -1,4 +1,4 @@
-import type { OptionType } from "../components/inputs/InputSearchField";
+import type { OptionType } from "../components/inputs/InputSearchFieldStock";
 
 export interface OrderForm {
   orderSymbol: OptionType | null;
