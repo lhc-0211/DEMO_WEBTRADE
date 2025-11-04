@@ -58,8 +58,16 @@ const processQueue = (): void => {
         const n = parseInt(newVal.replace(/,/g, ""), 10);
         const o = parseInt(oldVal.replace(/,/g, ""), 10);
         if (!isNaN(n) && !isNaN(o)) flashClass = n > o ? "u" : "d";
+      } else if (key === "high") {
+        flashClass =
+          (snapshot.orderBook?.[24].split("|")[1] as PriceCompare) ?? "t";
+      } else if (key === "low") {
+        flashClass =
+          (snapshot.orderBook?.[25].split("|")[1] as PriceCompare) ?? "t";
+      } else if (key === "avg") {
+        flashClass =
+          (snapshot.orderBook?.[28].split("|")[1] as PriceCompare) ?? "t";
       }
-
       if (flashClass) flashResults.push({ symbol, key, flashClass });
     }
 
@@ -100,6 +108,12 @@ const processQueue = (): void => {
         ) {
           const i = parseInt(key.slice(-1), 10) - 1;
           cmp = (asks[i * 3 + 2] as PriceCompare) ?? "t";
+        } else if (key === "high") {
+          cmp = (orderBook[24].split("|")[1] as PriceCompare) ?? "t";
+        } else if (key === "low") {
+          cmp = (orderBook[25].split("|")[1] as PriceCompare) ?? "t";
+        } else if (key === "avg") {
+          cmp = (orderBook[28].split("|")[1] as PriceCompare) ?? "t";
         }
       }
 

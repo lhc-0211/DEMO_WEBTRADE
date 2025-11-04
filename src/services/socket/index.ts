@@ -74,38 +74,69 @@ const initSocket = (baseUrl: string) => {
 
   socket.onmessage = (ev) => {
     try {
-      // === Compact message ===
-      const msg: WebSocketMessageCompact = JSON.parse(ev.data);
+      const msg = JSON.parse(ev.data) as WebSocketMessageCompact;
       if (!msg.symbol || !msg[1]) return;
 
-      const snapshot = snapshots.get(msg.symbol) ?? { symbol: msg.symbol };
+      const symbol = msg.symbol;
+      const snapshot = snapshots.get(symbol) ?? { symbol };
       let shouldUpdate = false;
 
       switch (msg[1]) {
-        case "r": // RefPrices
-          snapshot.refPrices = { ...msg };
+        case "r":
+          snapshot.refPrices = {
+            1: "r",
+            4: msg["4"],
+            5: msg["5"],
+            6: msg["6"],
+          };
           shouldUpdate = true;
           break;
-        case "t": // Trade
-          snapshot.trade = { ...msg };
+
+        case "t":
+          snapshot.trade = {
+            1: "t",
+            8: msg["8"],
+            9: msg["9"],
+            11: msg["11"],
+            12: msg["12"],
+            13: msg["13"],
+          };
           shouldUpdate = true;
           break;
-        case "ob": // OrderBook
-          snapshot.orderBook = { ...msg };
+
+        case "ob":
+          snapshot.orderBook = {
+            1: "ob",
+            22: msg["22"],
+            23: msg["23"],
+            24: msg["24"],
+            25: msg["25"],
+            26: msg["26"],
+            28: msg["28"],
+          };
           shouldUpdate = true;
           break;
-        case "ft": // ForeignTrade
-          snapshot.foreignTrade = { ...msg };
+
+        case "ft":
+          snapshot.foreignTrade = {
+            1: "ft",
+            15: msg["15"],
+            17: msg["17"],
+          };
           shouldUpdate = true;
           break;
-        case "fr": // ForeignRoom
-          snapshot.foreignRoom = { ...msg };
+
+        case "fr":
+          snapshot.foreignRoom = {
+            1: "fr",
+            21: msg["21"],
+          };
           shouldUpdate = true;
           break;
       }
 
       if (shouldUpdate) {
-        snapshots.set(msg.symbol, snapshot);
+        snapshots.set(symbol, snapshot);
         pendingBatch.push(snapshot);
         scheduleBatch();
         messageHandlers.forEach((h) => h(snapshot));

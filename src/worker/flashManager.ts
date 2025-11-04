@@ -12,7 +12,7 @@ const pendingFlashes = new Map<string, FlashResult>();
 const lastFlashTime = new Map<string, number>();
 let rafId: number | null = null;
 
-const FLASH_DURATION = 300;
+const FLASH_DURATION = 200;
 const MIN_FLASH_INTERVAL = 450;
 
 const applyFlash = (): void => {

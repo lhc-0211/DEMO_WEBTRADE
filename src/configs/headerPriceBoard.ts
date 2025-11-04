@@ -76,4 +76,7 @@ export const KEYS_COLOR = [
   "change",
   "changePc",
   "symbol",
+  "high",
+  "avg",
+  "low",
 ] as const;

@@ -90,9 +90,11 @@ function BodyTable({
   useEffect(() => {
     return () => {
       unregisterVisibleCell(symbol);
-      unregisterVisibleCellColor(symbol);
+      // unregisterVisibleCellColor(symbol);
     };
   }, [symbol]);
+
+  console.log("snapshot", snapshot);
 
   return (
     <div className="flex border-x border-b border-border divide-x divide-border w-full">
@@ -103,6 +105,8 @@ function BodyTable({
           return (
             <div
               key={col.key}
+              data-key={col.key}
+              data-symbol={symbol}
               className="h-7 grid place-items-center text-xs font-medium"
               style={{ minWidth: col.width }}
             >

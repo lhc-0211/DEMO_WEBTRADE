@@ -1,4 +1,4 @@
-import type { SnapshotDataCompact } from "./socketCient";
+import type { PriceCompare, SnapshotDataCompact } from "./socketCient";
 
 export interface FlashResult {
   symbol: string;
@@ -17,6 +17,6 @@ export type WorkerOutputMessage = {
   type: "update";
   data: {
     flashes: FlashResult[];
-    colors: Record<string, Record<string, string>>;
+    colors: Record<string, Record<string, PriceCompare | "t">>;
   };
 };
