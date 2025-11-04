@@ -3,7 +3,6 @@ import { socketClient } from "../../../../services/socket";
 import { useAppDispatch } from "../../../../store/hook";
 import { setListStockByIdFromCache } from "../../../../store/slices/priceboard/slice";
 import { fetchListStockById } from "../../../../store/slices/priceboard/thunks";
-import { setSubscribedOrder } from "../../../../store/slices/stock/slice";
 import PriceBoardBase from "./base";
 
 interface BoardProps {
@@ -13,7 +12,7 @@ interface BoardProps {
 function Board({ id }: BoardProps) {
   const dispatch = useAppDispatch();
 
-  const symbolsRef = useRef<string[]>([]);
+  const groupIdRef = useRef<string>("");
 
   useEffect(() => {
     if (!id) return;
@@ -21,9 +20,9 @@ function Board({ id }: BoardProps) {
     const cacheKey = `stocks_${id}`;
     const cachedData = localStorage.getItem(cacheKey);
 
-    if (symbolsRef.current.length > 0) {
-      socketClient.unsubscribe({ symbols: symbolsRef.current });
-      symbolsRef.current = [];
+    if (groupIdRef.current) {
+      socketClient.unsubscribe({ groupId: groupIdRef.current });
+      groupIdRef.current = "";
     }
 
     if (cachedData) {
@@ -33,10 +32,9 @@ function Board({ id }: BoardProps) {
 
         if (Array.isArray(symbols) && symbols.length > 0) {
           dispatch(setListStockByIdFromCache(id, symbols));
-          dispatch(setSubscribedOrder(symbols));
-          socketClient.subscribe({ symbols });
+          socketClient.subscribe({ groupId: id });
 
-          symbolsRef.current = symbols;
+          groupIdRef.current = id;
           return;
         }
       } catch (e) {
@@ -55,19 +53,18 @@ function Board({ id }: BoardProps) {
 
         // Cập nhật Redux
         dispatch(setListStockByIdFromCache(id, symbols));
-        dispatch(setSubscribedOrder(symbols));
 
         // Subscribe
-        socketClient.subscribe({ symbols });
+        socketClient.subscribe({ groupId: id });
 
-        symbolsRef.current = symbols;
+        groupIdRef.current = id;
       }
     });
 
     return () => {
-      if (symbolsRef.current.length > 0) {
-        socketClient.unsubscribe({ symbols: symbolsRef.current });
-        symbolsRef.current = [];
+      if (groupIdRef.current) {
+        socketClient.unsubscribe({ groupId: id });
+        groupIdRef.current = "";
       }
     };
   }, [id, dispatch]);
