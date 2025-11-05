@@ -1,11 +1,12 @@
-import type { PriceCompare, SnapshotDataCompact } from "./socketCient";
+import type { SnapshotDataCompact } from "./socketCient";
+
+export type PriceCompare = "u" | "d" | "c" | "f" | "r" | "x";
 
 export interface FlashResult {
   symbol: string;
   key: string;
-  flashClass: string | null;
+  flashClass: PriceCompare;
 }
-
 // === INPUT: main -> worker ===
 export type WorkerInputMessage =
   | { type: "batch"; data: SnapshotDataCompact[] }
@@ -20,3 +21,5 @@ export type WorkerOutputMessage = {
     colors: Record<string, Record<string, PriceCompare | "t">>;
   };
 };
+
+export type OrderBookValue = string | string[] | undefined;

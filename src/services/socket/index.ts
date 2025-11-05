@@ -14,7 +14,6 @@ import type {
 import { getOrCreateSessionId } from "../../utils";
 import { queueColors } from "../../worker/colorManager";
 import { queueFlash } from "../../worker/flashManager";
-import { apiClient } from "../apiClient";
 
 // ==================== SINGLE WORKER ====================
 const worker = new Worker(
@@ -55,6 +54,8 @@ const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_INTERVAL = 3000;
 
 let subscribedSymbols: string[] = [];
+let subscribedGroups: string[] = [];
+
 let messageHandlers: ((data: SnapshotDataCompact) => void)[] = [];
 const snapshots = new Map<string, SnapshotDataCompact>();
 let pendingBatch: SnapshotDataCompact[] = [];
@@ -176,30 +177,107 @@ const attemptReconnect = (baseUrl: string) => {
   }, RECONNECT_INTERVAL);
 };
 
-const reSubscribe = async () => {
-  if (subscribedSymbols.length === 0) return;
-  try {
-    await apiClient.post("/priceboard/subscriptions", {
-      type: "subscribe",
-      sessionId: getOrCreateSessionId(),
-      symbols: subscribedSymbols,
-    });
-  } catch (e) {
-    console.error("Re-subscribe failed:", e);
+// const reSubscribe = async () => {
+//   if (subscribedSymbols.length === 0) return;
+//   try {
+//     await apiClient.post("/priceboard/subscriptions", {
+//       type: "subscribe",
+//       sessionId: getOrCreateSessionId(),
+//       symbols: subscribedSymbols,
+//     });
+//   } catch (e) {
+//     console.error("Re-subscribe failed:", e);
+//   }
+// };
+
+const reSubscribe = () => {
+  if (!socket || socket.readyState !== WebSocket.OPEN) return;
+
+  const sessionId = getOrCreateSessionId();
+
+  // Re-sub theo symbols
+  if (subscribedSymbols.length) {
+    const msg = {
+      type: "subscriptions",
+      data: {
+        action: "subscribe",
+        sessionId,
+        symbols: subscribedSymbols,
+      },
+    };
+    try {
+      socket.send(JSON.stringify(msg));
+      console.log("Re-subscribed symbols:", subscribedSymbols);
+    } catch (error) {
+      console.error("Re-subscribe symbols failed:", error);
+    }
+  }
+
+  // Re-sub theo group
+  for (const groupId of subscribedGroups) {
+    const msg = {
+      type: "subscriptions",
+      data: {
+        action: "subscribe",
+        sessionId,
+        groupId,
+      },
+    };
+    try {
+      socket.send(JSON.stringify(msg));
+      console.log("Re-subscribed group:", groupId);
+    } catch (error) {
+      console.error("Re-subscribe group failed:", error);
+    }
   }
 };
 
 // ==================== SUBSCRIBE API ====================
-const sendSubscribeRequest = async (
+// const sendSubscribeRequest = async (
+//   action: "subscribe" | "unsubscribe",
+//   options: SubscribeOptions
+// ) => {
+//   await apiClient.post("/priceboard/subscriptions", {
+//     type: action,
+//     sessionId: getOrCreateSessionId(),
+//     groupId: options.groupId,
+//     symbols: options.symbols,
+//   });
+// };
+
+// ==================== SUB/UNSUB ====================
+const sendSubscribeRequest = (
   action: "subscribe" | "unsubscribe",
   options: SubscribeOptions
 ) => {
-  await apiClient.post("/priceboard/subscriptions", {
-    type: action,
-    sessionId: getOrCreateSessionId(),
-    groupId: options.groupId,
-    symbols: options.symbols,
-  });
+  console.log("action", action, "options", options);
+
+  if (!socket || socket.readyState !== WebSocket.OPEN) {
+    console.warn("Socket not ready, skip", action, options);
+    return;
+  }
+
+  if (!options.groupId && (!options.symbols || options.symbols.length === 0)) {
+    console.warn("No groupId or symbols to subscribe/unsubscribe");
+    return;
+  }
+
+  const msg = {
+    type: "subscriptions",
+    data: {
+      action,
+      sessionId: getOrCreateSessionId(),
+      groupId: options.groupId,
+      symbols: options.symbols,
+    },
+  };
+
+  try {
+    socket.send(JSON.stringify(msg));
+    console.log(`Socket ${action} sent`, msg);
+  } catch (error) {
+    console.error(`Socket ${action} send failed:`, error);
+  }
 };
 
 // ==================== CLEANUP ====================
@@ -227,24 +305,52 @@ export const socketClient = (() => {
   initSocket(baseUrl);
 
   return {
+    // subscribe: async (options: SubscribeOptions) => {
+    //   subscribedSymbols = Array.from(
+    //     new Set([...subscribedSymbols, ...(options.symbols ?? [])])
+    //   );
+    //   await sendSubscribeRequest("subscribe", options);
+    // },
+
     subscribe: async (options: SubscribeOptions) => {
-      subscribedSymbols = Array.from(
-        new Set([...subscribedSymbols, ...(options.symbols ?? [])])
-      );
+      const { groupId, symbols } = options;
+
+      if (groupId) {
+        if (!subscribedGroups.includes(groupId)) {
+          subscribedGroups.push(groupId);
+        }
+      }
+
+      if (symbols?.length) {
+        subscribedSymbols = Array.from(
+          new Set([...subscribedSymbols, ...symbols])
+        );
+      }
+
       await sendSubscribeRequest("subscribe", options);
     },
 
     unsubscribe: async (options: SubscribeOptions) => {
-      const symbols = options.symbols ?? [];
-      subscribedSymbols = subscribedSymbols.filter((s) => !symbols.includes(s));
-      symbols.forEach((sym) => {
-        snapshots.delete(sym);
-        worker.postMessage({
-          type: "clear",
-          data: [sym],
-        } satisfies WorkerInputMessage);
-      });
-      store.dispatch(clearSnapshot(symbols));
+      const { groupId, symbols } = options;
+
+      if (groupId) {
+        subscribedGroups = subscribedGroups.filter((g) => g !== groupId);
+      }
+
+      if (symbols?.length) {
+        subscribedSymbols = subscribedSymbols.filter(
+          (s) => !symbols.includes(s)
+        );
+        symbols.forEach((sym) => {
+          snapshots.delete(sym);
+          worker.postMessage({
+            type: "clear",
+            data: [sym],
+          } satisfies WorkerInputMessage);
+        });
+        store.dispatch(clearSnapshot(symbols));
+      }
+
       await sendSubscribeRequest("unsubscribe", options);
     },
 

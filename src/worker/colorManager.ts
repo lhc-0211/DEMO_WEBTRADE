@@ -1,33 +1,51 @@
 import type { PriceCompare } from "../types";
+import { visibleCells } from "../utils/visibleRegistry";
 
-const visibleCells = new Map<string, Map<string, HTMLElement>>();
+type ColorMap = Record<string, Record<string, PriceCompare | "t">>;
+
+let pendingColors: Record<string, Record<string, string | undefined>> = {};
 let rafId: number | null = null;
-let pendingColors: Record<string, Record<string, string>> = {};
 
-const applyColorToElement = (el: HTMLElement, colorClass: string): void => {
-  el.classList.remove("u", "d", "c", "f", "r", "t");
-  if (colorClass && colorClass !== "t") el.classList.add(colorClass);
+const applyColorToElement = (
+  el: HTMLElement,
+  colorClass: string | undefined
+): void => {
+  el.classList.remove("u", "d", "c", "f", "r");
+  if (colorClass) el.classList.add(colorClass);
 };
 
 const applyPendingColors = (): void => {
-  const remaining: Record<string, Record<string, string>> = {};
+  const remaining: typeof pendingColors = {};
 
   for (const [symbol, colMap] of Object.entries(pendingColors)) {
     const cellMap = visibleCells.get(symbol);
-    if (!cellMap) continue;
+
+    // Nếu symbol chưa có cell nào visible → GIỮ NGUYÊN
+    if (!cellMap || cellMap.size === 0) {
+      remaining[symbol] = colMap;
+      continue;
+    }
+
+    const symbolRemaining: Record<string, string | undefined> = {};
 
     for (const [key, color] of Object.entries(colMap)) {
       const el = cellMap.get(key);
       if (el) {
         applyColorToElement(el, color);
       } else {
-        if (!remaining[symbol]) remaining[symbol] = {};
-        remaining[symbol][key] = color;
+        symbolRemaining[key] = color; // giữ lại
       }
     }
+
+    // Chỉ lưu lại nếu còn cell chưa apply
+    if (Object.keys(symbolRemaining).length > 0) {
+      remaining[symbol] = symbolRemaining;
+    }
+    // Nếu đã apply hết → không lưu → sẽ bị xóa ở lần sau
   }
 
   pendingColors = remaining;
+
   if (Object.keys(pendingColors).length > 0) {
     rafId = requestAnimationFrame(applyPendingColors);
   } else {
@@ -35,45 +53,15 @@ const applyPendingColors = (): void => {
   }
 };
 
-export const queueColors = (
-  colors: Record<string, Record<string, PriceCompare | "t">>
-): void => {
+export const queueColors = (colors: ColorMap): void => {
   for (const [symbol, colMap] of Object.entries(colors)) {
     if (!pendingColors[symbol]) pendingColors[symbol] = {};
     for (const [key, cmp] of Object.entries(colMap)) {
-      pendingColors[symbol][key] = cmp === "t" ? "" : cmp;
+      pendingColors[symbol][key] = cmp === "t" ? undefined : cmp;
     }
   }
 
-  if (rafId === null) rafId = requestAnimationFrame(applyPendingColors);
-};
-
-export const registerVisibleCellColor = (
-  symbol: string,
-  key: string,
-  el: HTMLElement
-): void => {
-  let map = visibleCells.get(symbol);
-  if (!map) {
-    map = new Map();
-    visibleCells.set(symbol, map);
-  }
-  map.set(key, el);
-
-  const color = pendingColors[symbol]?.[key];
-  if (color !== undefined) applyColorToElement(el, color);
-};
-
-export const unregisterVisibleCellColor = (
-  symbol: string,
-  key?: string
-): void => {
-  if (!key) {
-    visibleCells.delete(symbol);
-    delete pendingColors[symbol];
-  } else {
-    const map = visibleCells.get(symbol);
-    map?.delete(key);
-    if (map?.size === 0) visibleCells.delete(symbol);
+  if (rafId === null) {
+    rafId = requestAnimationFrame(applyPendingColors);
   }
 };

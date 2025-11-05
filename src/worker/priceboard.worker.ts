@@ -26,6 +26,8 @@ const processQueue = (): void => {
 
   for (const snapshot of batch) {
     const { symbol } = snapshot;
+
+    // Nếu không visible → chỉ lưu prev, không xử lý
     if (!visibleSymbols.has(symbol)) {
       prevSnapshots.set(symbol, snapshot);
       continue;
@@ -37,7 +39,7 @@ const processQueue = (): void => {
       continue;
     }
 
-    // === FLASH ===
+    // === FLASH LOGIC ===
     const cacheNew: Record<string, string | null> = {};
     const cacheOld: Record<string, string | null> = {};
 
@@ -49,82 +51,96 @@ const processQueue = (): void => {
     for (const key of KEYS_COLOR) {
       const newVal = cacheNew[key];
       const oldVal = cacheOld[key];
-      if (newVal == null || oldVal == null || newVal === oldVal) continue;
+      if (!newVal || !oldVal || newVal === oldVal) continue;
 
       let flashClass: PriceCompare | null = null;
+
       if (key.includes("price") || key.includes("Price")) {
         flashClass = snapshot.trade?.[13] ?? prev.trade?.[13] ?? null;
       } else if (key.includes("volume") || key.includes("Volume")) {
         const n = parseInt(newVal.replace(/,/g, ""), 10);
         const o = parseInt(oldVal.replace(/,/g, ""), 10);
-        if (!isNaN(n) && !isNaN(o)) flashClass = n > o ? "u" : "d";
+        if (!isNaN(n) && !isNaN(o)) {
+          flashClass = n > o ? "u" : "d";
+        }
       } else if (key === "high") {
         flashClass =
-          (snapshot.orderBook?.[24].split("|")[1] as PriceCompare) ?? "t";
+          (snapshot.orderBook?.[24]?.split("|")[1] as PriceCompare) ?? null;
       } else if (key === "low") {
         flashClass =
-          (snapshot.orderBook?.[25].split("|")[1] as PriceCompare) ?? "t";
+          (snapshot.orderBook?.[25]?.split("|")[1] as PriceCompare) ?? null;
       } else if (key === "avg") {
         flashClass =
-          (snapshot.orderBook?.[28].split("|")[1] as PriceCompare) ?? "t";
-      }
-      if (flashClass) flashResults.push({ symbol, key, flashClass });
-    }
-
-    // === COLOR ===
-    const colorMap: Record<string, PriceCompare | "t"> = {};
-    const tradeCmp = snapshot.trade?.[13];
-    const orderBook = snapshot.orderBook;
-
-    const bids =
-      typeof orderBook?.[22] === "string"
-        ? orderBook[22].split("|")
-        : Array.isArray(orderBook?.[22])
-        ? orderBook[22]
-        : [];
-    const asks =
-      typeof orderBook?.[23] === "string"
-        ? orderBook[23].split("|")
-        : Array.isArray(orderBook?.[23])
-        ? orderBook[23]
-        : [];
-
-    for (const key of KEYS_COLOR) {
-      let cmp: PriceCompare | "t" = "t";
-
-      if (
-        ["lastPrice", "change", "changePercent", "lastVolume", "symbol"].some(
-          (k) => key.includes(k)
-        )
-      ) {
-        cmp = tradeCmp ?? "t";
-      } else if (orderBook) {
-        if (key.startsWith("priceBuy") || key.startsWith("volumeBuy")) {
-          const i = parseInt(key.slice(-1), 10) - 1;
-          cmp = (bids[i * 3 + 2] as PriceCompare) ?? "t";
-        } else if (
-          key.startsWith("priceSell") ||
-          key.startsWith("volumeSell")
-        ) {
-          const i = parseInt(key.slice(-1), 10) - 1;
-          cmp = (asks[i * 3 + 2] as PriceCompare) ?? "t";
-        } else if (key === "high") {
-          cmp = (orderBook[24].split("|")[1] as PriceCompare) ?? "t";
-        } else if (key === "low") {
-          cmp = (orderBook[25].split("|")[1] as PriceCompare) ?? "t";
-        } else if (key === "avg") {
-          cmp = (orderBook[28].split("|")[1] as PriceCompare) ?? "t";
-        }
+          (snapshot.orderBook?.[28]?.split("|")[1] as PriceCompare) ?? null;
       }
 
-      colorMap[key] = cmp;
+      if (flashClass) {
+        flashResults.push({ symbol, key, flashClass });
+      }
     }
 
-    colors[symbol] = colorMap;
+    // // === COLOR LOGIC ===
+    // const colorMap: Record<string, PriceCompare | "t"> = {};
+    // const tradeCmp = snapshot.trade?.[13] ?? "t";
+    // const orderBook = snapshot.orderBook;
+
+    // const getArr = (value: OrderBookValue): string[] => {
+    //   if (typeof value === "string") {
+    //     return value.split("|");
+    //   }
+    //   if (Array.isArray(value)) {
+    //     // Kiểm tra phần tử có phải string không (an toàn)
+    //     return value.every((item): item is string => typeof item === "string")
+    //       ? value
+    //       : [];
+    //   }
+    //   return [];
+    // };
+
+    // const bids = getArr(orderBook?.[22]);
+    // const asks = getArr(orderBook?.[23]);
+
+    // for (const key of KEYS_COLOR) {
+    //   let cmp: PriceCompare | "t" = "t";
+
+    //   if (
+    //     ["lastPrice", "change", "changePercent", "lastVolume", "symbol"].some(
+    //       (k) => key.includes(k)
+    //     )
+    //   ) {
+    //     cmp = tradeCmp;
+    //   } else if (orderBook) {
+    //     if (key.startsWith("priceBuy") || key.startsWith("volumeBuy")) {
+    //       const i = parseInt(key.slice(-1), 10) - 1;
+    //       cmp = (bids[i * 3 + 2] as PriceCompare) ?? "t";
+    //     } else if (
+    //       key.startsWith("priceSell") ||
+    //       key.startsWith("volumeSell")
+    //     ) {
+    //       const i = parseInt(key.slice(-1), 10) - 1;
+    //       cmp = (asks[i * 3 + 2] as PriceCompare) ?? "t";
+    //     } else if (key === "high") {
+    //       cmp = (orderBook[24]?.split("|")[1] as PriceCompare) ?? "t";
+    //     } else if (key === "low") {
+    //       cmp = (orderBook[25]?.split("|")[1] as PriceCompare) ?? "t";
+    //     } else if (key === "avg") {
+    //       cmp = (orderBook[28]?.split("|")[1] as PriceCompare) ?? "t";
+    //     }
+    //   }
+
+    //   colorMap[key] = cmp;
+    // }
+
+    // if (visibleSymbols.has(symbol)) {
+    //   colors[symbol] = colorMap;
+    // }
+
+    // colors[symbol] = colorMap;
     prevSnapshots.set(symbol, snapshot);
   }
 
-  if (flashResults.length || Object.keys(colors).length) {
+  // Gửi kết quả
+  if (flashResults.length > 0 || Object.keys(colors).length > 0) {
     self.postMessage({
       type: "update",
       data: { flashes: flashResults, colors },
@@ -132,22 +148,42 @@ const processQueue = (): void => {
   }
 
   isProcessing = false;
-  if (queue.length > 0) queueMicrotask(processQueue);
+
+  // Tiếp tục xử lý nếu còn
+  if (queue.length > 0) {
+    queueMicrotask(processQueue);
+  }
 };
 
+// === XỬ LÝ TIN NHẮN ===
 self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
   const { type, data } = e.data;
+
   switch (type) {
     case "batch":
       queue.push(...data);
-      if (queue.length > CACHE_LIMIT) queue = queue.slice(-CACHE_LIMIT);
+      if (queue.length > CACHE_LIMIT) {
+        queue = queue.slice(-CACHE_LIMIT);
+      }
       processQueue();
       break;
+
     case "visible":
-      visibleSymbols = new Set(data);
+      {
+        const oldVisible = visibleSymbols;
+        visibleSymbols = new Set(data);
+
+        // Xóa prev của symbol không còn visible
+        for (const sym of oldVisible) {
+          if (!visibleSymbols.has(sym)) {
+            prevSnapshots.delete(sym);
+          }
+        }
+      }
       break;
+
     case "clear":
-      data.forEach((s) => prevSnapshots.delete(s));
+      data.forEach((sym) => prevSnapshots.delete(sym));
       break;
   }
 };

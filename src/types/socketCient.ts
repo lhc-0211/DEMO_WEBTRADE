@@ -1,8 +1,9 @@
+import type { PriceCompare } from "./woker";
+
 export interface SubscribeOptions {
   groupId?: string;
   symbols?: string[];
 }
-export type PriceCompare = "u" | "d" | "r" | "c" | "f";
 
 // --- OrderBook ---
 export type OrderBookDataCompact = {
@@ -22,7 +23,7 @@ export type TradeDataCompact = {
   9: number; // volume
   11: number; // change abs
   12: number; // change pct
-  13: PriceCompare | null; //color
+  13: PriceCompare; //color
 };
 
 // --- ForeignTrade ---
