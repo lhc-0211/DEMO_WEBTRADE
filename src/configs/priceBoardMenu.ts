@@ -13,11 +13,11 @@ export const PRICE_BOARD_MENU: PriceBoardMenuGroup[] = [
     key: "hose",
     label: "HOSE",
     items: [
-      { id: "vnindex", name: "VNINDEX" },
+      // { id: "vnindex", name: "VNINDEX" },
+      { id: "hose", name: "HOSE" },
       { id: "vn30", name: "VN30" },
-      { id: "vn100", name: "VN100" },
-      { id: "vnxall", name: "VNXALL" },
-      { id: "vnx50", name: "VNX50" },
+      // { id: "vnxall", name: "VNXALL" },
+      // { id: "vnx50", name: "VNX50" },
     ],
   },
   {
