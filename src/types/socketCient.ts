@@ -5,49 +5,45 @@ export interface SubscribeOptions {
   symbols?: string[];
 }
 
-// --- OrderBook ---
+export type SubscribeMessage = {
+  type: "subscribe" | "unsubscribe";
+  sessionId: string;
+  groupId?: string;
+  symbols?: string[];
+};
+
+export type IndexDataCompact = {
+  1: "mi";
+  10: string; // time
+  29: number; // value
+  30: number; //  up
+  31: number; //  down
+  32: number; // noChange
+  33: number; // totalVol
+  35: string; // id
+};
+
 export type OrderBookDataCompact = {
   1: "ob";
-  22: string; // bids
-  23: string; // asks
-  24: string; // high
-  25: string; // low
-  26: number; // total volume
-  28: string; // avg
+  22: string;
+  23: string;
+  24: string;
+  25: string;
+  26: number;
+  28: string;
 };
-
-// --- Trade ---
 export type TradeDataCompact = {
   1: "t";
-  8: number; // price
-  9: number; // volume
-  11: number; // change abs
-  12: number; // change pct
-  13: PriceCompare; //color
+  8: number;
+  9: number;
+  11: number;
+  12: number;
+  13: PriceCompare;
 };
+export type ForeignTradeDataCompact = { 1: "ft"; 15: number; 17: number };
+export type ForeignRoomDataCompact = { 1: "fr"; 21: number };
+export type RefPricesDataCompact = { 1: "r"; 4: number; 5: number; 6: number };
 
-// --- ForeignTrade ---
-export type ForeignTradeDataCompact = {
-  1: "ft";
-  15: number; // buy volume
-  17: number; // sell volume
-};
-
-// --- ForeignRoom ---
-export type ForeignRoomDataCompact = {
-  1: "fr";
-  21: number; // total room
-};
-
-// --- RefPrices ---
-export type RefPricesDataCompact = {
-  1: "r";
-  4: number; // ref
-  5: number; // ceil
-  6: number; // floor
-};
-
-// --- Snapshot ---
 export type SnapshotDataCompact = {
   symbol: string;
   orderBook?: OrderBookDataCompact;
@@ -57,10 +53,79 @@ export type SnapshotDataCompact = {
   refPrices?: RefPricesDataCompact;
 };
 
-// --- WebSocket Message
+// ==================== TOÀN BỘ WEB SOCKET MESSAGE TYPES ====================
+type RefMessage = {
+  symbol: string;
+  1: "r";
+  4: number;
+  5: number;
+  6: number;
+  recv_ts: number;
+};
+type TradeMessage = {
+  symbol: string;
+  1: "t";
+  8: number;
+  9: number;
+  11: number;
+  12: number;
+  13: PriceCompare;
+  recv_ts: number;
+};
+type OrderBookMessage = {
+  symbol: string;
+  1: "ob";
+  22: string;
+  23: string;
+  24: string;
+  25: string;
+  26: number;
+  28: string;
+  recv_ts: number;
+};
+type ForeignTradeMessage = {
+  symbol: string;
+  1: "ft";
+  15: number;
+  17: number;
+  recv_ts: number;
+};
+type ForeignRoomMessage = {
+  symbol: string;
+  1: "fr";
+  21: number;
+  recv_ts: number;
+};
+
+export type FullSnapshotMessage = {
+  "1": "snapshot";
+  sessionId: string;
+  symbol: string;
+  recv_ts: number;
+  refPrices?: RefPricesDataCompact & { symbol: string };
+  orderBook?: OrderBookDataCompact & { symbol: string };
+  trade?: TradeDataCompact & { symbol: string };
+  foreignTrade?: ForeignTradeDataCompact & { symbol: string };
+  foreignRoom?: ForeignRoomDataCompact & { symbol: string };
+};
+
+export type IndexData = {
+  id: string; // 35
+  value: number; // 29
+  change?: number;
+  changePct?: number;
+  up?: number; // 30
+  down?: number; //31
+  noChange?: number; //32
+  totalVol?: number; //33
+  time?: string; //10
+};
+
 export type WebSocketMessageCompact =
-  | (OrderBookDataCompact & { symbol: string; recv_ts: number })
-  | (TradeDataCompact & { symbol: string; recv_ts: number })
-  | (ForeignTradeDataCompact & { symbol: string; recv_ts: number })
-  | (ForeignRoomDataCompact & { symbol: string; recv_ts: number })
-  | (RefPricesDataCompact & { symbol: string; recv_ts: number });
+  | RefMessage
+  | TradeMessage
+  | OrderBookMessage
+  | ForeignTradeMessage
+  | ForeignRoomMessage
+  | FullSnapshotMessage
+  | IndexDataCompact;

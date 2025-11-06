@@ -1,50 +1,26 @@
-import { useEffect } from "react";
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { useAppDispatch, useAppSelector } from "../../../../store/hook";
-import {
-  selectAllChartStatuses,
-  selectChartIndexs,
-  selectInfoIndex,
-  selectInfoIndexStatus,
-} from "../../../../store/slices/priceboard/selector";
-import {
-  fetchChartIndexRequest,
-  fetchInfoIndexRequest,
-} from "../../../../store/slices/priceboard/slice";
+import { useAppSelector } from "../../../../store/hook";
+import { selectMajorIndices } from "../../../../store/slices/stock/selector";
 import type {
   ChartIndexItem,
-  InfoIndex,
   MakeOptional,
   PriceVolumeChart,
 } from "../../../../types";
 import { convertTimeStringToUnix } from "../../../../utils";
 import ChartIndexDashboardSkeleton from "./ChartIndexDashboardSkeleton";
 import ChartIndexInfo from "./ChartIndexInfo";
-import ChartRender from "./ChartRender";
 
 export default function ChartIndexDashboard() {
-  const dispatch = useAppDispatch();
+  const { vnIndex, vn30Index, hnxIndex, upcomIndex } =
+    useAppSelector(selectMajorIndices);
 
-  const infoIndex = useAppSelector(selectInfoIndex);
-  const chartIndexs = useAppSelector(selectChartIndexs);
-
-  const { loading } = useAppSelector(selectInfoIndexStatus);
-  const chartStatuses = useAppSelector(selectAllChartStatuses);
-
-  useEffect(() => {
-    dispatch(fetchInfoIndexRequest());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (infoIndex.length > 0) {
-      infoIndex.forEach((dataIndex: InfoIndex) => {
-        if (dataIndex.indexsTypeCode) {
-          dispatch(fetchChartIndexRequest(dataIndex.indexsTypeCode));
-        }
-      });
-    }
-  }, [infoIndex, dispatch]);
+  const indicesList = [
+    { key: "1:200", label: "VN-Index", data: vnIndex },
+    { key: "1:002", label: "VN30", data: vn30Index },
+    { key: "2:200", label: "HNX", data: hnxIndex },
+    { key: "4:200", label: "UPCoM", data: upcomIndex },
+  ].filter((item) => !!item.data);
 
   const swiperProps = {
     spaceBetween: 8,
@@ -84,41 +60,33 @@ export default function ChartIndexDashboard() {
   return (
     <div className="w-full h-full">
       <Swiper {...swiperProps} className="w-full h-full ">
-        {loading
-          ? [...Array(infoIndex.length || 4)].map((_, index) => (
+        {indicesList.length === 0
+          ? [...Array(4)].map((_, index) => (
               <SwiperSlide key={index} className="h-full">
                 <ChartIndexDashboardSkeleton />
               </SwiperSlide>
             ))
-          : infoIndex.map((item: InfoIndex) => {
-              const status = chartStatuses[item.indexsTypeCode] || {
-                loading: false,
-                error: null,
-              };
-              const loadingChart = status.loading;
-
+          : indicesList.map(({ key, data }) => {
               return (
-                <SwiperSlide key={item.indexsTypeCode} className="h-full">
+                <SwiperSlide key={key} className="h-full">
                   <div className="flex flex-row gap-3 items-center w-full h-full bg-sidebar-default rounded border border-border">
-                    <ChartIndexInfo dataIndex={item} />
-
-                    {/* chart */}
-                    {loadingChart ? (
-                      <div className="w-3/5 animate-pulse h-full">
-                        <div className="w-full h-full bg-gray-300/40 rounded"></div>
-                      </div>
-                    ) : (
-                      <div className="w-3/5 h-full flex items-center justify-center rounded">
-                        <ChartRender
-                          data={handleProcessDataChart(
-                            chartIndexs[item.indexsTypeCode]?.data?.length > 0
-                              ? chartIndexs[item.indexsTypeCode].data
-                              : []
-                          )}
-                          openIndex={item.openIndexes}
-                        />
-                      </div>
-                    )}
+                    <ChartIndexInfo dataIndex={data} />
+                    {/* //   {loadingChart ? ( */}
+                    <div className="w-3/5 animate-pulse h-full">
+                      <div className="w-full h-full bg-gray-300/40 rounded"></div>
+                    </div>
+                    {/* // ) : (
+                    //   <div className="w-3/5 h-full flex items-center justify-center rounded">
+                    //     <ChartRender
+                    //       data={handleProcessDataChart(
+                    //         chartIndexs[item.indexsTypeCode]?.data?.length > 0
+                    //           ? chartIndexs[item.indexsTypeCode].data
+                    //           : []
+                    //       )}
+                    //       openIndex={item.openIndexes}
+                    //     />
+                    //   </div>
+                    // )} */}
                   </div>
                 </SwiperSlide>
               );

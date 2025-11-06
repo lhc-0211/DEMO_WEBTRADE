@@ -1,17 +1,17 @@
+// store/slices/stock/slice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { SnapshotDataCompact } from "../../../types";
-
-export type CellColorMap = Record<string, string>;
-export type SymbolColorMap = Record<string, CellColorMap>;
+import type { IndexData, SnapshotDataCompact } from "../../../types";
 
 interface StockState {
   snapshots: Record<string, SnapshotDataCompact>;
   subscribedOrder: string[];
+  indices: Record<string, IndexData>;
 }
 
 const initialState: StockState = {
   snapshots: {},
   subscribedOrder: [],
+  indices: {},
 };
 
 const stockSlice = createSlice({
@@ -19,26 +19,29 @@ const stockSlice = createSlice({
   initialState,
   reducers: {
     updateSnapshots(state, action: PayloadAction<SnapshotDataCompact[]>) {
-      action.payload.forEach((snapshot) => {
-        state.snapshots[snapshot.symbol] = {
-          ...state.snapshots[snapshot.symbol],
-          ...snapshot,
-        };
-      });
+      for (const s of action.payload) {
+        state.snapshots[s.symbol] = { ...state.snapshots[s.symbol], ...s };
+      }
     },
 
     clearSnapshot(state, action: PayloadAction<string[]>) {
-      action.payload.forEach((symbol) => {
-        delete state.snapshots[symbol];
-      });
+      for (const sym of action.payload) delete state.snapshots[sym];
     },
 
     resetSnapshots(state) {
       state.snapshots = {};
+      state.indices = {};
+      state.subscribedOrder = [];
     },
 
     setSubscribedOrder: (state, action: PayloadAction<string[]>) => {
       state.subscribedOrder = action.payload;
+    },
+
+    updateIndex(state, action: PayloadAction<IndexData[]>) {
+      for (const idx of action.payload) {
+        state.indices[idx.id] = idx;
+      }
     },
   },
 });
@@ -48,6 +51,7 @@ export const {
   clearSnapshot,
   resetSnapshots,
   setSubscribedOrder,
+  updateIndex,
 } = stockSlice.actions;
 
 export default stockSlice.reducer;

@@ -1,15 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { MdOutlineArrowLeft, MdOutlineArrowRight } from "react-icons/md";
-import { getScrollbarSize, List, type RowComponentProps } from "react-window";
-import { useAppDispatch, useAppSelector } from "../../../../store/hook";
-import {
-  selectTopStockTraded,
-  selectTopStockTradedStatus,
-} from "../../../../store/slices/priceboard/selector";
-import {
-  fetchTopForeignTradedRequest,
-  fetchTopStockTradedRequest,
-} from "../../../../store/slices/priceboard/slice";
+import { getScrollbarSize, type RowComponentProps } from "react-window";
+import { useAppDispatch } from "../../../../store/hook";
 import type {
   ModeTableSynThetic,
   topForeignTradedItem,
@@ -76,26 +68,26 @@ function RowComponentForeign({
 export default function SynTheticTable() {
   const disatch = useAppDispatch();
 
-  const topStockTraded = useAppSelector(selectTopStockTraded);
-  const { loading: loadingStock } = useAppSelector(selectTopStockTradedStatus);
+  // const topStockTraded = useAppSelector(selectTopStockTraded);
+  // const { loading: loadingStock } = useAppSelector(selectTopStockTradedStatus);
 
-  const topForeignTraded = useAppSelector(
-    (state) => state.priceBoard.data.topForeignTraded
-  );
-  const { loading: loadingForeign, error: errorForeign } = useAppSelector(
-    (state) => state.priceBoard.status.fetchTopForeignTraded
-  );
+  // const topForeignTraded = useAppSelector(
+  //   (state) => state.priceBoard.data.topForeignTraded
+  // );
+  // const { loading: loadingForeign, error: errorForeign } = useAppSelector(
+  //   (state) => state.priceBoard.status.fetchTopForeignTraded
+  // );
 
   const [size] = useState(getScrollbarSize);
   const [modeTable, setModeTable] = useState<ModeTableSynThetic>("INDAY");
 
-  useEffect(() => {
-    if (modeTable === "INDAY") {
-      disatch(fetchTopStockTradedRequest("10"));
-    } else {
-      disatch(fetchTopForeignTradedRequest("10"));
-    }
-  }, [modeTable, disatch]);
+  // useEffect(() => {
+  //   if (modeTable === "INDAY") {
+  //     disatch(fetchTopStockTradedRequest("10"));
+  //   } else {
+  //     disatch(fetchTopForeignTradedRequest("10"));
+  //   }
+  // }, [modeTable, disatch]);
 
   return (
     <div className="bg-surface rounded-xl pb-1 px-1">
@@ -129,7 +121,7 @@ export default function SynTheticTable() {
             <div className="shrink" style={{ width: size }} />
           </div>
           <div className="overflow-hidden h-[91px]">
-            {loadingStock ? (
+            {/* {loadingStock ? (
               <SynTheticTableSkeleton type="INDAY" />
             ) : (
               <List
@@ -138,7 +130,8 @@ export default function SynTheticTable() {
                 rowHeight={20}
                 rowProps={{ topStockTraded }}
               />
-            )}
+            )} */}
+            <SynTheticTableSkeleton type="INDAY" />
           </div>
         </div>
       ) : (
@@ -153,7 +146,7 @@ export default function SynTheticTable() {
             <div className="shrink" style={{ width: size }} />
           </div>
           <div className="overflow-hidden h-[91px]">
-            {loadingForeign ? (
+            {/* {loadingForeign ? (
               <SynTheticTableSkeleton type="FOREIGN" />
             ) : errorForeign ? (
               <div className="w-full h-full text-red-500">
@@ -166,7 +159,8 @@ export default function SynTheticTable() {
                 rowHeight={20}
                 rowProps={{ topForeignTraded }}
               />
-            )}
+            )} */}
+            <SynTheticTableSkeleton type="FOREIGN" />
           </div>
         </div>
       )}
