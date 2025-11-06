@@ -12,7 +12,6 @@ import type {
   WorkerOutputMessage,
 } from "../../types";
 import { getOrCreateSessionId } from "../../utils";
-import { queueColors } from "../../worker/colorManager";
 import { queueFlash } from "../../worker/flashManager";
 
 // ==================== SINGLE WORKER ====================
@@ -27,11 +26,7 @@ worker.onmessage = (e: MessageEvent<WorkerOutputMessage>) => {
   const { type, data } = e.data;
   if (type !== "update") return;
 
-  const { flashes, colors } = data;
-
-  if (colors && Object.keys(colors).length > 0) {
-    queueColors(colors);
-  }
+  const { flashes } = data;
 
   if (flashes.length > 0) {
     queueFlash(flashes);

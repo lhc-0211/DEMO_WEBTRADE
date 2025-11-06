@@ -32,7 +32,7 @@ const PriceCell = memo(function PriceCell({
 }: PriceCellProps) {
   const cellRef = useRef<HTMLDivElement>(null);
 
-  // === ĐĂNG KÝ CHO FLASH (TRỪ SYMBOL) ===
+  // === ĐĂNG KÝ FLASH (giữ nguyên) ===
   useEffect(() => {
     if (disableFlash) return;
     const el = cellRef.current;
@@ -44,7 +44,7 @@ const PriceCell = memo(function PriceCell({
     };
   }, [symbol, cellKey, disableFlash]);
 
-  // === TÍNH MÀU TỪ SNAPSHOT ===
+  // === TÍNH MÀU ===
   const colorClass = (() => {
     if (cellKey === "ceil") return "c";
     if (cellKey === "floor") return "f";
@@ -101,23 +101,24 @@ const PriceCell = memo(function PriceCell({
     return "";
   })();
 
-  // === ÁP DỤNG MÀU + ĐẬM ===
-  useEffect(() => {
-    const el = cellRef.current;
-    if (el && colorClass) {
-      el.classList.remove("u", "d", "c", "f", "r");
-      el.classList.add(colorClass);
-    }
-  }, [colorClass]);
-
+  // === TÍNH GIÁ TRỊ ===
   const value = getColumnValueCompact(snapshot, cellKey);
+
+  // === CLASSNAME HOÀN CHỈNH ===
+  const className = [
+    "flex items-center justify-center text-xs font-medium h-7",
+    "transition-colors duration-75", // optional: mượt hơn
+    colorClass,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div
       ref={cellRef}
       data-symbol={symbol}
       data-key={cellKey}
-      className="flex items-center justify-center text-xs font-medium h-7"
+      className={className}
       style={{ minWidth: width }}
     >
       {value ?? ""}

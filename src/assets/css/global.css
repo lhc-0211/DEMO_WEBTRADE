@@ -344,6 +344,22 @@ input:-webkit-autofill {
 }
 
 /* TODO : Đổi bg của bảng giá */
+/* trần */
+[data-key="ceil"] {
+  background-color: rgb(209 213 219 / 10%);
+  color: var(--color-stock-text-purple) !important;
+}
+/* sàn */
+[data-key="floor"] {
+  background-color: rgb(209 213 219 / 10%);
+  color: var(--color-stock-text-blue) !important;
+}
+/*  tham chiếu */
+[data-key="ref"] {
+  background-color: rgb(209 213 219 / 10%);
+  color: var(--color-stock-text-yellow) !important;
+}
+
 /* trần, sàn, tham chiếu */
 [data-key="ceil"],
 [data-key="floor"],
