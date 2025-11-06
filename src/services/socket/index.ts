@@ -198,12 +198,9 @@ const reSubscribe = () => {
   // Re-sub theo symbols
   if (subscribedSymbols.length) {
     const msg = {
-      type: "subscriptions",
-      data: {
-        action: "subscribe",
-        sessionId,
-        symbols: subscribedSymbols,
-      },
+      type: "subscribe",
+      sessionId,
+      symbols: subscribedSymbols,
     };
     try {
       socket.send(JSON.stringify(msg));
@@ -216,12 +213,9 @@ const reSubscribe = () => {
   // Re-sub theo group
   for (const groupId of subscribedGroups) {
     const msg = {
-      type: "subscriptions",
-      data: {
-        action: "subscribe",
-        sessionId,
-        groupId,
-      },
+      type: "subscribe",
+      sessionId,
+      groupId,
     };
     try {
       socket.send(JSON.stringify(msg));
@@ -263,13 +257,10 @@ const sendSubscribeRequest = (
   }
 
   const msg = {
-    type: "subscriptions",
-    data: {
-      action,
-      sessionId: getOrCreateSessionId(),
-      groupId: options.groupId,
-      symbols: options.symbols,
-    },
+    type: action,
+    sessionId: getOrCreateSessionId(),
+    groupId: options.groupId,
+    symbols: options.symbols,
   };
 
   try {
