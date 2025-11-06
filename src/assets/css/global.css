@@ -197,19 +197,6 @@ input:-webkit-autofill {
   padding: 0 12px;
   font-size: 12px !important;
 }
-/* .Toastify__toast.Toastify__toast--warning {
-  background-color: var(--color-warning-darker) !important;
-}
-.Toastify__toast.Toastify__toast--error {
-  background-color: var(--color-error-darker) !important;
-}
-.Toastify__toast.Toastify__toast--info {
-  background-color: var(--color-infomation-darker) !important;
-}
-
-.Toastify__toast.Toastify__toast--success {
-  background-color: var(--color-success-darker) !important;
-} */
 
 .Toastify__toast-body {
   padding: 0;
@@ -334,6 +321,7 @@ input:-webkit-autofill {
   transition: background-color 0.3s ease;
 }
 
+/* TODO: Màu flash bảng giá */
 [data-flash="up"] {
   background: var(--color-green-500) !important;
   color: var(--color-background-primary) !important;
@@ -353,4 +341,22 @@ input:-webkit-autofill {
 [data-flash="ref"] {
   background: var(--color-yellow-500) !important;
   color: var(--color-background-primary) !important;
+}
+
+/* TODO : Đổi bg của bảng giá */
+/* trần, sàn, tham chiếu */
+[data-key="ceil"],
+[data-key="floor"],
+[data-key="ref"],
+/* Khớp lệnh */
+[data-key="lastPrice"],
+[data-key="lastVolume"],
+[data-key="change"],
+[data-key="changePc"],
+/* Cao, thấp, tb, tổng khối lượng */
+[data-key="high"],
+[data-key="avg"],
+[data-key="low"],
+[data-key="totalVol"] {
+  background-color: rgb(209 213 219 / 10%);
 }

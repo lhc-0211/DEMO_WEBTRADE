@@ -45,9 +45,10 @@ interface PriceBoardBaseProps {
 interface SortableRowProps {
   symbol: string;
   snapshot: SnapshotDataCompact;
+  index: number;
 }
 
-function SortableRow({ symbol, snapshot }: SortableRowProps) {
+function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging, isOver } =
     useSortable({ id: symbol });
 
@@ -69,7 +70,7 @@ function SortableRow({ symbol, snapshot }: SortableRowProps) {
       ref={setNodeRef}
       style={style}
       className={`
-        bg-background-primary 
+        ${index % 2 === 1 ? "bg-gray-300/30" : ""}
         ${
           isDragging
             ? "ring-2 ring-DTND-500 ring-opacity-50 border-t border-border"
@@ -224,7 +225,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
 
     return (
       <div key={key} style={style}>
-        <SortableRow symbol={symbol} snapshot={snapshot} />
+        <SortableRow symbol={symbol} snapshot={snapshot} index={index} />
       </div>
     );
   };
