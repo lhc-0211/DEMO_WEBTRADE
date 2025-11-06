@@ -66,10 +66,10 @@ export const PRICE_BOARD_MENU: PriceBoardMenuGroup[] = [
     key: "oddlot",
     label: "Lô lẻ",
     items: [
-      { id: "oddlot_hose", name: "Lô lẻ HOSE", market: "HOSE", type: "oddlot" },
-      { id: "oddlot_hnx", name: "Lô lẻ HNX", market: "HNX", type: "oddlot" },
+      { id: "hsx_ll", name: "Lô lẻ HOSE", market: "HOSE", type: "oddlot" },
+      { id: "hnx_ll", name: "Lô lẻ HNX", market: "HNX", type: "oddlot" },
       {
-        id: "oddlot_upcom",
+        id: "upcom_ll",
         name: "Lô lẻ UPCOM",
         market: "UPCOM",
         type: "oddlot",

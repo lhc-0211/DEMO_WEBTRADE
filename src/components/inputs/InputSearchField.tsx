@@ -51,7 +51,7 @@ export default function InputSearchField({
 
   return (
     <motion.div
-      animate={{ width: open ? 250 : 30 }}
+      animate={{ width: open ? 160 : 30 }}
       transition={{ type: "spring", stiffness: 200, damping: 20 }}
       className={`px-2 h-9! p-0.5 flex items-center justify-center bg-input  rounded-md ${
         open

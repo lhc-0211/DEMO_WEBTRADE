@@ -1,7 +1,6 @@
 import { useForm } from "react-hook-form";
 import InputSearchField from "../../../../components/inputs/InputSearchField";
 import SelectField from "../../../../components/inputs/SelectField";
-import { getColorTypeAcc } from "../../../../utils";
 
 type FormValues = {
   keyword: string;
@@ -31,15 +30,19 @@ export default function OrderSearchForm() {
   const accountOptions = [
     {
       value: "001",
-      label: "TK-001",
-      subLabel: "Margin",
-      colorClass: getColorTypeAcc("MARGIN"),
+      label: "Đã khớp",
     },
     {
       value: "002",
-      label: "TK-002",
-      subLabel: "Thường",
-      colorClass: getColorTypeAcc("NORMAL"),
+      label: "Khớp một phần",
+    },
+    {
+      value: "003",
+      label: "Chờ khớp",
+    },
+    {
+      value: "004",
+      label: "Đã hủy",
     },
   ];
 
@@ -48,17 +51,6 @@ export default function OrderSearchForm() {
       onSubmit={handleSubmit(onSubmit)}
       className="flex flex-row gap-1 items-center"
     >
-      {/* --- Select tài khoản --- */}
-      <div className="w-40">
-        <SelectField
-          value={account}
-          onChange={(val) => setValue("account", val)}
-          options={accountOptions}
-          placeholder="Trạng thái"
-          className="h-9!"
-        />
-      </div>
-
       {/* --- Ô tìm kiếm --- */}
       <div className="flex-1">
         <InputSearchField
@@ -68,6 +60,16 @@ export default function OrderSearchForm() {
           })}
           error={errors.keyword}
           className="placeholder:text-xs!"
+        />
+      </div>
+      {/* --- Select tài khoản --- */}
+      <div className="w-40">
+        <SelectField
+          value={account}
+          onChange={(val) => setValue("account", val)}
+          options={accountOptions}
+          placeholder="Trạng thái"
+          className="h-9!"
         />
       </div>
     </form>
