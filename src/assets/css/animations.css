@@ -1,0 +1,77 @@
+/* TODO: Animations */
+/* XUẤT HIỆN: Từ góc phải trên xuống */
+@keyframes fadeInFromTopRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+}
+
+.animate-fadeInFromTopRight {
+  animation: fadeInFromTopRight 0.25s ease forwards;
+}
+
+/* MẤT ĐI: Ngược lại - từ góc phải trên */
+@keyframes fadeOutToTopRight {
+  from {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px) translateY(-10px);
+  }
+}
+
+.animate-fadeOutToTopRight {
+  animation: fadeOutToTopRight 0.2s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.25s ease forwards;
+}
+
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+.animate-fadeInDown {
+  animation: fadeInDown 0.2s ease-out forwards;
+}
+
+.animate-fadeOutUp {
+  animation: fadeOutUp 0.2s ease-out forwards;
+}

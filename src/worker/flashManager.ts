@@ -1,83 +1,45 @@
-// src/queues/flashQueue.ts
-import type { FlashResult, PriceCompare } from "../types";
-import {
-  registerCell,
-  unregisterCell,
-  visibleCells,
-} from "../utils/visibleRegistry";
+import type { FlashResult } from "../types";
+import { visibleCells } from "../utils/visibleRegistry";
 
-const FLASH_MAP: Record<PriceCompare, string> = {
-  u: "up",
-  d: "down",
-  c: "ceil",
-  f: "floor",
-  r: "ref",
-  x: "",
-};
-
-const pendingFlashes = new Map<string, FlashResult>();
-const lastFlashTime = new Map<string, number>();
-const timeoutIds = new Map<string, number>();
+const flashGroups = new Map<string, Set<HTMLElement>>();
 let rafId: number | null = null;
+const FLASH_DURATION = 180;
 
-const FLASH_DURATION = 200;
-const MIN_FLASH_INTERVAL = 450;
-const KEY_SEPARATOR = ""; // NULL char - không bao giờ xuất hiện trong key
+const applyFlashes = () => {
+  for (const [type, cells] of flashGroups) {
+    cells.forEach((cell) => {
+      if (cell.isConnected) cell.dataset.flash = type; // "u", "d", "c"...
+    });
 
-const getCellKey = (symbol: string, key: string): string =>
-  `${symbol}${KEY_SEPARATOR}${key}`;
-
-const applyFlashes = (): void => {
-  const now = performance.now();
-
-  for (const [cellKey, { symbol, key, flashClass }] of pendingFlashes) {
-    const lastTime = lastFlashTime.get(cellKey) ?? 0;
-    if (now - lastTime < MIN_FLASH_INTERVAL) continue;
-
-    const cell = visibleCells.get(symbol)?.get(key);
-    if (!cell) continue;
-
-    const flashType = FLASH_MAP[flashClass];
-    if (!flashType) continue;
-
-    // Xóa timeout cũ
-    const oldTid = timeoutIds.get(cellKey);
-    if (oldTid) clearTimeout(oldTid);
-
-    cell.dataset.flash = flashType;
-    lastFlashTime.set(cellKey, now);
-
-    const tid = setTimeout(() => {
-      if (cell.isConnected && cell.dataset.flash === flashType) {
-        delete cell.dataset.flash;
-      }
-      timeoutIds.delete(cellKey);
-    }, FLASH_DURATION) as unknown as number;
-
-    timeoutIds.set(cellKey, tid);
+    setTimeout(() => {
+      cells.forEach((cell) => {
+        if (cell.isConnected && cell.dataset.flash === type) {
+          delete cell.dataset.flash;
+        }
+      });
+    }, FLASH_DURATION);
   }
-
-  pendingFlashes.clear();
+  flashGroups.clear();
   rafId = null;
 };
 
-export const queueFlash = (results: readonly FlashResult[]): void => {
-  const now = performance.now();
+export const queueFlash = (results: FlashResult[]) => {
+  if (!results.length) return;
 
   for (const r of results) {
-    const cellKey = getCellKey(r.symbol, r.key);
-    const lastTime = lastFlashTime.get(cellKey) ?? 0;
-    if (now - lastTime >= MIN_FLASH_INTERVAL) {
-      pendingFlashes.set(cellKey, r);
-    }
+    if (!r.flashClass || r.flashClass === "x") continue;
+
+    const cell = visibleCells.get(r.symbol)?.get(r.key);
+    if (!cell) continue;
+
+    const type = r.flashClass; // "u", "d", "c"...
+
+    const set = flashGroups.get(type) || new Set();
+    set.add(cell);
+    flashGroups.set(type, set);
   }
 
-  if (rafId === null && pendingFlashes.size > 0) {
+  if (rafId === null) {
     rafId = requestAnimationFrame(applyFlashes);
   }
-};
-
-export {
-  registerCell as registerVisibleCell,
-  unregisterCell as unregisterVisibleCell,
 };

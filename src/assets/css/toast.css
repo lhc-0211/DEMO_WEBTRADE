@@ -1,0 +1,51 @@
+/* Custom css toast */
+.Toastify__toast {
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 12px !important;
+}
+
+.Toastify__toast-body {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 20px auto;
+  gap: 8px;
+}
+
+.Toastify__toast-body .Toastify__toast-icon {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-position: right;
+  background-repeat: no-repeat;
+  background-size: cover;
+  min-height: 48px;
+  height: 100%;
+  width: 16px;
+  height: 16px;
+}
+
+.Toastify__progress-bar {
+  height: 2px;
+}
+
+.Toastify__toast-icon {
+  width: 20px;
+  height: 20px;
+}
+
+.Toastify__toast {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.Toastify__close-button {
+  align-self: center;
+}
+
+.Toastify__close-button--light {
+  color: #ffffff;
+  opacity: 1;
+}

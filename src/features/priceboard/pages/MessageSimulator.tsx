@@ -74,7 +74,7 @@ export const MessageSimulator: React.FC = () => {
       trade: {
         "8": Math.round(base),
         "9": 100 + (totalMsgs.current % 100),
-        "11": Math.round(base * 1000),
+        "11": 1,
         "12": 1,
         "13": priceCompare,
       },
@@ -118,7 +118,7 @@ export const MessageSimulator: React.FC = () => {
       const workerBatch: any[] = [];
 
       // CHỈ 30 MÃ MỖI LẦN
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 200; i++) {
         const symbol =
           symbols.current[Math.floor(Math.random() * symbols.current.length)];
         const { snapshot } = createData(symbol);

@@ -6,3 +6,7 @@
 @import "ag-grid-community/styles/ag-grid.css";
 @import "ag-grid-community/styles/ag-theme-balham.css";
 /* @import "./font.css"; */
+@import "./animations.css";
+@import "./scroll.css";
+@import "./toast.css";
+@import "./priceboard.css";

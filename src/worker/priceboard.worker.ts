@@ -79,63 +79,6 @@ const processQueue = (): void => {
       }
     }
 
-    // // === COLOR LOGIC ===
-    // const colorMap: Record<string, PriceCompare | "t"> = {};
-    // const tradeCmp = snapshot.trade?.[13] ?? "t";
-    // const orderBook = snapshot.orderBook;
-
-    // const getArr = (value: OrderBookValue): string[] => {
-    //   if (typeof value === "string") {
-    //     return value.split("|");
-    //   }
-    //   if (Array.isArray(value)) {
-    //     // Kiểm tra phần tử có phải string không (an toàn)
-    //     return value.every((item): item is string => typeof item === "string")
-    //       ? value
-    //       : [];
-    //   }
-    //   return [];
-    // };
-
-    // const bids = getArr(orderBook?.[22]);
-    // const asks = getArr(orderBook?.[23]);
-
-    // for (const key of KEYS_COLOR) {
-    //   let cmp: PriceCompare | "t" = "t";
-
-    //   if (
-    //     ["lastPrice", "change", "changePercent", "lastVolume", "symbol"].some(
-    //       (k) => key.includes(k)
-    //     )
-    //   ) {
-    //     cmp = tradeCmp;
-    //   } else if (orderBook) {
-    //     if (key.startsWith("priceBuy") || key.startsWith("volumeBuy")) {
-    //       const i = parseInt(key.slice(-1), 10) - 1;
-    //       cmp = (bids[i * 3 + 2] as PriceCompare) ?? "t";
-    //     } else if (
-    //       key.startsWith("priceSell") ||
-    //       key.startsWith("volumeSell")
-    //     ) {
-    //       const i = parseInt(key.slice(-1), 10) - 1;
-    //       cmp = (asks[i * 3 + 2] as PriceCompare) ?? "t";
-    //     } else if (key === "high") {
-    //       cmp = (orderBook[24]?.split("|")[1] as PriceCompare) ?? "t";
-    //     } else if (key === "low") {
-    //       cmp = (orderBook[25]?.split("|")[1] as PriceCompare) ?? "t";
-    //     } else if (key === "avg") {
-    //       cmp = (orderBook[28]?.split("|")[1] as PriceCompare) ?? "t";
-    //     }
-    //   }
-
-    //   colorMap[key] = cmp;
-    // }
-
-    // if (visibleSymbols.has(symbol)) {
-    //   colors[symbol] = colorMap;
-    // }
-
-    // colors[symbol] = colorMap;
     prevSnapshots.set(symbol, snapshot);
   }
 

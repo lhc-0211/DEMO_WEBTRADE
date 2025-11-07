@@ -52,24 +52,24 @@ export default function ChartIndexInfo(props: Props) {
       {/* Mã tăng giảm, phiên */}
       <div className="flex flex-col gap-1">
         <div className="grid grid-cols-3">
-          <span className="text-[10px] font-semibold text-stock-text-green flex flex-row items-center justify-center whitespace-nowrap">
+          <span className="text-[10px] font-semibold u flex flex-row items-center justify-center whitespace-nowrap">
             <TiArrowSortedUp className="w-3 h-3" />
             <span>
               {dataIndex && dataIndex.up}{" "}
-              <span className="text-stock-text-purple">
+              <span className="c">
                 {/* ( {dataIndex.fluctuationUpperLimitIssueCount}) */}( - )
               </span>
             </span>
           </span>
-          <span className="text-[10px] font-semibold text-stock-text-yellow flex flex-row items-center justify-center whitespace-nowrap">
+          <span className="text-[10px] font-semibold r flex flex-row items-center justify-center whitespace-nowrap">
             <FaSquare className="w-[7px] h-[7px] mr-0.5" />
             <span>{dataIndex && dataIndex.noChange}</span>
           </span>
-          <span className="text-[10px] font-semibold text-stock-text-red flex flex-row items-center justify-center whitespace-nowrap">
+          <span className="text-[10px] font-semibold d flex flex-row items-center justify-center whitespace-nowrap">
             <TiArrowSortedDown className="w-3 h-3" />
             <span>
               {dataIndex && dataIndex.down}{" "}
-              <span className="text-stock-text-blue-100">
+              <span className="f">
                 {/* ({dataIndex.fluctuationLowerLimitIssueCount}) */}( - )
               </span>
             </span>

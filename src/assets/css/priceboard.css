@@ -1,0 +1,125 @@
+.i,
+.g {
+  color: var(--color-stock-text-green) !important;
+}
+
+.UP .bg-status-index {
+  background-color: var(--color-success-darker) !important;
+}
+
+.DOWN .bg-status-index {
+  background-color: var(--color-error-darker) !important;
+}
+
+.e {
+  color: var(--color-stock-text-yellow) !important;
+}
+
+.EQUAL .bg-status-index {
+  background-color: var(--color-warning-darker) !important;
+}
+
+.FLOOR .bg-status-index {
+  background-color: var(--color-infomation-darker) !important;
+}
+
+.CEIL .bg-status-index {
+  background-color: var(--color-features-darker) !important;
+}
+
+/* TODO: Màu flash bảng giá */
+.cell {
+  transition: none !important;
+  will-change: background-color, color;
+}
+.UP,
+.u {
+  color: #22c55e !important;
+}
+
+.DOWN,
+.d {
+  color: #ef4444 !important;
+}
+
+.CEIL,
+.c {
+  color: #a855f7 !important;
+}
+
+.FLOOR,
+.f {
+  color: #3b82f6 !important;
+}
+
+.REF,
+.EQUAL,
+.r {
+  color: #eab308 !important;
+}
+
+.cell[data-flash="u"] {
+  background-color: #22c55e !important;
+  color: var(--color-primary-darker) !important;
+}
+.cell[data-flash="d"] {
+  background-color: #ef4444 !important;
+  color: var(--color-primary-darker) !important;
+}
+.cell[data-flash="c"] {
+  background-color: #a855f7 !important;
+  color: var(--color-primary-darker) !important;
+}
+.cell[data-flash="f"] {
+  background-color: #3b82f6 !important;
+  color: var(--color-primary-darker) !important;
+}
+.cell[data-flash="r"] {
+  background-color: #eab308 !important;
+  color: var(--color-primary-darker) !important;
+}
+
+.cell[data-flash] {
+  animation: flashOff 0.18s forwards;
+}
+
+@keyframes flashOff {
+  to {
+    background-color: transparent !important;
+    color: inherit !important;
+  }
+}
+
+/* TODO : Đổi bg của bảng giá */
+/* trần */
+[data-key="ceil"] {
+  background-color: rgb(209 213 219 / 10%);
+  color: #a855f7 !important;
+}
+/* sàn */
+[data-key="floor"] {
+  background-color: rgb(209 213 219 / 10%);
+  color: #3b82f6 !important;
+}
+/*  tham chiếu */
+[data-key="ref"] {
+  background-color: rgb(209 213 219 / 10%);
+  color: #eab308 !important;
+}
+
+/* trần, sàn, tham chiếu */
+[data-key="ceil"],
+[data-key="floor"],
+[data-key="ref"],
+/* Khớp lệnh */
+[data-key="lastPrice"],
+[data-key="lastVolume"],
+[data-key="change"],
+[data-key="changePc"],
+/* Cao, thấp, tb, tổng khối lượng */
+[data-key="high"],
+[data-key="avg"],
+[data-key="low"],
+[data-key="totalVol"] {
+  background-color: rgb(209 213 219 / 10%);
+}

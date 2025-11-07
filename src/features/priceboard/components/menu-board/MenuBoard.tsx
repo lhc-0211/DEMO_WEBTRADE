@@ -12,9 +12,8 @@ export default function MenuBoard({
   return (
     <div className="flex flex-wrap gap-1">
       {PRICE_BOARD_MENU.map((group) => {
-        const { key, label, items } = group;
+        const { key, items } = group;
 
-        // If only one item, render a button
         if (items.length === 1) {
           const item = items[0];
           return (
@@ -30,7 +29,6 @@ export default function MenuBoard({
           );
         }
 
-        // If multiple items, render a dropdown with animation
         return (
           <DropdownGroup
             key={key}
@@ -44,7 +42,6 @@ export default function MenuBoard({
   );
 }
 
-// Separate component for dropdown groups to use the hook
 function DropdownGroup({
   group,
   active,
@@ -95,7 +92,7 @@ function DropdownGroup({
               className={`p-2 cursor-pointer rounded-lg mt-2 text-sm ${
                 active === item.id
                   ? "bg-DTND-500"
-                  : "hover:bg-DTND-500 hover:translate-x-[2px]"
+                  : "hover:bg-DTND-500 hover:translate-x-0.5"
               }`}
               onClick={() => {
                 onChange(item.id);

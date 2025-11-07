@@ -9,18 +9,18 @@ import type {
   PriceCompare,
   SnapshotDataCompact,
 } from "../../../../../types";
-import { getColumnValueCompact } from "../../../../../utils/priceboard";
 import {
   registerVisibleCell,
   unregisterVisibleCell,
-} from "../../../../../worker/flashManager";
+} from "../../../../../utils";
+import { getColumnValueCompact } from "../../../../../utils/priceboard";
 
 interface PriceCellProps {
   symbol: string;
   cellKey: string;
   width?: number;
   snapshot: SnapshotDataCompact;
-  disableFlash?: boolean; // ← MỚI: tắt flash cho symbol
+  disableFlash?: boolean; // tắt flash cho symbol
 }
 
 const PriceCell = memo(function PriceCell({
@@ -32,7 +32,6 @@ const PriceCell = memo(function PriceCell({
 }: PriceCellProps) {
   const cellRef = useRef<HTMLDivElement>(null);
 
-  // === ĐĂNG KÝ FLASH (giữ nguyên) ===
   useEffect(() => {
     if (disableFlash) return;
     const el = cellRef.current;
@@ -104,10 +103,9 @@ const PriceCell = memo(function PriceCell({
   // === TÍNH GIÁ TRỊ ===
   const value = getColumnValueCompact(snapshot, cellKey);
 
-  // === CLASSNAME HOÀN CHỈNH ===
   const className = [
-    "flex items-center justify-center text-xs font-medium h-7",
-    "transition-colors duration-75", // optional: mượt hơn
+    "flex items-center justify-center text-xs font-medium h-7 cell",
+    "transition-colors duration-75",
     colorClass,
   ]
     .filter(Boolean)
@@ -159,7 +157,6 @@ function BodyTable({
       {columns.map((col) => {
         const hasChildren = !!col.children?.length;
 
-        // DÙNG PriceCell CHO TẤT CẢ (kể cả symbol)
         if (col.key === "symbol") {
           return (
             <div
@@ -176,7 +173,7 @@ function BodyTable({
                   symbol={symbol}
                   cellKey={col.key}
                   snapshot={snapshot}
-                  disableFlash={true} // ← TẮT FLASH CHO SYMBOL
+                  disableFlash={true} // TẮT FLASH CHO SYMBOL
                 />
                 <svg
                   className="w-4 h-4 ml-1 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
