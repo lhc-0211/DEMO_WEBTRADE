@@ -2,7 +2,6 @@ import { store } from "../../store";
 import {
   clearSnapshot,
   resetSnapshots,
-  updateIndex,
   updateSnapshots,
 } from "../../store/slices/stock/slice";
 import type {
@@ -83,19 +82,19 @@ const parseMessage = (raw: string): void => {
 
   // INDEX: "1" === "mi"
   if (msg[1] === "mi") {
-    store.dispatch(
-      updateIndex([
-        {
-          id: msg[35],
-          value: +msg[29],
-          up: +msg[30],
-          down: +msg[31],
-          noChange: +msg[32],
-          totalVol: +msg[33],
-          time: msg[10],
-        },
-      ])
-    );
+    // store.dispatch(
+    //   updateIndex([
+    //     {
+    //       id: msg[35],
+    //       value: +msg[29],
+    //       up: +msg[30],
+    //       down: +msg[31],
+    //       noChange: +msg[32],
+    //       totalVol: +msg[33],
+    //       time: msg[10],
+    //     },
+    //   ])
+    // );
     return;
   }
 

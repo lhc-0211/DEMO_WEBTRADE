@@ -177,3 +177,22 @@ export interface FetchCashBalanceResponse {
     maxFee: string;
   };
 }
+
+export type typeTableActive =
+  | "ORDER"
+  | "ORDER_OVERTIME"
+  | "CONDITIONAL_ORDER"
+  | "INVESTMENT_LIST";
+
+export type OrderTable = {
+  orderId: number;
+  time: string | number;
+  side: string;
+  symbol: string;
+  price: string;
+  volume: string;
+  total: string;
+  status: string;
+  statusId: string;
+  matchVolume: string;
+};

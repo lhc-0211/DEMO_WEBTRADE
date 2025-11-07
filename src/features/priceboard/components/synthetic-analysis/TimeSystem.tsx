@@ -41,7 +41,7 @@ export default function TimeSystem() {
   }, []);
 
   return (
-    <div className="w-full grid place-items-center h-[148px] bg-surface rounded-[20px]">
+    <div className="w-full grid place-items-center h-[148px] bg-surface rounded">
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2 items-center justify-center">
           {time ? (
@@ -73,11 +73,11 @@ export default function TimeSystem() {
             <div className="w-full h-full bg-gray-300/40 rounded"></div>
           </div>
         ) : isOpen ? (
-          <span className="px-4 rounded-2xl text-stock-text-green bg-success-dark text-xs font-semibold h-[26px] grid place-items-center">
+          <span className="px-4 rounded-lg text-background-primary bg-green-300 text-xs font-semibold h-[26px] grid place-items-center">
             Mở cửa
           </span>
         ) : (
-          <span className="px-4 rounded-2xl text-stock-text-red bg-error-dark text-xs font-semibold h-[26px] grid place-items-center">
+          <span className="px-4 rounded-lg text-background-primary bg-red-300 text-xs font-semibold h-[26px] grid place-items-center">
             Đóng cửa
           </span>
         )}

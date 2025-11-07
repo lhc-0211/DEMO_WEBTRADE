@@ -4,7 +4,7 @@ import type { RootState } from "../..";
 import type { IndexData, SnapshotDataCompact } from "../../../types";
 
 // === STOCK SELECTORS (giữ nguyên) ===
-const selectSnapshots = (state: RootState) => state.stock.snapshots;
+export const selectSnapshots = (state: RootState) => state.stock.snapshots;
 const selectSubscribedOrder = (state: RootState) => state.stock.subscribedOrder;
 
 export const selectAllSymbols = createSelector(

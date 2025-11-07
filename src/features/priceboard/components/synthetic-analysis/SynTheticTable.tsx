@@ -90,7 +90,7 @@ export default function SynTheticTable() {
   // }, [modeTable, disatch]);
 
   return (
-    <div className="bg-surface rounded-xl pb-1 px-1">
+    <div className="bg-surface rounded pb-1 px-1">
       <div className="flex flex-row items-center justify-between p-1 border-b border-border h-[33px]">
         <MdOutlineArrowLeft
           className="w-6 h-6 text-text-title cursor-pointer"

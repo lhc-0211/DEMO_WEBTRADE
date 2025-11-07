@@ -15,91 +15,14 @@ import {
   selectListOrdersIndayStatus,
 } from "../../../../store/slices/place-order/selector";
 import { fetchListOrdersIndayRequest } from "../../../../store/slices/place-order/slice";
+import type { OrderTable } from "../../../../types/placeOrder";
 import {
   canDeleteOrder,
   canEditOrder,
   getOrderStatus,
 } from "../../../../utils";
+import EditOrderModal from "./EditOrderModal";
 import OrderTableSkeleton from "./OrderTableSkeleton";
-
-type Order = {
-  orderId: number;
-  time: string | number;
-  side: string;
-  symbol: string;
-  price: string;
-  volume: string;
-  total: string;
-  status: string;
-  statusId: string;
-  matchVolume: string;
-};
-
-const columns: ColumnDef<Order>[] = [
-  {
-    header: "LOẠI LỆNH",
-    columns: [
-      { header: "Order ID", accessorKey: "orderId" },
-      { header: "Thời gian đặt", accessorKey: "time" },
-      { header: "Lệnh", accessorKey: "side" },
-      { header: "Mã", accessorKey: "symbol" },
-    ],
-  },
-  {
-    header: "CHI TIẾT LỆNH",
-    columns: [
-      { header: "Giá đặt", accessorKey: "price" },
-      { header: "KL đặt", accessorKey: "volume" },
-      { header: "Giá trị đặt (₫)", accessorKey: "total" },
-      { header: "Trạng thái", accessorKey: "status" },
-    ],
-  },
-  {
-    header: "THAO TÁC",
-    columns: [
-      {
-        header: "Thao tác",
-        id: "action",
-        cell: ({ row }) => {
-          const order = row.original;
-          const canEdit = canEditOrder(
-            order.statusId,
-            order.volume,
-            order.matchVolume
-          );
-          const canCancel = canDeleteOrder(
-            order.statusId,
-            order.volume,
-            order.matchVolume
-          );
-
-          return (
-            <div className="flex items-center justify-center gap-4">
-              {canEdit && (
-                <button
-                  onClick={() => console.log("Sửa:", order)}
-                  className="text-text-title hover:text-text-subtitle"
-                  title="Sửa lệnh"
-                >
-                  <FaPen size={14} />
-                </button>
-              )}
-              {canCancel && (
-                <button
-                  onClick={() => console.log("Hủy:", order)}
-                  className="text-red-400 hover:text-red-300"
-                  title="Hủy lệnh"
-                >
-                  <FaTrash size={14} />
-                </button>
-              )}
-            </div>
-          );
-        },
-      },
-    ],
-  },
-];
 
 function OrderHisTable() {
   const dispatch = useAppDispatch();
@@ -108,7 +31,9 @@ function OrderHisTable() {
   const { loading } = useAppSelector(selectListOrdersIndayStatus);
   const accountProfile = useAppSelector(selectAccountProfile);
 
-  const [tableData, setTableData] = useState<Order[]>([]);
+  const [tableData, setTableData] = useState<OrderTable[]>([]);
+  const [dataOrderEdit, setDataOrderEdit] = useState<OrderTable | undefined>();
+  const [openModalEdit, setOpenModalEdit] = useState<boolean>(false);
 
   const preListOrdersInday = usePrevious(listOrdersInday);
 
@@ -149,6 +74,78 @@ function OrderHisTable() {
 
     setTableData(tableData);
   }, [listOrdersInday, preListOrdersInday]);
+
+  const handleEditOrder = (data: OrderTable) => {
+    setDataOrderEdit(data);
+    setOpenModalEdit(true);
+  };
+
+  /** Cấu hình cột */
+  const columns: ColumnDef<OrderTable>[] = [
+    {
+      header: "LOẠI LỆNH",
+      columns: [
+        { header: "Order ID", accessorKey: "orderId" },
+        { header: "Thời gian đặt", accessorKey: "time" },
+        { header: "Lệnh", accessorKey: "side" },
+        { header: "Mã", accessorKey: "symbol" },
+      ],
+    },
+    {
+      header: "CHI TIẾT LỆNH",
+      columns: [
+        { header: "Giá đặt", accessorKey: "price" },
+        { header: "KL đặt", accessorKey: "volume" },
+        { header: "Giá trị đặt (₫)", accessorKey: "total" },
+        { header: "Trạng thái", accessorKey: "status" },
+      ],
+    },
+    {
+      header: "THAO TÁC",
+      columns: [
+        {
+          header: "Thao tác",
+          id: "action",
+          cell: ({ row }) => {
+            const order = row.original;
+            const canEdit = canEditOrder(
+              order.statusId,
+              order.volume,
+              order.matchVolume
+            );
+            const canCancel = canDeleteOrder(
+              order.statusId,
+              order.volume,
+              order.matchVolume
+            );
+
+            return (
+              <div className="flex items-center justify-center gap-4">
+                {canEdit && (
+                  <button
+                    onClick={() => handleEditOrder(order)}
+                    className="text-text-title hover:text-text-subtitle"
+                    title="Sửa lệnh"
+                  >
+                    <FaPen size={14} />
+                  </button>
+                )}
+                {canCancel && (
+                  <button
+                    onClick={() => console.log("Hủy:", order)}
+                    className="text-red-400 hover:text-red-300"
+                    title="Hủy lệnh"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                )}
+              </div>
+            );
+          },
+        },
+      ],
+    },
+  ];
 
   const table = useReactTable({
     data: tableData,
@@ -207,7 +204,7 @@ function OrderHisTable() {
             <tr key={row.id} className=" hover:bg-surface">
               {row.getVisibleCells().map((cell) => {
                 const accessorKey = (
-                  cell.column.columnDef as { accessorKey?: keyof Order }
+                  cell.column.columnDef as { accessorKey?: keyof OrderTable }
                 )?.accessorKey;
                 const value = cell.getValue();
 
@@ -242,6 +239,14 @@ function OrderHisTable() {
           ))}
         </tbody>
       </table>
+      {openModalEdit && (
+        <EditOrderModal
+          isOpen={openModalEdit}
+          onClose={() => setOpenModalEdit(false)}
+          data={dataOrderEdit}
+          onSubmit={() => setOpenModalEdit(false)}
+        />
+      )}
     </div>
   );
 }

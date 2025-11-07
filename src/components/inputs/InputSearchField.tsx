@@ -1,53 +1,25 @@
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { type FieldError, type UseFormRegisterReturn } from "react-hook-form";
-import { LuSearch, LuX } from "react-icons/lu";
+import { LuSearch } from "react-icons/lu";
 
 type InputSearchProps = {
-  label?: string;
   placeholder?: string;
   error?: FieldError;
   registration?: UseFormRegisterReturn;
   className?: string;
-  defaultValue?: string;
-  onSearch?: (value: string) => void; // callback khi Enter hoặc click icon
-  debounceTime?: number; // thời gian chờ khi nhập
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  value: string;
 };
 
 export default function InputSearchField({
   placeholder,
   error,
-  registration,
   className,
-  defaultValue = "",
-  onSearch,
-  debounceTime = 0,
+  onChange,
+  value,
 }: InputSearchProps) {
-  const [value, setValue] = useState(defaultValue);
   const [open, setOpen] = useState(false);
-
-  // debounce search khi gõ
-  useEffect(() => {
-    if (!debounceTime || !onSearch) return;
-    const handler = setTimeout(() => {
-      onSearch(value.trim());
-    }, debounceTime);
-    return () => clearTimeout(handler);
-  }, [value, debounceTime, onSearch]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === "Enter" && onSearch) {
-        onSearch(value.trim());
-      }
-    },
-    [onSearch, value]
-  );
-
-  const handleClear = useCallback(() => {
-    setValue("");
-    onSearch?.("");
-  }, [onSearch]);
 
   return (
     <motion.div
@@ -62,14 +34,12 @@ export default function InputSearchField({
       {open && (
         <motion.input
           type="text"
-          placeholder={placeholder ?? "Nhập từ khóa tìm kiếm..."}
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
+          placeholder={placeholder ?? "Nhập từ khóa tìm kiếm..."}
           className={`${
             className ?? ""
           } border-none bg-input text-sm font-medium text-text-title placeholder:text-text-subtitle w-full caret-DTND-200`}
-          {...registration}
+          onChange={onChange}
           autoComplete="off"
           autoFocus
         />
@@ -80,15 +50,10 @@ export default function InputSearchField({
         type="button"
         onClick={() => {
           setOpen(!open);
-          onSearch?.(value.trim());
         }}
         className=" text-text-title hover:text-yellow-500"
       >
-        {value ? (
-          <LuX onClick={handleClear} />
-        ) : (
-          <LuSearch className="cursor-pointer" />
-        )}
+        <LuSearch className="cursor-pointer" />
       </button>
 
       {/* hiển thị lỗi */}

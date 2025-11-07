@@ -47,7 +47,6 @@ const SelectField: React.FC<Props> = ({
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, [showSelect]);
 
-  // Update selected option
   useEffect(() => {
     const opt = options.find((o) => o.value === value);
     setSelected(opt || null);

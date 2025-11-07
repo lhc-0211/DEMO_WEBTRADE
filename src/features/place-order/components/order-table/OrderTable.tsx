@@ -1,12 +1,11 @@
 import { useState } from "react";
+import type { typeTableActive } from "../../../../types/placeOrder";
 import OrderHisOvertime from "./OrderHisOvertime";
 import OrderHisTable from "./OrderHisTable";
 import OrderSearchForm from "./OrderSearchForm";
 
 export default function OrderTable() {
-  const [tabActive, setTabActive] = useState<
-    "ORDER" | "ORDER_OVERTIME" | "CONDITIONAL_ORDER" | "INVESTMENT_LIST"
-  >("ORDER");
+  const [tabActive, setTabActive] = useState<typeTableActive>("ORDER");
 
   return (
     <div className="w-full h-full flex flex-col gap-4">
@@ -45,7 +44,7 @@ export default function OrderTable() {
             Danh mục đầu tư
           </div> */}
         </div>
-        <OrderSearchForm />
+        <OrderSearchForm tabActive={tabActive} />
       </div>
       <div className="h-[calc(100%-52px)]">
         {tabActive === "ORDER" && <OrderHisTable />}

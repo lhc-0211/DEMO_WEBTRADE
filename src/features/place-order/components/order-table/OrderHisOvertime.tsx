@@ -35,72 +35,6 @@ type Order = {
   matchVolume: string;
 };
 
-const columns: ColumnDef<Order>[] = [
-  {
-    header: "LOẠI LỆNH",
-    columns: [
-      { header: "Order ID", accessorKey: "orderId" },
-      { header: "Thời gian đặt", accessorKey: "time" },
-      { header: "Lệnh", accessorKey: "side" },
-      { header: "Mã", accessorKey: "symbol" },
-    ],
-  },
-  {
-    header: "CHI TIẾT LỆNH",
-    columns: [
-      { header: "Giá đặt", accessorKey: "price" },
-      { header: "KL đặt", accessorKey: "volume" },
-      { header: "Giá trị đặt (₫)", accessorKey: "total" },
-      { header: "Trạng thái", accessorKey: "status" },
-    ],
-  },
-  {
-    header: "THAO TÁC",
-    columns: [
-      {
-        header: "Thao tác",
-        id: "action",
-        cell: ({ row }) => {
-          const order = row.original;
-          const canEdit = canEditOrder(
-            order.statusId,
-            order.volume,
-            order.matchVolume
-          );
-          const canCancel = canDeleteOrder(
-            order.statusId,
-            order.volume,
-            order.matchVolume
-          );
-
-          return (
-            <div className="flex items-center justify-center gap-4">
-              {canEdit && (
-                <button
-                  onClick={() => console.log("Sửa:", order)}
-                  className="text-text-title hover:text-text-subtitle"
-                  title="Sửa lệnh"
-                >
-                  <FaPen size={14} />
-                </button>
-              )}
-              {canCancel && (
-                <button
-                  onClick={() => console.log("Hủy:", order)}
-                  className="text-red-400 hover:text-red-300"
-                  title="Hủy lệnh"
-                >
-                  <FaTrash size={14} />
-                </button>
-              )}
-            </div>
-          );
-        },
-      },
-    ],
-  },
-];
-
 function OrderHisOvertime() {
   const dispatch = useAppDispatch();
 
@@ -150,6 +84,72 @@ function OrderHisOvertime() {
 
     setTableData(tableData);
   }, [listOrdersInday, preListOrdersInday]);
+
+  const columns: ColumnDef<Order>[] = [
+    {
+      header: "LOẠI LỆNH",
+      columns: [
+        { header: "Order ID", accessorKey: "orderId" },
+        { header: "Thời gian đặt", accessorKey: "time" },
+        { header: "Lệnh", accessorKey: "side" },
+        { header: "Mã", accessorKey: "symbol" },
+      ],
+    },
+    {
+      header: "CHI TIẾT LỆNH",
+      columns: [
+        { header: "Giá đặt", accessorKey: "price" },
+        { header: "KL đặt", accessorKey: "volume" },
+        { header: "Giá trị đặt (₫)", accessorKey: "total" },
+        { header: "Trạng thái", accessorKey: "status" },
+      ],
+    },
+    {
+      header: "THAO TÁC",
+      columns: [
+        {
+          header: "Thao tác",
+          id: "action",
+          cell: ({ row }) => {
+            const order = row.original;
+            const canEdit = canEditOrder(
+              order.statusId,
+              order.volume,
+              order.matchVolume
+            );
+            const canCancel = canDeleteOrder(
+              order.statusId,
+              order.volume,
+              order.matchVolume
+            );
+
+            return (
+              <div className="flex items-center justify-center gap-4">
+                {canEdit && (
+                  <button
+                    onClick={() => console.log("Sửa:", order)}
+                    className="text-text-title hover:text-text-subtitle"
+                    title="Sửa lệnh"
+                  >
+                    <FaPen size={14} />
+                  </button>
+                )}
+                {canCancel && (
+                  <button
+                    onClick={() => console.log("Hủy:", order)}
+                    className="text-red-400 hover:text-red-300"
+                    title="Hủy lệnh"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                )}
+              </div>
+            );
+          },
+        },
+      ],
+    },
+  ];
 
   const table = useReactTable({
     data: tableData,
