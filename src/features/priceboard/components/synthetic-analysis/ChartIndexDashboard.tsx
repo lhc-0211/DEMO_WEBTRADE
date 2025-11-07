@@ -2,12 +2,6 @@ import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useAppSelector } from "../../../../store/hook";
 import { selectMajorIndices } from "../../../../store/slices/stock/selector";
-import type {
-  ChartIndexItem,
-  MakeOptional,
-  PriceVolumeChart,
-} from "../../../../types";
-import { convertTimeStringToUnix } from "../../../../utils";
 import ChartIndexDashboardSkeleton from "./ChartIndexDashboardSkeleton";
 import ChartIndexInfo from "./ChartIndexInfo";
 
@@ -35,27 +29,27 @@ export default function ChartIndexDashboard() {
     noSwipingClass: "no-swiping",
   };
 
-  const handleProcessDataChart = (dataChart: ChartIndexItem[]) => {
-    const dataFormat: MakeOptional<PriceVolumeChart, "s"> = {
-      c: [],
-      h: [],
-      l: [],
-      o: [],
-      v: [],
-      t: [],
-    };
+  // const handleProcessDataChart = (dataChart: ChartIndexItem[]) => {
+  //   const dataFormat: MakeOptional<PriceVolumeChart, "s"> = {
+  //     c: [],
+  //     h: [],
+  //     l: [],
+  //     o: [],
+  //     v: [],
+  //     t: [],
+  //   };
 
-    dataChart.forEach((item: ChartIndexItem) => {
-      dataFormat.c.push(item.close);
-      dataFormat.h.push(item.high);
-      dataFormat.l.push(item.low);
-      dataFormat.o.push(item.open);
-      dataFormat.v.push(item.volume);
-      dataFormat.t.push(convertTimeStringToUnix(item.time));
-    });
+  //   dataChart.forEach((item: ChartIndexItem) => {
+  //     dataFormat.c.push(item.close);
+  //     dataFormat.h.push(item.high);
+  //     dataFormat.l.push(item.low);
+  //     dataFormat.o.push(item.open);
+  //     dataFormat.v.push(item.volume);
+  //     dataFormat.t.push(convertTimeStringToUnix(item.time));
+  //   });
 
-    return dataFormat;
-  };
+  //   return dataFormat;
+  // };
 
   return (
     <div className="w-full h-full">

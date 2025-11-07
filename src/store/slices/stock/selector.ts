@@ -49,6 +49,7 @@ export const selectIndicesByIds = createSelector(
     for (const id of ids) {
       if (indices[id]) result[id] = indices[id];
     }
+
     return result;
   }
 );
@@ -64,9 +65,9 @@ export const selectMajorIndices = createSelector(
     hnxIndex?: IndexData;
     upcomIndex?: IndexData;
   } => ({
-    vnIndex: indices["1:200"],
-    vn30Index: indices["1:002"],
-    hnxIndex: indices["2:200"],
+    vn30Index: indices["2:002"],
+    vnIndex: indices["2:100"],
+    hnxIndex: indices["2:300"],
     upcomIndex: indices["4:200"],
   })
 );

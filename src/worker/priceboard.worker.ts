@@ -27,7 +27,7 @@ const processQueue = (): void => {
   for (const snapshot of batch) {
     const { symbol } = snapshot;
 
-    // Nếu không visible → chỉ lưu prev, không xử lý
+    // Nếu không visible -> chỉ lưu prev, không xử lý
     if (!visibleSymbols.has(symbol)) {
       prevSnapshots.set(symbol, snapshot);
       continue;
