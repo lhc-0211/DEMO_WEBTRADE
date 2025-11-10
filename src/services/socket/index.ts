@@ -1,7 +1,9 @@
 import { store } from "../../store";
+import { setListStockByIdFromCache } from "../../store/slices/priceboard/slice";
 import {
   clearSnapshot,
   resetSnapshots,
+  updateIndex,
   updateSnapshots,
 } from "../../store/slices/stock/slice";
 import type {
@@ -80,21 +82,31 @@ const parseMessage = (raw: string): void => {
     return;
   }
 
+  //Snapshot listSymbol by groupId
+  if ("type" in msg && msg.type === "symbolList") {
+    const { groupId, symbols } = msg;
+    const cacheKey = `stocks_${groupId}`;
+
+    localStorage.setItem(cacheKey, JSON.stringify({ groupId, symbols }));
+    store.dispatch(setListStockByIdFromCache(groupId, symbols));
+    return;
+  }
+
   // INDEX: "1" === "mi"
-  if (msg[1] === "mi") {
-    // store.dispatch(
-    //   updateIndex([
-    //     {
-    //       id: msg[35],
-    //       value: +msg[29],
-    //       up: +msg[30],
-    //       down: +msg[31],
-    //       noChange: +msg[32],
-    //       totalVol: +msg[33],
-    //       time: msg[10],
-    //     },
-    //   ])
-    // );
+  if ("1" in msg && msg["1"] === "mi") {
+    store.dispatch(
+      updateIndex([
+        {
+          id: msg[35],
+          value: +msg[29],
+          up: +msg[30],
+          down: +msg[31],
+          noChange: +msg[32],
+          totalVol: +msg[33],
+          time: msg[10],
+        },
+      ])
+    );
     return;
   }
 
@@ -158,7 +170,7 @@ const parseMessage = (raw: string): void => {
     return;
   }
 
-  if (!msg.symbol || !msg[1]) return;
+  if (!("symbol" in msg) || !msg.symbol || !msg[1]) return;
 
   const symbol = msg.symbol;
   const existing = snapshots.get(symbol);
@@ -356,6 +368,12 @@ export const socketClient = {
 
   getSnapshot: (symbol: string) => snapshots.get(symbol),
   getAllSnapshots: () => [...snapshots.values()],
+
+  getSymbolList: (options: SubscribeOptions) => {
+    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    const sessionId = getOrCreateSessionId();
+    send({ type: "getSymbolList", sessionId, groupId: options?.groupId });
+  },
 
   setVisibleSymbols: (symbols: string[]) => {
     worker.postMessage({

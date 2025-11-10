@@ -2,7 +2,6 @@ import { memo, useEffect, useRef } from "react";
 import { socketClient } from "../../../../services/socket";
 import { useAppDispatch } from "../../../../store/hook";
 import { setListStockByIdFromCache } from "../../../../store/slices/priceboard/slice";
-import { fetchListStockById } from "../../../../store/slices/priceboard/thunks";
 import PriceBoardBase from "./base";
 
 interface BoardProps {
@@ -43,23 +42,27 @@ function Board({ id }: BoardProps) {
       }
     }
 
-    dispatch(fetchListStockById(id)).then((action) => {
-      if (fetchListStockById.fulfilled.match(action)) {
-        const response = action.payload;
-        const symbols = response.symbols;
+    // dispatch(fetchListStockById(id)).then((action) => {
+    //   if (fetchListStockById.fulfilled.match(action)) {
+    //     const response = action.payload;
+    //     const symbols = response.symbols;
 
-        // Lưu cache
-        localStorage.setItem(cacheKey, JSON.stringify(response));
+    //     // Lưu cache
+    //     localStorage.setItem(cacheKey, JSON.stringify(response));
 
-        // Cập nhật Redux
-        dispatch(setListStockByIdFromCache(id, symbols));
+    //     // Cập nhật Redux
+    //     dispatch(setListStockByIdFromCache(id, symbols));
 
-        // Subscribe
-        socketClient.subscribe({ groupId: id });
+    //     // Subscribe
+    //     socketClient.subscribe({ groupId: id });
 
-        groupIdRef.current = id;
-      }
-    });
+    //     groupIdRef.current = id;
+    //   }
+    // });
+
+    socketClient.getSymbolList({ groupId: id });
+    socketClient.subscribe({ groupId: id });
+    groupIdRef.current = id;
 
     return () => {
       if (groupIdRef.current) {

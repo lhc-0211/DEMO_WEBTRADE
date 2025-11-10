@@ -6,7 +6,7 @@ export interface SubscribeOptions {
 }
 
 export type SubscribeMessage = {
-  type: "subscribe" | "unsubscribe";
+  type: "subscribe" | "unsubscribe" | "getSymbolList";
   sessionId: string;
   groupId?: string;
   symbols?: string[];
@@ -97,6 +97,12 @@ type ForeignRoomMessage = {
   recv_ts: number;
 };
 
+type SymbolListMessage = {
+  type: "symbolList";
+  groupId: string;
+  symbols: string[];
+};
+
 export type FullSnapshotMessage = {
   "1": "snapshot";
   sessionId: string;
@@ -128,4 +134,5 @@ export type WebSocketMessageCompact =
   | ForeignTradeMessage
   | ForeignRoomMessage
   | FullSnapshotMessage
-  | IndexDataCompact;
+  | IndexDataCompact
+  | SymbolListMessage;
