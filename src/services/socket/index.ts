@@ -349,7 +349,38 @@ export const socketClient = {
   },
 
   unsubscribe: (options: SubscribeOptions) => {
-    if (options.groupId) subscribedGroups.delete(options.groupId);
+    if (options.groupId) {
+      subscribedGroups.delete(options.groupId);
+
+      //Lấy danh sách symbol của group từ localStorage
+      const cacheKey = `stocks_${options.groupId}`;
+      const cached = localStorage.getItem(cacheKey);
+      let groupSymbols: string[] = [];
+
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          groupSymbols = parsed.symbols ?? [];
+        } catch {
+          console.warn("Invalid cache for", options.groupId);
+        }
+      }
+
+      // Nếu có list symbol -> clear snapshot
+      if (groupSymbols.length > 0) {
+        groupSymbols.forEach((sym) => {
+          subscribedSymbols.delete(sym);
+          snapshots.delete(sym);
+          worker.postMessage({
+            type: "clear",
+            data: [sym],
+          } satisfies WorkerInputMessage);
+        });
+
+        store.dispatch(clearSnapshot(groupSymbols));
+      }
+    }
+
     if (options.symbols?.length) {
       options.symbols.forEach((s) => {
         subscribedSymbols.delete(s);
