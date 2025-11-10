@@ -3,11 +3,11 @@
   color: var(--color-stock-text-green) !important;
 }
 
-.UP .bg-status-index {
+.u .bg-status-index {
   background-color: var(--color-success-darker) !important;
 }
 
-.DOWN .bg-status-index {
+.d .bg-status-index {
   background-color: var(--color-error-darker) !important;
 }
 
@@ -15,15 +15,15 @@
   color: var(--color-stock-text-yellow) !important;
 }
 
-.EQUAL .bg-status-index {
+.e .bg-status-index {
   background-color: var(--color-warning-darker) !important;
 }
 
-.FLOOR .bg-status-index {
+.f .bg-status-index {
   background-color: var(--color-infomation-darker) !important;
 }
 
-.CEIL .bg-status-index {
+.c .bg-status-index {
   background-color: var(--color-features-darker) !important;
 }
 

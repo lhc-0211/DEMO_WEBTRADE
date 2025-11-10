@@ -48,14 +48,14 @@ export const PRICE_BOARD_MENU: PriceBoardMenuGroup[] = [
     label: "Thỏa thuận",
     items: [
       {
-        id: "deal_hose",
+        id: "hsx_tt",
         name: "Thỏa thuận HOSE",
         market: "HOSE",
         type: "deal",
       },
-      { id: "deal_hnx", name: "Thỏa thuận HNX", market: "HNX", type: "deal" },
+      { id: "hnx_tt", name: "Thỏa thuận HNX", market: "HNX", type: "deal" },
       {
-        id: "deal_upcom",
+        id: "upcom_tt",
         name: "Thỏa thuận UPCOM",
         market: "UPCOM",
         type: "deal",

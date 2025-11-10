@@ -15,12 +15,17 @@ export type SubscribeMessage = {
 export type IndexDataCompact = {
   1: "mi";
   10: string; // time
+  11: number; //change
+  12: number; //changePct
   29: number; // value
   30: number; //  up
   31: number; //  down
   32: number; // noChange
   33: number; // totalVol
+  34: number; // totalAmountTraded
   35: string; // id
+  36: number; //openIndex
+  37: string; //indexCompare
 };
 
 export type OrderBookDataCompact = {
@@ -125,6 +130,9 @@ export type IndexData = {
   noChange?: number; //32
   totalVol?: number; //33
   time?: string; //10
+  totalAmountTraded?: number; //34
+  indexCompare: string; //37
+  openIndex?: number; //36
 };
 
 export type WebSocketMessageCompact =

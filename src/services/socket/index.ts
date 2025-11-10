@@ -104,6 +104,11 @@ const parseMessage = (raw: string): void => {
           noChange: +msg[32],
           totalVol: +msg[33],
           time: msg[10],
+          change: +msg[11],
+          changePct: +msg[12],
+          totalAmountTraded: +msg[34],
+          openIndex: +msg[36],
+          indexCompare: msg[37],
         },
       ])
     );

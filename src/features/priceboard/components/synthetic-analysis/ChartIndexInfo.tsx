@@ -19,8 +19,7 @@ export default function ChartIndexInfo(props: Props) {
           {dataIndex && mapIdToNameIndex(dataIndex.id)}
         </span>
         <div
-          // className={`flex flex-row gap-2 items-center whitespace-nowrap ${dataIndex.status}`}
-          className={`flex flex-row gap-2 items-center whitespace-nowrap`}
+          className={`flex flex-row gap-2 items-center whitespace-nowrap ${dataIndex?.indexCompare}`}
         >
           <div className="p-0.5 rounded grid place-items-center bg-status-index">
             <FaArrowUpLong className=" w-3 h-3" />
@@ -30,8 +29,8 @@ export default function ChartIndexInfo(props: Props) {
               {dataIndex && numberFormat(dataIndex.value)}
             </span>
             <span className="text-[10px] font-semibold">
-              {/* ({dataIndex.change} / {dataIndex.percentChange}%) */}({"-"} /{" "}
-              {"-"}%)
+              ({dataIndex && dataIndex.change} /{" "}
+              {dataIndex && dataIndex?.changePct}%)
             </span>
           </div>
         </div>
@@ -40,12 +39,14 @@ export default function ChartIndexInfo(props: Props) {
       {/* value, volume */}
       <div className="flex flex-col gap-1">
         <span className="text-xs font-normal text-text-title">
-          {/* {numberFormat(dataIndex.totalVolumeTraded)}{" "} */}
-          {"-"} <span className="text-text-subtitle">CP</span>
+          {numberFormat(dataIndex?.totalVol)}{" "}
+          <span className="text-text-subtitle">CP</span>
         </span>
         <span className="text-xs font-normal text-text-title">
-          {/* {numberFormat(dataIndex.grossTradeAmt / 10e8)}{" "} */}
-          {"-"} <span className="text-text-subtitle">Tỷ</span>
+          {dataIndex &&
+            dataIndex.totalAmountTraded &&
+            numberFormat(dataIndex?.totalAmountTraded / 10e8)}{" "}
+          <span className="text-text-subtitle">Tỷ</span>
         </span>
       </div>
 

@@ -24,8 +24,8 @@ import { useAppSelector } from "../../../../../store/hook";
 import { selectSymbolsByBoardId } from "../../../../../store/slices/priceboard/selector.ts";
 import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
 import type { SnapshotDataCompact } from "../../../../../types/socketCient.ts";
-import BodyTable from "./BodyTable";
-import HeaderColumns from "./HeaderTable";
+import BodyTableBase from "./BodyTable";
+import HeaderColumnsBase from "./HeaderTable";
 
 const ROW_HEIGHT = 29;
 const HEADER_HEIGHT = 58;
@@ -84,7 +84,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
           style={{ zIndex: 100 }}
         />
       )}
-      <BodyTable
+      <BodyTableBase
         symbol={symbol}
         snapshot={snapshot}
         dragListeners={listeners}
@@ -238,7 +238,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
     >
       <div className="min-w-[1812px] flex flex-col">
         <div style={{ height: HEADER_HEIGHT }}>
-          <HeaderColumns />
+          <HeaderColumnsBase />
         </div>
 
         <DndContext

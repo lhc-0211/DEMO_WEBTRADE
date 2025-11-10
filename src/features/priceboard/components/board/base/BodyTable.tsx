@@ -131,7 +131,7 @@ interface BodyTableProps {
   dragAttributes?: DraggableAttributes;
 }
 
-function BodyTable({
+function BodyTableBase({
   symbol,
   snapshot,
   dragListeners,
@@ -222,4 +222,4 @@ function BodyTable({
   );
 }
 
-export default memo(BodyTable);
+export default memo(BodyTableBase);

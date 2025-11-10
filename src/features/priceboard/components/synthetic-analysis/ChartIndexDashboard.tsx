@@ -10,10 +10,10 @@ export default function ChartIndexDashboard() {
     useAppSelector(selectMajorIndices);
 
   const indicesList = [
-    { key: "1:200", label: "VN-Index", data: vnIndex },
-    { key: "1:002", label: "VN30", data: vn30Index },
-    { key: "2:200", label: "HNX", data: hnxIndex },
-    { key: "4:200", label: "UPCoM", data: upcomIndex },
+    { key: "1:001", label: "VN-Index", data: vnIndex },
+    { key: "1:100", label: "VN30", data: vn30Index },
+    { key: "2:001", label: "HNX", data: hnxIndex },
+    { key: "4:001", label: "UPCoM", data: upcomIndex },
   ].filter((item) => !!item.data);
 
   const swiperProps = {

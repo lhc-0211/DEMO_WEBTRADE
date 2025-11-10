@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ALL_COLUMNS } from "../../../../../configs/headerPriceBoard";
 import type { Column } from "../../../../../types";
 
-export default function HeaderColumns() {
+export default function HeaderColumnsBase() {
   const [columns] = useState<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
     if (saved) {

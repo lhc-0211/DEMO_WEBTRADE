@@ -65,9 +65,9 @@ export const selectMajorIndices = createSelector(
     hnxIndex?: IndexData;
     upcomIndex?: IndexData;
   } => ({
-    vn30Index: indices["2:002"],
-    vnIndex: indices["2:100"],
-    hnxIndex: indices["2:300"],
-    upcomIndex: indices["4:200"],
+    vnIndex: indices["1:001"],
+    vn30Index: indices["1:100"],
+    hnxIndex: indices["2:001"],
+    upcomIndex: indices["4:001"],
   })
 );
