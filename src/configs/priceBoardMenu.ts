@@ -2,14 +2,6 @@ import type { PriceBoardMenuGroup } from "../types";
 
 export const PRICE_BOARD_MENU: PriceBoardMenuGroup[] = [
   {
-    key: "customer",
-    label: "Nhóm yêu thích",
-    items: [
-      { id: "favorite", name: "Yêu thích", isCustom: true },
-      { id: "all", name: "Toàn thị trường" },
-    ],
-  },
-  {
     key: "hose",
     label: "HOSE",
     items: [

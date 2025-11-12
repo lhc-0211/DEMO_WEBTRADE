@@ -11,6 +11,11 @@ export default function MenuBoard({
 }) {
   return (
     <div className="flex flex-wrap gap-1">
+      <button
+        className={`px-2 py-1 rounded-[26px] text-text-title text-sm flex items-center `}
+      >
+        Danh mục yêu thích
+      </button>
       {PRICE_BOARD_MENU.map((group) => {
         const { key, items } = group;
 
