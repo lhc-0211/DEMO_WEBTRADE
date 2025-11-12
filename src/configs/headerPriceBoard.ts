@@ -1,5 +1,4 @@
-// columnsConfig.ts
-export const ALL_COLUMNS = [
+export const ALL_COLUMNS_BASE = [
   // { key: "mark", label: "", default: true, width: 24 },
   { key: "symbol", label: "CK", default: true, width: 68 },
   { key: "ceil", label: "Trần", default: true, width: 65 },
@@ -80,3 +79,65 @@ export const KEYS_COLOR = [
   "avg",
   "low",
 ] as const;
+
+export const ALL_COLUMNS_CW = [
+  { key: "symbol", label: "CK", default: true, width: 68 },
+  { key: "tcph", label: "TCPH", default: true, width: 78 },
+  { key: "gdcc", label: "GDCC", default: true, width: 98 },
+  { key: "ceil", label: "Trần", default: true, width: 65 },
+  { key: "floor", label: "Sàn", default: true, width: 65 },
+  { key: "ref", label: "TC", default: true, width: 65 },
+  {
+    key: "buy",
+    label: "Bên mua",
+    default: true,
+    children: [
+      { key: "priceBuy3", label: "Giá 3", default: true, width: 65 },
+      { key: "volumeBuy3", label: "KL 3", default: true, width: 65 },
+      { key: "priceBuy2", label: "Giá 2", default: true, width: 65 },
+      { key: "volumeBuy2", label: "KL 2", default: true, width: 65 },
+      { key: "priceBuy1", label: "Giá 1", default: true, width: 65 },
+      { key: "volumeBuy1", label: "KL 1", default: true, width: 65 },
+    ],
+  },
+  {
+    key: "match",
+    label: "Khớp lệnh",
+    default: true,
+    children: [
+      { key: "lastPrice", label: "Khớp", default: true, width: 60 },
+      { key: "lastVolume", label: "KL", default: true, width: 65 },
+      { key: "change", label: "+/-", default: true, width: 55 },
+      { key: "changePc", label: "%", default: true, width: 55 },
+    ],
+  },
+  {
+    key: "sell",
+    label: "Bên bán",
+    default: true,
+    children: [
+      { key: "priceSell1", label: "Giá 1", default: true, width: 68 },
+      { key: "volumeSell1", label: "KL 1", default: true, width: 68 },
+      { key: "priceSell2", label: "Giá 2", default: true, width: 68 },
+      { key: "volumeSell2", label: "KL 2", default: true, width: 68 },
+      { key: "priceSell3", label: "Giá 3", default: true, width: 68 },
+      { key: "volumeSell3", label: "KL 3", default: true, width: 68 },
+    ],
+  },
+  { key: "high", label: "Cao", default: false, width: 50 },
+  { key: "low", label: "Thấp", default: false, width: 50 },
+  { key: "totalVol", label: "Tổng KL", default: true, width: 80 },
+  {
+    key: "stockBase",
+    label: "CK cơ sở",
+    default: false,
+    children: [
+      { key: "symbolStock", label: "CK", default: true, width: 60 },
+      { key: "lastPrice", label: "Giá", default: true, width: 60 },
+    ],
+  },
+  { key: "th", label: "TH", default: true, width: 80 },
+];
+
+export const ROW_HEIGHT = 29;
+export const HEADER_HEIGHT = 58;

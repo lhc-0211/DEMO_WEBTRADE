@@ -6,10 +6,11 @@ export interface SubscribeOptions {
 }
 
 export type SubscribeMessage = {
-  type: "subscribe" | "unsubscribe" | "getSymbolList";
+  type: "subscribe" | "unsubscribe" | "getSymbolList" | "request_nego";
   sessionId: string;
   groupId?: string;
   symbols?: string[];
+  marketId?: string;
 };
 
 export type IndexDataCompact = {

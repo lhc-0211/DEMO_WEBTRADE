@@ -18,18 +18,17 @@ import { CSS } from "@dnd-kit/utilities";
 import { memo, useCallback, useEffect, useState } from "react";
 import { List, type ListRowProps } from "react-virtualized";
 import type { RenderedRows } from "react-virtualized/dist/es/List";
-import {
-  HEADER_HEIGHT,
-  ROW_HEIGHT,
-} from "../../../../../configs/headerPriceBoard.ts";
 import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts";
 import { socketClient } from "../../../../../services/socket";
 import { useAppSelector } from "../../../../../store/hook";
 import { selectSymbolsByBoardId } from "../../../../../store/slices/priceboard/selector.ts";
 import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
 import type { SnapshotDataCompact } from "../../../../../types/socketCient.ts";
-import BodyTableBase from "./BodyTable";
-import HeaderColumnsBase from "./HeaderTable";
+import BodyTableCW from "./BodyTable";
+import HeaderColumnsCW from "./HeaderTable";
+
+const ROW_HEIGHT = 29;
+const HEADER_HEIGHT = 58;
 
 // === CẤU TRÚC CACHE ===
 interface CachedBoardData {
@@ -38,7 +37,7 @@ interface CachedBoardData {
 }
 
 // === PROPS ===
-interface PriceBoardBaseProps {
+interface PriceBoardCWProps {
   boardId: string;
 }
 
@@ -85,7 +84,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
           style={{ zIndex: 100 }}
         />
       )}
-      <BodyTableBase
+      <BodyTableCW
         symbol={symbol}
         snapshot={snapshot}
         dragListeners={listeners}
@@ -96,7 +95,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
 }
 
 // === MAIN COMPONENT ===
-function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
+function PriceBoardBase({ boardId }: PriceBoardCWProps) {
   const { containerRef } = usePerfectScrollbar();
   const [containerWidth, setContainerWidth] = useState(1200);
   const [listHeight, setListHeight] = useState(500);
@@ -239,7 +238,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
     >
       <div className="min-w-[1812px] flex flex-col">
         <div style={{ height: HEADER_HEIGHT }}>
-          <HeaderColumnsBase />
+          <HeaderColumnsCW />
         </div>
 
         <DndContext

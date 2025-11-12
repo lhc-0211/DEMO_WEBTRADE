@@ -3,7 +3,7 @@ import type {
   DraggableSyntheticListeners,
 } from "@dnd-kit/core";
 import { memo, useEffect, useRef } from "react";
-import { ALL_COLUMNS_BASE } from "../../../../../configs/headerPriceBoard";
+import { ALL_COLUMNS_CW } from "../../../../../configs/headerPriceBoard";
 import type {
   Column,
   PriceCompare,
@@ -131,7 +131,7 @@ interface BodyTableProps {
   dragAttributes?: DraggableAttributes;
 }
 
-function BodyTableBase({
+function BodyTableCw({
   symbol,
   snapshot,
   dragListeners,
@@ -140,9 +140,9 @@ function BodyTableBase({
   const columns: Column[] = (() => {
     const saved = localStorage.getItem("clientConfig");
     try {
-      return saved ? JSON.parse(saved) : ALL_COLUMNS_BASE;
+      return saved ? JSON.parse(saved) : ALL_COLUMNS_CW;
     } catch {
-      return ALL_COLUMNS_BASE;
+      return ALL_COLUMNS_CW;
     }
   })();
 
@@ -222,4 +222,4 @@ function BodyTableBase({
   );
 }
 
-export default memo(BodyTableBase);
+export default memo(BodyTableCw);

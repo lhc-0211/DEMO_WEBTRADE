@@ -38,11 +38,11 @@ export const PRICE_BOARD_MENU: PriceBoardMenuGroup[] = [
     label: "Chứng quyền",
     items: [{ id: "cw", name: "Chứng quyền" }],
   },
-  {
-    key: "etf",
-    label: "ETF",
-    items: [{ id: "etf", name: "ETFs" }],
-  },
+  // {
+  //   key: "etf",
+  //   label: "ETF",
+  //   items: [{ id: "etf", name: "ETFs" }],
+  // },
   {
     key: "deal",
     label: "Thỏa thuận",

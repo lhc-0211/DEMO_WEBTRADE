@@ -395,6 +395,15 @@ export const socketClient = {
     sendSubscribeRequest("unsubscribe", options);
   },
 
+  requestNego: (marketId: string) => {
+    const sessionId = getOrCreateSessionId();
+    send({
+      type: "request_nego",
+      sessionId: sessionId,
+      marketId,
+    });
+  },
+
   onMessage: (handler: (data: SnapshotDataCompact) => void) => {
     messageHandlers.push(handler);
     return () => {

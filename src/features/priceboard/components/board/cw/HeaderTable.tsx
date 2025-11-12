@@ -1,18 +1,18 @@
 import { useState } from "react";
-import { ALL_COLUMNS_BASE } from "../../../../../configs/headerPriceBoard";
+import { ALL_COLUMNS_CW } from "../../../../../configs";
 import type { Column } from "../../../../../types";
 
-export default function HeaderColumnsBase() {
+export default function HeaderColumnsCW() {
   const [columns] = useState<Column[]>(() => {
     const saved = localStorage.getItem("clientConfig");
     if (saved) {
       try {
         return JSON.parse(saved);
       } catch {
-        return ALL_COLUMNS_BASE;
+        return ALL_COLUMNS_CW;
       }
     }
-    return ALL_COLUMNS_BASE;
+    return ALL_COLUMNS_CW;
   });
 
   return (
