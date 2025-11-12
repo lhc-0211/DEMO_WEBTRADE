@@ -11,8 +11,8 @@ export default function ChartIndexDashboard() {
 
   const indicesList = [
     { key: "1:001", label: "VN-Index", data: vnIndex },
-    { key: "1:100", label: "VN30", data: vn30Index },
-    { key: "2:001", label: "HNX", data: hnxIndex },
+    { key: "1:105", label: "VN30", data: vn30Index },
+    { key: "2:002", label: "HNX", data: hnxIndex },
     { key: "4:001", label: "UPCoM", data: upcomIndex },
   ].filter((item) => !!item.data);
 

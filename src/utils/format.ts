@@ -54,9 +54,9 @@ export function mapIdToNameIndex(id: string) {
     "101": "VN30-Index",
     "002": "HNX-Index",
     "301": "UPCOM-Index",
-    "1:100": "VN30-Index",
+    "1:105": "VN30-Index",
     "1:001": "VN-Index",
-    "2:001": "HNX-Index",
+    "2:002": "HNX-Index",
     "4:001": "UPCOM-Index",
   };
 
