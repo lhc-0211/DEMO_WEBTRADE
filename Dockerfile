@@ -5,7 +5,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 COPY . .env ./
 RUN npm run build
 
-FROM nginx:stable-alpine
+FROM nginx:stable-alpine-slim
 WORKDIR /app
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
