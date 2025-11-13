@@ -142,12 +142,15 @@ function DropdownFavorites({
     setAddingNew(false);
   };
 
-  const handleRemove = (favKey: string) => {
-    setFavorites((prev) => {
+  const handleRemove = async (favKey: string) => {
+    await setFavorites((prev) => {
       const newFavs = prev.filter((f) => f.key !== favKey);
       localStorage.setItem("favorites", JSON.stringify(newFavs));
       return newFavs;
     });
+
+    handleMouseLeave();
+    onChange("vn30");
   };
 
   const activeItem = favorites.find((item) => item.id === active);

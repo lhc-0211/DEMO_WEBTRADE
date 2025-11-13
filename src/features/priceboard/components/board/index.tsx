@@ -104,15 +104,14 @@ function Board({ id }: BoardProps) {
 
   return (
     <>
-      {(id === "hose" ||
-        id === "vn30" ||
-        id === "hnx" ||
-        id === "hnx30" ||
-        id === "upcom" ||
-        id === "hsx_ll" ||
-        id === "hnx_ll" ||
-        id === "upcom_ll") && <PriceBoardBase boardId={id} />}
-
+      {id === "hose" && <PriceBoardBase boardId={id} />}
+      {id === "vn30" && <PriceBoardBase boardId={id} />}
+      {id === "hnx30" && <PriceBoardBase boardId={id} />}
+      {id === "hnx" && <PriceBoardBase boardId={id} />}
+      {id === "upcom" && <PriceBoardBase boardId={id} />}
+      {id === "hsx_ll" && <PriceBoardBase boardId={id} />}
+      {id === "hnx_ll" && <PriceBoardBase boardId={id} />}
+      {id === "upcom_ll" && <PriceBoardBase boardId={id} />}
       {id === "cw" && <PriceBoardCW boardId={id} />}
 
       {(id === "hsx_tt" || id === "hnx_tt" || id === "upcom_tt") && (

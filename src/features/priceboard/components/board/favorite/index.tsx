@@ -202,12 +202,6 @@ function PriceBoardFavorite({ boardId }: PriceBoardFavoriteProps) {
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
-          onDragStart={() => {
-            document.body.style.cursor = "grabbing";
-          }}
-          onDragCancel={() => {
-            document.body.style.cursor = "default";
-          }}
         >
           <SortableContext
             items={symbols}

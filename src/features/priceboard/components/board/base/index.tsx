@@ -187,15 +187,6 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
     [symbols]
   );
 
-  useEffect(() => {
-    updateVisibleSymbols({
-      startIndex: 0,
-      stopIndex: 19,
-      overscanStartIndex: 0,
-      overscanStopIndex: 19,
-    });
-  }, [boardId, symbols, updateVisibleSymbols]);
-
   // === DnD SENSORS ===
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -255,12 +246,6 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
           sensors={sensors}
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
-          onDragStart={() => {
-            document.body.style.cursor = "grabbing";
-          }}
-          onDragCancel={() => {
-            document.body.style.cursor = "default";
-          }}
         >
           <SortableContext
             items={symbols}

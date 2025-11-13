@@ -175,19 +175,6 @@ function BodyTableBase({
                   snapshot={snapshot}
                   disableFlash={true} // TẮT FLASH CHO SYMBOL
                 />
-                <svg
-                  className="w-4 h-4 ml-1 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
               </div>
             </div>
           );
