@@ -1,0 +1,5 @@
+services:
+  web-trade:
+    image: git.dtnd.vn/rnd/web-trade
+    ports:
+      - "80:80"
