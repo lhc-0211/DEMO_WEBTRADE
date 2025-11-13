@@ -90,7 +90,7 @@ export default function InputSearchFieldStock({
         }
 
         return (
-          <div className="flex flex-col gap-[4px]">
+          <div className="flex flex-col gap-1">
             <span className="font-semibold text-text-title uppercase">
               {option.value}
               {option.post_to && (

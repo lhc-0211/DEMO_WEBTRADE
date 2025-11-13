@@ -28,6 +28,10 @@ const stockSlice = createSlice({
       for (const sym of action.payload) delete state.snapshots[sym];
     },
 
+    clearSnapshotAll(state) {
+      state.snapshots = {};
+    },
+
     resetSnapshots(state) {
       state.snapshots = {};
       state.indices = {};
@@ -52,6 +56,7 @@ export const {
   resetSnapshots,
   setSubscribedOrder,
   updateIndex,
+  clearSnapshotAll,
 } = stockSlice.actions;
 
 export default stockSlice.reducer;

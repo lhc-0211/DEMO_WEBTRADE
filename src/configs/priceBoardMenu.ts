@@ -33,7 +33,7 @@ export const PRICE_BOARD_MENU: PriceBoardMenuGroup[] = [
   // {
   //   key: "etf",
   //   label: "ETF",
-  //   items: [{ id: "etf", name: "ETFs" }],
+  //   items: [{ id: "etf", name: "ETFs", symbols: ["AAA", "ACB"] }],
   // },
   {
     key: "deal",

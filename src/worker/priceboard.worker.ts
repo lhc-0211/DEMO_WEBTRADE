@@ -123,10 +123,24 @@ self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
           }
         }
       }
+      console.log(
+        "[Worker] Visible symbols hiện tại:",
+        Array.from(visibleSymbols)
+      );
       break;
 
     case "clear":
       data.forEach((sym) => prevSnapshots.delete(sym));
+      break;
+
+    case "clearAll":
+      queue = [];
+      prevSnapshots.clear();
+      visibleSymbols.clear();
+      isProcessing = false;
+      self.postMessage({
+        type: "clearedAll",
+      } satisfies WorkerOutputMessage);
       break;
   }
 };

@@ -2,6 +2,7 @@ import { store } from "../../store";
 import { setListStockByIdFromCache } from "../../store/slices/priceboard/slice";
 import {
   clearSnapshot,
+  clearSnapshotAll,
   resetSnapshots,
   updateIndex,
   updateSnapshots,
@@ -393,6 +394,49 @@ export const socketClient = {
       store.dispatch(clearSnapshot(options.symbols));
     }
     sendSubscribeRequest("unsubscribe", options);
+  },
+
+  unsubscribeAll: () => {
+    const sessionId = getOrCreateSessionId();
+
+    if (socket?.readyState === WebSocket.OPEN) {
+      try {
+        socket.send(
+          JSON.stringify({
+            type: "unsubscribe",
+            sessionId,
+          } satisfies SubscribeMessage)
+        );
+      } catch (err) {
+        console.error("Failed to send unsubscribeAll:", err);
+      }
+    }
+
+    // Xóa subscription sets
+    subscribedSymbols.clear();
+    subscribedGroups.clear();
+    snapshots.clear();
+    store.dispatch(clearSnapshotAll());
+    worker.postMessage({
+      type: "clearAll",
+    } satisfies WorkerInputMessage);
+
+    // Reset batch và các hàng đợi
+    pendingBatch = [];
+    if (rafId !== null) {
+      if (
+        typeof cancelIdleCallback === "function" &&
+        typeof requestIdleCallback === "function"
+      ) {
+        cancelIdleCallback(rafId);
+      } else {
+        cancelAnimationFrame(rafId);
+      }
+      rafId = null;
+    }
+
+    // Xóa offline queue (nếu có)
+    offlineQueue = offlineQueue.filter((job) => job.action !== "subscribe");
   },
 
   requestNego: (marketId: string) => {

@@ -11,15 +11,20 @@ export interface FlashResult {
 export type WorkerInputMessage =
   | { type: "batch"; data: SnapshotDataCompact[] }
   | { type: "visible"; data: string[] }
-  | { type: "clear"; data: string[] };
+  | { type: "clear"; data: string[] }
+  | { type: "clearAll"; data?: never };
 
 // === OUTPUT: worker -> main ===
-export type WorkerOutputMessage = {
-  type: "update";
-  data: {
-    flashes: FlashResult[];
-    colors: Record<string, Record<string, PriceCompare | "t">>;
-  };
-};
+export type WorkerOutputMessage =
+  | {
+      type: "update";
+      data: {
+        flashes: FlashResult[];
+        colors: Record<string, Record<string, PriceCompare | "t">>;
+      };
+    }
+  | {
+      type: "clearedAll";
+    };
 
 export type OrderBookValue = string | string[] | undefined;

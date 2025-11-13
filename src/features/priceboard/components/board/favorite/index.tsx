@@ -22,23 +22,18 @@ import {
   HEADER_HEIGHT,
   ROW_HEIGHT,
 } from "../../../../../configs/headerPriceBoard.ts";
-import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts";
-import { socketClient } from "../../../../../services/socket";
-import { useAppSelector } from "../../../../../store/hook";
+import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts.ts";
+import { socketClient } from "../../../../../services/socket/index.ts";
+import { useAppSelector } from "../../../../../store/hook.ts";
 import { selectSymbolsByBoardId } from "../../../../../store/slices/priceboard/selector.ts";
-import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
+import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector.ts";
+import type { Favorite } from "../../../../../types/priceBoard.ts";
 import type { SnapshotDataCompact } from "../../../../../types/socketCient.ts";
-import BodyTableBase from "./BodyTable";
-import HeaderColumnsBase from "./HeaderTable";
-
-// === CẤU TRÚC CACHE ===
-interface CachedBoardData {
-  groupId: string;
-  symbols: string[];
-}
+import BodyTableFavorite from "./BodyTable.tsx";
+import HeaderColumnsFavorite from "./HeaderTable.tsx";
 
 // === PROPS ===
-interface PriceBoardBaseProps {
+interface PriceBoardFavoriteProps {
   boardId: string;
 }
 
@@ -85,7 +80,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
           style={{ zIndex: 100 }}
         />
       )}
-      <BodyTableBase
+      <BodyTableFavorite
         symbol={symbol}
         snapshot={snapshot}
         dragListeners={listeners}
@@ -96,7 +91,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
 }
 
 // === MAIN COMPONENT ===
-function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
+function PriceBoardFavorite({ boardId }: PriceBoardFavoriteProps) {
   const { containerRef } = usePerfectScrollbar();
   const [containerWidth, setContainerWidth] = useState(1200);
   const [listHeight, setListHeight] = useState(500);
@@ -113,29 +108,6 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
 
   // === KHỞI TẠO TỪ CACHE ===
   useEffect(() => {
-    const cacheKey = `stocks_${boardId}`;
-    const cachedData = localStorage.getItem(cacheKey);
-
-    if (cachedData) {
-      try {
-        const parsed = JSON.parse(cachedData) as unknown;
-        if (
-          typeof parsed === "object" &&
-          parsed !== null &&
-          "groupId" in parsed &&
-          "symbols" in parsed &&
-          Array.isArray((parsed as CachedBoardData).symbols)
-        ) {
-          const data = parsed as CachedBoardData;
-          const ordered = data.symbols.filter((s) => baseSymbols.includes(s));
-          const missing = baseSymbols.filter((s) => !ordered.includes(s));
-          setSymbols([...ordered, ...missing]);
-          return;
-        }
-      } catch (e) {
-        console.warn("Failed to parse cache", e);
-      }
-    }
     setSymbols(baseSymbols);
   }, [baseSymbols, boardId]);
 
@@ -145,23 +117,6 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
       const newSymbols = [...prev];
       baseSymbols.forEach((s) => !newSymbols.includes(s) && newSymbols.push(s));
       const filtered = newSymbols.filter((s) => baseSymbols.includes(s));
-
-      const cacheKey = `stocks_${boardId}`;
-      const cachedData = localStorage.getItem(cacheKey);
-      if (cachedData) {
-        try {
-          const parsed = JSON.parse(cachedData) as Partial<CachedBoardData>;
-          localStorage.setItem(
-            cacheKey,
-            JSON.stringify({
-              groupId: parsed.groupId || boardId,
-              symbols: filtered,
-            })
-          );
-        } catch (err) {
-          console.error(err);
-        }
-      }
       return filtered;
     });
   }, [baseSymbols, boardId]);
@@ -187,16 +142,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
     [symbols]
   );
 
-  useEffect(() => {
-    updateVisibleSymbols({
-      startIndex: 0,
-      stopIndex: 19,
-      overscanStartIndex: 0,
-      overscanStopIndex: 19,
-    });
-  }, [boardId, symbols, updateVisibleSymbols]);
-
-  // === DnD SENSORS ===
+  // ===  DnD SENSORS ===
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -212,22 +158,23 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
       const newIndex = items.indexOf(over.id as string);
       const newOrder = arrayMove(items, oldIndex, newIndex);
 
-      const cacheKey = `stocks_${boardId}`;
+      const cacheKey = "favorites";
       const cachedData = localStorage.getItem(cacheKey);
-      const updated: CachedBoardData = cachedData
-        ? {
-            ...(JSON.parse(cachedData) as Partial<CachedBoardData>),
-            groupId: boardId,
-            symbols: newOrder,
-          }
-        : { groupId: boardId, symbols: newOrder };
 
-      localStorage.setItem(cacheKey, JSON.stringify(updated));
+      if (cachedData) {
+        const favorites: Favorite[] = JSON.parse(cachedData);
+
+        const favorite = favorites[0];
+        favorite.symbols = newOrder;
+
+        localStorage.setItem(cacheKey, JSON.stringify(favorites));
+      }
+
       return newOrder;
     });
   };
 
-  // === ROW RENDERER ===
+  // === 7. ROW RENDERER ===
   const rowRenderer = ({ index, key, style }: ListRowProps) => {
     const symbol = symbols[index];
     if (!symbol) return null;
@@ -248,7 +195,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
     >
       <div className="min-w-[1812px] flex flex-col">
         <div style={{ height: HEADER_HEIGHT }}>
-          <HeaderColumnsBase />
+          <HeaderColumnsFavorite />
         </div>
 
         <DndContext
@@ -282,4 +229,4 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
   );
 }
 
-export default memo(PriceBoardBase);
+export default memo(PriceBoardFavorite);

@@ -2,9 +2,11 @@ import { memo, useEffect, useRef } from "react";
 import { socketClient } from "../../../../services/socket";
 import { useAppDispatch } from "../../../../store/hook";
 import { setListStockByIdFromCache } from "../../../../store/slices/priceboard/slice";
+import type { Favorite } from "../../../../types";
 import PriceBoardBase from "./base";
 import PriceBoardCW from "./cw";
 import PriceBoardDeal from "./deal";
+import PriceBoardFavorite from "./favorite";
 
 interface BoardProps {
   id: string;
@@ -19,12 +21,32 @@ function Board({ id }: BoardProps) {
 
     // Unsubscribe nhóm trước đó nếu có
     if (groupIdRef.current) {
-      if (["hsx_tt", "hnx_tt", "upcom_tt"].includes(id)) {
-        console.log("unsub tt");
-      } else {
-        socketClient.unsubscribe({ groupId: groupIdRef.current });
-      }
+      socketClient.unsubscribeAll();
       groupIdRef.current = "";
+    }
+
+    //TODO: Danh mục yêu thích
+    if (id.startsWith("fav_")) {
+      const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+      const fav = favorites.find((f: Favorite) => f.id === id);
+      if (fav && Array.isArray(fav.symbols)) {
+        // Gửi symbols từ danh mục yêu thích lên redux
+        dispatch(setListStockByIdFromCache(id, fav.symbols));
+
+        // Subscribe theo danh mục này
+        socketClient.subscribe({
+          symbols: [...fav.symbols], //đăng ký theo danh sách mã
+        });
+
+        groupIdRef.current = id;
+        return;
+      } else {
+        console.warn(
+          "Không tìm thấy danh mục yêu thích hoặc danh mục trống:",
+          id
+        );
+        return;
+      }
     }
 
     // Nếu id là các thị trường thỏa thuận
@@ -74,11 +96,7 @@ function Board({ id }: BoardProps) {
     // Cleanup khi unmount hoặc id thay đổi
     return () => {
       if (groupIdRef.current) {
-        if (["hsx_tt", "hnx_tt", "upcom_tt"].includes(id)) {
-          console.log("unsub tt");
-        } else {
-          socketClient.unsubscribe({ groupId: groupIdRef.current });
-        }
+        socketClient.unsubscribeAll();
         groupIdRef.current = "";
       }
     };
@@ -100,6 +118,8 @@ function Board({ id }: BoardProps) {
       {(id === "hsx_tt" || id === "hnx_tt" || id === "upcom_tt") && (
         <PriceBoardDeal boardId={id} />
       )}
+
+      {id?.startsWith("fav_") && <PriceBoardFavorite boardId={id} />}
     </>
   );
 }

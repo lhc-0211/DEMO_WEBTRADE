@@ -18,7 +18,7 @@ export default function MenuDashboard(props: Props) {
     <div className="flex flex-row items-center justify-between">
       <MenuBoard active={active} onChange={onChange} />
       <div className="flex flex-row gap-1 items-center">
-        <FormSearchStock />
+        <FormSearchStock active={active} />
         <MdSettings
           className="text-lg"
           onClick={() => setIsOpenConfig(true)}

@@ -16,7 +16,7 @@ const Button: React.FC<ButtonProps> = ({
     "px-4 py-2 rounded-xl text-sm font-medium transition-colors duration-200 flex items-center justify-center gap-2";
 
   const variants = {
-    primary: "bg-yellow-300 text-text-title hover:bg-yellow-200",
+    primary: "bg-DTND-500 text-text-title hover:bg-DTND-600",
     secondary: "bg-gray-600 text-text-title hover:bg-gray-500",
     danger: "bg-red-400 text-text-title hover:bg-red-300",
     close: "bg-button-gray text-text-title hover:bg-neutral-white-900",

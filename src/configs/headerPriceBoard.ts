@@ -1,3 +1,30 @@
+export const ROW_HEIGHT = 29;
+export const HEADER_HEIGHT = 58;
+
+export const KEYS_COLOR = [
+  "lastPrice",
+  "lastVolume",
+  "priceBuy1",
+  "volumeBuy1",
+  "priceBuy2",
+  "volumeBuy2",
+  "priceBuy3",
+  "volumeBuy3",
+  "priceSell1",
+  "volumeSell1",
+  "priceSell2",
+  "volumeSell2",
+  "priceSell3",
+  "volumeSell3",
+  "change",
+  "changePc",
+  "symbol",
+  "high",
+  "avg",
+  "low",
+] as const;
+
+// Bảng giá cơ sở
 export const ALL_COLUMNS_BASE = [
   // { key: "mark", label: "", default: true, width: 24 },
   { key: "symbol", label: "CK", default: true, width: 68 },
@@ -57,29 +84,7 @@ export const ALL_COLUMNS_BASE = [
   },
 ];
 
-export const KEYS_COLOR = [
-  "lastPrice",
-  "lastVolume",
-  "priceBuy1",
-  "volumeBuy1",
-  "priceBuy2",
-  "volumeBuy2",
-  "priceBuy3",
-  "volumeBuy3",
-  "priceSell1",
-  "volumeSell1",
-  "priceSell2",
-  "volumeSell2",
-  "priceSell3",
-  "volumeSell3",
-  "change",
-  "changePc",
-  "symbol",
-  "high",
-  "avg",
-  "low",
-] as const;
-
+//Bảng giá chứng quyền
 export const ALL_COLUMNS_CW = [
   { key: "symbol", label: "CK", default: true, width: 68 },
   { key: "tcph", label: "TCPH", default: true, width: 78 },
@@ -139,5 +144,62 @@ export const ALL_COLUMNS_CW = [
   { key: "th", label: "TH", default: true, width: 80 },
 ];
 
-export const ROW_HEIGHT = 29;
-export const HEADER_HEIGHT = 58;
+//Bảng giá danh mục yêu thích
+export const ALL_COLUMNS_FAVORITE = [
+  { key: "mark", label: "", default: true, width: 24 },
+  { key: "symbol", label: "CK", default: true, width: 68 },
+  { key: "ceil", label: "Trần", default: true, width: 65 },
+  { key: "floor", label: "Sàn", default: true, width: 65 },
+  { key: "ref", label: "TC", default: true, width: 65 },
+  {
+    key: "buy",
+    label: "Bên mua",
+    default: true,
+    children: [
+      { key: "priceBuy3", label: "Giá 3", default: true, width: 65 },
+      { key: "volumeBuy3", label: "KL 3", default: true, width: 65 },
+      { key: "priceBuy2", label: "Giá 2", default: true, width: 65 },
+      { key: "volumeBuy2", label: "KL 2", default: true, width: 65 },
+      { key: "priceBuy1", label: "Giá 1", default: true, width: 65 },
+      { key: "volumeBuy1", label: "KL 1", default: true, width: 65 },
+    ],
+  },
+  {
+    key: "match",
+    label: "Khớp lệnh",
+    default: true,
+    children: [
+      { key: "lastPrice", label: "Khớp", default: true, width: 60 },
+      { key: "lastVolume", label: "KL", default: true, width: 65 },
+      { key: "change", label: "+/-", default: true, width: 55 },
+      { key: "changePc", label: "%", default: true, width: 55 },
+    ],
+  },
+  {
+    key: "sell",
+    label: "Bên bán",
+    default: true,
+    children: [
+      { key: "priceSell1", label: "Giá 1", default: true, width: 68 },
+      { key: "volumeSell1", label: "KL 1", default: true, width: 68 },
+      { key: "priceSell2", label: "Giá 2", default: true, width: 68 },
+      { key: "volumeSell2", label: "KL 2", default: true, width: 68 },
+      { key: "priceSell3", label: "Giá 3", default: true, width: 68 },
+      { key: "volumeSell3", label: "KL 3", default: true, width: 68 },
+    ],
+  },
+  { key: "high", label: "Cao", default: false, width: 50 },
+  { key: "avg", label: "TB", default: false, width: 50 },
+  { key: "low", label: "Thấp", default: false, width: 50 },
+  { key: "totalVol", label: "Tổng KL", default: true, width: 80 },
+  {
+    key: "foreign",
+    label: "GD NĐT NN",
+    default: false,
+    children: [
+      { key: "foreignBuy", label: "Mua", default: true, width: 80 },
+      { key: "foreignSell", label: "Bán", default: true, width: 80 },
+      { key: "foreignRoom", label: "Room", default: true, width: 80 },
+    ],
+  },
+];

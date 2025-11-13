@@ -34,28 +34,28 @@
 }
 .UP,
 .u {
-  color: #22c55e !important;
+  color: var(--color-stock-text-green) !important;
 }
 
 .DOWN,
 .d {
-  color: #ef4444 !important;
+  color: var(--color-stock-text-red) !important;
 }
 
 .CEIL,
 .c {
-  color: #a855f7 !important;
+  color: var(--color-stock-text-purple) !important;
 }
 
 .FLOOR,
 .f {
-  color: #3b82f6 !important;
+  color: var(--color-stock-text-blue) !important;
 }
 
 .REF,
 .EQUAL,
 .r {
-  color: #eab308 !important;
+  color: var(--color-stock-text-yellow) !important;
 }
 
 .cell[data-flash="u"] {
@@ -94,17 +94,17 @@
 /* trần */
 [data-key="ceil"] {
   background-color: rgb(209 213 219 / 10%);
-  color: #a855f7 !important;
+  color: var(--color-stock-text-purple) !important;
 }
 /* sàn */
 [data-key="floor"] {
   background-color: rgb(209 213 219 / 10%);
-  color: #3b82f6 !important;
+  color: var(--color-stock-text-blue) !important;
 }
 /*  tham chiếu */
 [data-key="ref"] {
   background-color: rgb(209 213 219 / 10%);
-  color: #eab308 !important;
+  color: var(--color-stock-text-yellow) !important;
 }
 
 /* trần, sàn, tham chiếu */

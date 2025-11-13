@@ -119,3 +119,11 @@ export interface ListStockByIdResponse {
   groupId: string;
   symbols: string[];
 }
+
+export interface Favorite {
+  key: string;
+  label: string;
+  id: string;
+  symbols: string[];
+  pinned?: string[];
+}
