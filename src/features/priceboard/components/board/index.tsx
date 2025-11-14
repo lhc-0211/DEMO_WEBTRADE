@@ -1,4 +1,5 @@
 import { memo, useEffect, useRef } from "react";
+import { useWindowActive } from "../../../../hooks/useWindowActive";
 import { socketClient } from "../../../../services/socket";
 import { useAppDispatch } from "../../../../store/hook";
 import { setListStockByIdFromCache } from "../../../../store/slices/priceboard/slice";
@@ -15,7 +16,24 @@ interface BoardProps {
 function Board({ id }: BoardProps) {
   const dispatch = useAppDispatch();
 
+  const { windowIsActive, shouldRefreshData } = useWindowActive();
+
   const groupIdRef = useRef<string>("");
+  const prevActiveRef = useRef<boolean>(true);
+
+  useEffect(() => {
+    if (windowIsActive && !prevActiveRef.current) {
+      const needRefresh = shouldRefreshData(3_000);
+      if (needRefresh) {
+        console.log(needRefresh);
+      }
+
+      // Xóa sessionStorage
+      sessionStorage.removeItem("priceboard_inactive_at");
+    }
+    prevActiveRef.current = windowIsActive;
+  }, [windowIsActive, shouldRefreshData]);
+
   useEffect(() => {
     if (!id) return;
 

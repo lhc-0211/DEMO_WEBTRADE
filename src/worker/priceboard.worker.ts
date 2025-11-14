@@ -123,10 +123,6 @@ self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
           }
         }
       }
-      console.log(
-        "[Worker] Visible symbols hiện tại:",
-        Array.from(visibleSymbols)
-      );
       break;
 
     case "clear":
