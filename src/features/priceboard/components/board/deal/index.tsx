@@ -1,14 +1,11 @@
+import { useAppSelector } from "../../../../../store/hook";
+import { selectDealData } from "../../../../../store/slices/stock/selector";
 import TableAsk from "./TableAsk";
 import TableBid from "./TableBid";
 import TableMatch from "./TableMatch";
 
-// === PROPS ===
-interface PriceBoardDealProps {
-  boardId: string;
-}
-
-export default function PriceBoardDeal({ boardId }: PriceBoardDealProps) {
-  console.log("boardId", boardId);
+export default function PriceBoardDeal() {
+  const dealData = useAppSelector(selectDealData);
 
   return (
     <div className="grid grid-cols-4 gap-5">
@@ -19,7 +16,7 @@ export default function PriceBoardDeal({ boardId }: PriceBoardDealProps) {
 
       {/* Khớp lệnh */}
       <div className="col-span-2">
-        <TableMatch />
+        <TableMatch data={dealData ? dealData["38"] : []} />
       </div>
 
       {/* Bên bán */}

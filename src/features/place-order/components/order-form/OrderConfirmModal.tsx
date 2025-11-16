@@ -42,7 +42,7 @@ export default function OrderConfirmModal({
       {isOpen && (
         <Modal
           isOpen={isOpen}
-          contentLabel="Đăng nhập"
+          contentLabel="Xác nhận đặt lệnh"
           ariaHideApp={false}
           style={customStyles}
           closeTimeoutMS={350}
@@ -50,7 +50,7 @@ export default function OrderConfirmModal({
           className="ReactModal__Content"
         >
           <motion.div
-            key="login-modal"
+            key="order-confirm-modal"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

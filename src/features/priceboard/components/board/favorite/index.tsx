@@ -42,9 +42,10 @@ interface SortableRowProps {
   symbol: string;
   snapshot: SnapshotDataCompact;
   index: number;
+  boardId: string;
 }
 
-function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
+function SortableRow({ symbol, snapshot, index, boardId }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging, isOver } =
     useSortable({ id: symbol });
 
@@ -85,6 +86,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
         snapshot={snapshot}
         dragListeners={listeners}
         dragAttributes={attributes}
+        active={boardId}
       />
     </div>
   );
@@ -182,7 +184,12 @@ function PriceBoardFavorite({ boardId }: PriceBoardFavoriteProps) {
 
     return (
       <div key={key} style={style}>
-        <SortableRow symbol={symbol} snapshot={snapshot} index={index} />
+        <SortableRow
+          symbol={symbol}
+          snapshot={snapshot}
+          index={index}
+          boardId={boardId}
+        />
       </div>
     );
   };

@@ -1,17 +1,21 @@
 // store/slices/stock/slice.ts
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { IndexData, SnapshotDataCompact } from "../../../types";
+import type { DealData, IndexData, SnapshotDataCompact } from "../../../types";
 
 interface StockState {
   snapshots: Record<string, SnapshotDataCompact>;
   subscribedOrder: string[];
   indices: Record<string, IndexData>;
+  dealMessage: DealData | null;
+  detailSymbol: string | null;
 }
 
 const initialState: StockState = {
   snapshots: {},
   subscribedOrder: [],
   indices: {},
+  dealMessage: null,
+  detailSymbol: null,
 };
 
 const stockSlice = createSlice({
@@ -47,6 +51,14 @@ const stockSlice = createSlice({
         state.indices[idx.id] = idx;
       }
     },
+
+    setDealMessage(state, action: PayloadAction<DealData>) {
+      state.dealMessage = action.payload;
+    },
+
+    setDetailSymbol(state, action: PayloadAction<string>) {
+      state.detailSymbol = action.payload;
+    },
   },
 });
 
@@ -57,6 +69,8 @@ export const {
   setSubscribedOrder,
   updateIndex,
   clearSnapshotAll,
+  setDealMessage,
+  setDetailSymbol,
 } = stockSlice.actions;
 
 export default stockSlice.reducer;

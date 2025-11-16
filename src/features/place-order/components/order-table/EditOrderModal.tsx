@@ -37,7 +37,7 @@ export default function EditOrderModal({
     <AnimatePresence>
       <Modal
         isOpen={isOpen}
-        contentLabel="Đăng nhập"
+        contentLabel="Sửa lệnh đặt"
         ariaHideApp={false}
         style={customStyles}
         closeTimeoutMS={350}
@@ -45,7 +45,7 @@ export default function EditOrderModal({
         className="ReactModal__Content"
       >
         <motion.div
-          key="login-modal"
+          key="edit-order-modal"
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}

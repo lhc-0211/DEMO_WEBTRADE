@@ -51,7 +51,7 @@ export default function SessionExpiredModal() {
           className="ReactModal__Content"
         >
           <motion.div
-            key="login-modal"
+            key="session-ex-modal"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

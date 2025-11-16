@@ -99,89 +99,94 @@ export default function ConfirmOtpModal({
 
   return (
     <AnimatePresence>
-      <Modal
-        isOpen={isOpen}
-        contentLabel="Đăng nhập"
-        ariaHideApp={false}
-        style={customStyles}
-        closeTimeoutMS={350}
-        overlayClassName="ReactModal__Overlay"
-        className="ReactModal__Content"
-      >
-        <motion.div
-          key="login-modal"
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-xl"
+      {isOpen && (
+        <Modal
+          isOpen={isOpen}
+          contentLabel="Xác thực OTP"
+          ariaHideApp={false}
+          style={customStyles}
+          closeTimeoutMS={350}
+          overlayClassName="ReactModal__Overlay"
+          className="ReactModal__Content"
         >
-          <div className="flex flex-col rounded-xl border border-border bg-background-primary">
-            <div className={`flex flex-row items-center justify-between`}>
-              <div></div>
-              <div
-                className="cursor-pointer p-1 hover:bg-gray-300 rounded-full"
-                onClick={onCloseModal}
-              >
-                <IoClose className="w-7 h-7 text-text-subtitle cursor-pointer" />
+          <motion.div
+            key="confirm-otp-modal"
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+            className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-xl"
+          >
+            <div className="flex flex-col rounded-xl border border-border bg-background-primary">
+              <div className={`flex flex-row items-center justify-between`}>
+                <div></div>
+                <div
+                  className="cursor-pointer p-1 hover:bg-gray-300 rounded-full"
+                  onClick={onCloseModal}
+                >
+                  <IoClose className="w-7 h-7 text-text-subtitle cursor-pointer" />
+                </div>
               </div>
-            </div>
 
-            <div className="w-full text-center text-xl text-text-title px-4 pb-4">
-              Xác thực OTP
-              <p className="text-sm text-text-subtitle font-medium pt-2">
-                Chúng tôi đã gửi một mã OTP xác nhận đến số điện thoại{" "}
-                <span className="text-stock-text-green">
-                  {hideMiddleDigits(accountProfile?.cCustMobile + "")}
-                </span>
-                , mã sẽ có hiệu lực trong vòng 5 phút
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit(submit)} className="flex flex-col p-4">
-              <div className="flex flex-col gap-4">
-                <InputFieldOTP registration={register("otp")} />
-                <span className="text-sm text-text-subtitle">
-                  Bạn không nhận được mã?
-                  <span
-                    className={` ${
-                      time === 0
-                        ? "text-stock-text-green cursor-pointer"
-                        : "text-text-disable cursor-not-allowed"
-                    }`}
-                    onClick={() => handleGetOtp()}
-                  >
-                    {" "}
-                    Gửi lại{" "}
+              <div className="w-full text-center text-xl text-text-title px-4 pb-4">
+                Xác thực OTP
+                <p className="text-sm text-text-subtitle font-medium pt-2">
+                  Chúng tôi đã gửi một mã OTP xác nhận đến số điện thoại{" "}
+                  <span className="text-stock-text-green">
+                    {hideMiddleDigits(accountProfile?.cCustMobile + "")}
                   </span>
-                  ({formatTime(time)})
-                </span>
+                  , mã sẽ có hiệu lực trong vòng 5 phút
+                </p>
               </div>
 
-              <div className="flex items-center flex-row-reverse gap-4 pt-10">
-                <Button
-                  variant="primary"
-                  fullWidth
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="!h-10"
-                >
-                  {loading ? <ScaleLoader height={25} /> : "Tiếp tục"}
-                </Button>
-                <Button
-                  variant="close"
-                  fullWidth
-                  className="!h-10"
-                  type="button"
-                  onClick={onPre}
-                >
-                  Quay lại
-                </Button>
-              </div>
-            </form>
-          </div>
-        </motion.div>
-      </Modal>
+              <form
+                onSubmit={handleSubmit(submit)}
+                className="flex flex-col p-4"
+              >
+                <div className="flex flex-col gap-4">
+                  <InputFieldOTP registration={register("otp")} />
+                  <span className="text-sm text-text-subtitle">
+                    Bạn không nhận được mã?
+                    <span
+                      className={` ${
+                        time === 0
+                          ? "text-stock-text-green cursor-pointer"
+                          : "text-text-disable cursor-not-allowed"
+                      }`}
+                      onClick={() => handleGetOtp()}
+                    >
+                      {" "}
+                      Gửi lại{" "}
+                    </span>
+                    ({formatTime(time)})
+                  </span>
+                </div>
+
+                <div className="flex items-center flex-row-reverse gap-4 pt-10">
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="h-10!"
+                  >
+                    {loading ? <ScaleLoader height={25} /> : "Tiếp tục"}
+                  </Button>
+                  <Button
+                    variant="close"
+                    fullWidth
+                    className="h-10!"
+                    type="button"
+                    onClick={onPre}
+                  >
+                    Quay lại
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </Modal>
+      )}
     </AnimatePresence>
   );
 }

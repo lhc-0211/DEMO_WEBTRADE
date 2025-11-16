@@ -136,6 +136,22 @@ export type IndexData = {
   openIndex?: number; //36
 };
 
+export type OrderDeal = {
+  "8": number; //price
+  "9": number; //volume
+  "10": string; //transactTime
+  "11": number; //changeAbs
+  "12": number; //changePct
+  "13": string; //priceCompare
+  symbol: string;
+};
+
+export type DealData = {
+  1: "nego";
+  38: OrderDeal[];
+  39: string[];
+};
+
 export type WebSocketMessageCompact =
   | RefMessage
   | TradeMessage
@@ -144,4 +160,5 @@ export type WebSocketMessageCompact =
   | ForeignRoomMessage
   | FullSnapshotMessage
   | IndexDataCompact
-  | SymbolListMessage;
+  | SymbolListMessage
+  | DealData;

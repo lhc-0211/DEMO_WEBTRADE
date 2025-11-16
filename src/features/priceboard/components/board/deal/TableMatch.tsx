@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { getScrollbarSize, List, type RowComponentProps } from "react-window";
 import { HEADER_HEIGHT } from "../../../../../configs/headerPriceBoard.ts";
 import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts";
+import type { OrderDeal } from "../../../../../types/socketCient.ts";
+import { formatPrice, formatVolPrice } from "../../../../../utils/format.ts";
 
-function TableMatch({ addresses }: { addresses?: any[] }) {
+function TableMatch({ data }: { data: OrderDeal[] }) {
   const [size] = useState(getScrollbarSize);
   const { containerRef } = usePerfectScrollbar();
   const [containerWidth, setContainerWidth] = useState(1200);
@@ -32,16 +34,12 @@ function TableMatch({ addresses }: { addresses?: any[] }) {
             Khớp lệnh
           </div>
           <div className="flex flex-row items-center justify-center w-full divide-x divide-border bg-gray-300/50 text-xs font-medium">
-            <div className="flex-1 grid place-items-center h-7">STT</div>
-            <div className="flex-1 grid place-items-center min-w-10  h-7">
-              Mã CK
-            </div>
-            <div className="flex-1 grid place-items-center h-7">Giá</div>
-            <div className="flex-1 grid place-items-center h-7">KL</div>
-            <div className="flex-1 grid place-items-center h-7">Giá trị</div>
-            <div className="flex-1 grid place-items-center min-w-20 h-7">
-              Thời gian
-            </div>
+            <div className="w-1/6 grid place-items-center h-7">STT</div>
+            <div className="w-1/6 grid place-items-center h-7">Mã CK</div>
+            <div className="w-1/6 grid place-items-center h-7">Giá</div>
+            <div className="w-1/6 grid place-items-center h-7">KL</div>
+            <div className="w-1/6 grid place-items-center h-7">Giá trị</div>
+            <div className="w-1/6 grid place-items-center h-7">Thời gian</div>
           </div>
         </div>
         <div className="shrink" style={{ width: size }} />
@@ -49,12 +47,12 @@ function TableMatch({ addresses }: { addresses?: any[] }) {
 
       <div className="overflow-hidden">
         <List
-          height={listHeight}
+          // height={listHeight}
+          // width={containerWidth}
           rowComponent={RowComponent}
-          rowCount={addresses?.length || 0}
+          rowCount={data?.length || 0}
           rowHeight={25}
-          rowProps={{ addresses }}
-          width={Math.max(containerWidth, 1812)}
+          rowProps={{ datas: data || [] }}
         />
       </div>
     </div>
@@ -63,21 +61,32 @@ function TableMatch({ addresses }: { addresses?: any[] }) {
 
 function RowComponent({
   index,
-  addresses,
+  datas,
   style,
 }: RowComponentProps<{
-  addresses: any[];
+  datas: OrderDeal[];
 }>) {
-  const address = addresses[index];
+  const data = datas[index];
 
   return (
-    <div className="flex flex-row items-center gap-2 px-2" style={style}>
-      <div className="flex-1">{address.city}</div>
-      <div className="flex-1">{address.state}</div>
-      <div className="w-10 text-xs">{address.zip}</div>
-      <div className="w-10 text-xs">{address.zip}</div>
-      <div className="w-10 text-xs">{address.zip}</div>
-      <div className="w-10 text-xs">{address.zip}</div>
+    <div
+      className={`flex flex-row items-center h-7 divide-x divide-border border-b border-x border-border text-xs font-normal ${
+        index % 2 === 0 ? "bg-gray-300/30" : ""
+      }`}
+      style={style}
+    >
+      <div className="w-1/6 grid place-items-center h-7">{index + 1}</div>
+      <div className={`w-1/6 grid place-items-center h-7 ${data?.["13"]}`}>
+        {data?.symbol?.split(":")[0]}
+      </div>
+      <div className={`w-1/6 grid place-items-center h-7 ${data?.["13"]}`}>
+        {formatPrice(data["8"])}
+      </div>
+      <div className="w-1/6 grid place-items-center h-7">
+        {formatVolPrice(data["9"])}
+      </div>
+      <div className="w-1/6 grid place-items-center h-7"></div>
+      <div className="w-1/6 grid place-items-center h-7">{data["10"]}</div>
     </div>
   );
 }

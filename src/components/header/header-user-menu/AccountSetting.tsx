@@ -125,23 +125,19 @@ export default function AccountSetting({
       </div>
 
       {/* modal change nickname */}
-      {isOpenChangeNickname && (
-        <ChangeNicknameModal
-          isOpen={isOpenChangeNickname}
-          accountProfile={accountProfile}
-          onClose={() => setIsOpenChangeNickname(false)}
-        />
-      )}
+      <ChangeNicknameModal
+        isOpen={isOpenChangeNickname}
+        accountProfile={accountProfile}
+        onClose={() => setIsOpenChangeNickname(false)}
+      />
 
       {/* modal change account info */}
-      {isOpenChangeAccountInfo && (
-        <ChangeAccountInfoModal
-          isOpen={isOpenChangeAccountInfo}
-          typeChange={typeChange}
-          accountProfile={accountProfile}
-          onClose={() => setIsOpenChangeAccountInfo(false)}
-        />
-      )}
+      <ChangeAccountInfoModal
+        isOpen={isOpenChangeAccountInfo}
+        typeChange={typeChange}
+        accountProfile={accountProfile}
+        onClose={() => setIsOpenChangeAccountInfo(false)}
+      />
     </div>
   );
 }

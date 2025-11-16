@@ -23,16 +23,54 @@ function Board({ id }: BoardProps) {
 
   useEffect(() => {
     if (windowIsActive && !prevActiveRef.current) {
-      const needRefresh = shouldRefreshData(3_000);
+      const needRefresh = shouldRefreshData(60_000);
+
       if (needRefresh) {
-        console.log(needRefresh);
+        // BỎ đăng ký cũ
+        socketClient.unsubscribeAll();
+
+        // ĐĂNG KÝ LẠI theo group hiện tại
+        if (groupIdRef.current.startsWith("fav_")) {
+          const favorites = JSON.parse(
+            localStorage.getItem("favorites") || "[]"
+          );
+          const fav = favorites.find(
+            (f: Favorite) => f.id === groupIdRef.current
+          );
+
+          if (fav && Array.isArray(fav.symbols)) {
+            dispatch(
+              setListStockByIdFromCache(groupIdRef.current, fav.symbols)
+            );
+            socketClient.subscribe({ symbols: [...fav.symbols] });
+          }
+        } else if (
+          ["hsx_tt", "hnx_tt", "upcom_tt"].includes(groupIdRef.current)
+        ) {
+          let marketId = "";
+          switch (groupIdRef.current) {
+            case "hsx_tt":
+              marketId = "STO";
+              break;
+            case "hnx_tt":
+              marketId = "STX";
+              break;
+            case "upcom_tt":
+              marketId = "UPCOM";
+              break;
+          }
+          socketClient.requestNego(marketId);
+        } else {
+          socketClient.subscribe({ groupId: groupIdRef.current });
+        }
       }
 
-      // Xóa sessionStorage
+      // Sau refresh thì clear inactive session
       sessionStorage.removeItem("priceboard_inactive_at");
     }
+
     prevActiveRef.current = windowIsActive;
-  }, [windowIsActive, shouldRefreshData]);
+  }, [windowIsActive, shouldRefreshData, dispatch]);
 
   useEffect(() => {
     if (!id) return;
@@ -133,7 +171,7 @@ function Board({ id }: BoardProps) {
       {id === "cw" && <PriceBoardCW boardId={id} />}
 
       {(id === "hsx_tt" || id === "hnx_tt" || id === "upcom_tt") && (
-        <PriceBoardDeal boardId={id} />
+        <PriceBoardDeal />
       )}
 
       {id?.startsWith("fav_") && <PriceBoardFavorite boardId={id} />}

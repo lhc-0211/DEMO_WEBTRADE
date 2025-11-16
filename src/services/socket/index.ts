@@ -4,6 +4,7 @@ import {
   clearSnapshot,
   clearSnapshotAll,
   resetSnapshots,
+  setDealMessage,
   updateIndex,
   updateSnapshots,
 } from "../../store/slices/stock/slice";
@@ -90,6 +91,12 @@ const parseMessage = (raw: string): void => {
 
     localStorage.setItem(cacheKey, JSON.stringify({ groupId, symbols }));
     store.dispatch(setListStockByIdFromCache(groupId, symbols));
+    return;
+  }
+
+  // INDEX: "1" === "nego"
+  if ("1" in msg && msg["1"] === "nego") {
+    store.dispatch(setDealMessage(msg));
     return;
   }
 

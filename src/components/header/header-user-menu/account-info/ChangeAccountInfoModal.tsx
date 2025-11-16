@@ -127,6 +127,7 @@ export default function ChangeAccountInfoModal({
   const onCloseModal = () => {
     onClose();
     reset();
+    setStep(1);
   };
 
   const onSubmit = async () => {
@@ -151,100 +152,104 @@ export default function ChangeAccountInfoModal({
 
   return (
     <AnimatePresence>
-      {step === 1 && (
-        <Modal
-          isOpen={isOpen}
-          contentLabel="Đăng nhập"
-          ariaHideApp={false}
-          style={customStyles}
-          closeTimeoutMS={350}
-          overlayClassName="ReactModal__Overlay"
-          className="ReactModal__Content"
-        >
-          <motion.div
-            key="login-modal"
-            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-xl"
-          >
-            <div className="flex flex-col rounded-xl border border-border bg-background-primary">
-              <div
-                className={`flex flex-row items-center justify-between pb-5 border-b border-border px-4 py-4`}
+      {isOpen && (
+        <>
+          {step === 1 && (
+            <Modal
+              isOpen={isOpen}
+              contentLabel="Thay đổi thông tin tài khoản"
+              ariaHideApp={false}
+              style={customStyles}
+              closeTimeoutMS={350}
+              overlayClassName="ReactModal__Overlay"
+              className="ReactModal__Content"
+            >
+              <motion.div
+                key="change-acc-info-modal"
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-xl"
               >
-                <div className="text-text-title text-[20px] text-bold">
-                  Thay đổi thông tin liên hệ
-                  <p className="text-sm font-normal text-text-body mt-2">
-                    Bạn sẽ cần xác thực lại danh tính để hoàn tất thay đổi
-                  </p>
-                </div>
-
-                <div
-                  className="cursor-pointer p-1 hover:bg-gray-300 rounded-full"
-                  onClick={onCloseModal}
-                >
-                  <IoClose className="w-7 h-7 text-text-subtitle cursor-pointer" />
-                </div>
-              </div>
-
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="flex flex-col p-4"
-              >
-                {typeChange === "email" ? (
-                  <InputField
-                    label="Email"
-                    type="email"
-                    placeholder="Nhập email mới"
-                    registration={register("email")}
-                    error={errors.email}
-                    requied={true}
-                  />
-                ) : (
-                  <InputField
-                    label="Địa chỉ"
-                    type="text"
-                    placeholder="Nhập địa chỉ mới"
-                    registration={register("address")}
-                    error={errors.address}
-                    requied={true}
-                  />
-                )}
-
-                <div className="flex items-center flex-row-reverse gap-4 pt-10">
-                  <Button
-                    variant="primary"
-                    fullWidth
-                    type="submit"
-                    disabled={isSubmitting || loading}
-                    className="!h-10"
+                <div className="flex flex-col rounded-xl border border-border bg-background-primary">
+                  <div
+                    className={`flex flex-row items-center justify-between pb-5 border-b border-border px-4 py-4`}
                   >
-                    {loading ? <ScaleLoader height={25} /> : "Xác nhận"}
-                  </Button>
-                  <Button
-                    variant="close"
-                    fullWidth
-                    className="!h-10"
-                    type="button"
-                    onClick={onPreModal}
-                  >
-                    Quay lại
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </motion.div>
-        </Modal>
-      )}
+                    <div className="text-text-title text-[20px] text-bold">
+                      Thay đổi thông tin liên hệ
+                      <p className="text-sm font-normal text-text-body mt-2">
+                        Bạn sẽ cần xác thực lại danh tính để hoàn tất thay đổi
+                      </p>
+                    </div>
 
-      {step === 2 && (
-        <ConfirmOtpModal
-          isOpen={true}
-          onClose={() => onCloseModal()}
-          onPre={() => onPreModal()}
-          onSubmit={handleChangeInfo}
-        />
+                    <div
+                      className="cursor-pointer p-1 hover:bg-gray-300 rounded-full"
+                      onClick={onCloseModal}
+                    >
+                      <IoClose className="w-7 h-7 text-text-subtitle cursor-pointer" />
+                    </div>
+                  </div>
+
+                  <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="flex flex-col p-4"
+                  >
+                    {typeChange === "email" ? (
+                      <InputField
+                        label="Email"
+                        type="email"
+                        placeholder="Nhập email mới"
+                        registration={register("email")}
+                        error={errors.email}
+                        requied={true}
+                      />
+                    ) : (
+                      <InputField
+                        label="Địa chỉ"
+                        type="text"
+                        placeholder="Nhập địa chỉ mới"
+                        registration={register("address")}
+                        error={errors.address}
+                        requied={true}
+                      />
+                    )}
+
+                    <div className="flex items-center flex-row-reverse gap-4 pt-10">
+                      <Button
+                        variant="primary"
+                        fullWidth
+                        type="submit"
+                        disabled={isSubmitting || loading}
+                        className="h-10!"
+                      >
+                        {loading ? <ScaleLoader height={25} /> : "Xác nhận"}
+                      </Button>
+                      <Button
+                        variant="close"
+                        fullWidth
+                        className="h-10!"
+                        type="button"
+                        onClick={onPreModal}
+                      >
+                        Quay lại
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </motion.div>
+            </Modal>
+          )}
+
+          {step === 2 && (
+            <ConfirmOtpModal
+              isOpen={true}
+              onClose={() => onCloseModal()}
+              onPre={() => onPreModal()}
+              onSubmit={handleChangeInfo}
+            />
+          )}
+        </>
       )}
     </AnimatePresence>
   );

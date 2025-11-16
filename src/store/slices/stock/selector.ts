@@ -19,10 +19,12 @@ export const selectSnapshotsBySymbols = createSelector(
   [selectSnapshots, (_: RootState, symbols: readonly string[]) => symbols],
   (snapshots, symbols): Readonly<Record<string, SnapshotDataCompact>> => {
     const result: Record<string, SnapshotDataCompact> = {};
+
     for (const sym of symbols) {
       const snap = snapshots[sym];
       if (snap) result[sym] = snap;
     }
+
     return result;
   }
 );
@@ -71,3 +73,10 @@ export const selectMajorIndices = createSelector(
     upcomIndex: indices["4:001"],
   })
 );
+
+/**Lấy data thỏa thuận */
+export const selectDealData = (state: RootState) => state.stock.dealMessage;
+
+/**Lấy symbol detail */
+export const selectDetailSymbol = (state: RootState) =>
+  state.stock.detailSymbol;

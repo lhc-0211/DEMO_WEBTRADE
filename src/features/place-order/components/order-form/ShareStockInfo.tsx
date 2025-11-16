@@ -35,7 +35,7 @@ function ShareStockInfo({
       <div className="flex items-center">
         {/* Ô giá chính */}
         <div
-          className={`mr-3 p-2 rounded-lg h-[64px] w-[109px] flex flex-col items-center justify-center gap-1 ${color} ${getBgColorStock(
+          className={`mr-3 p-2 rounded-lg h-16 w-[109px] flex flex-col items-center justify-center gap-1 ${color} ${getBgColorStock(
             color
           )}`}
         >

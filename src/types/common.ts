@@ -19,3 +19,8 @@ export interface IErrMsg {
       }
     | undefined;
 }
+
+export type ValueSelect = {
+  value: string;
+  label: string;
+};

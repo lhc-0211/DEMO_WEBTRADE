@@ -2,138 +2,26 @@ import type {
   DraggableAttributes,
   DraggableSyntheticListeners,
 } from "@dnd-kit/core";
-import { memo, useEffect, useRef } from "react";
-import { BsPinAngleFill } from "react-icons/bs";
+import { memo, useEffect } from "react";
+import { IoClose } from "react-icons/io5";
 import { ALL_COLUMNS_FAVORITE } from "../../../../../configs/headerPriceBoard";
+import { socketClient } from "../../../../../services/socket";
+import { useAppDispatch } from "../../../../../store/hook";
+import { setListStockByIdFromCache } from "../../../../../store/slices/priceboard/slice";
 import type {
   Column,
-  PriceCompare,
+  Favorite,
   SnapshotDataCompact,
 } from "../../../../../types";
-import {
-  registerVisibleCell,
-  unregisterVisibleCell,
-} from "../../../../../utils";
-import { getColumnValueCompact } from "../../../../../utils/priceboard";
-
-interface PriceCellProps {
-  symbol: string;
-  cellKey: string;
-  width?: number;
-  snapshot: SnapshotDataCompact;
-  disableFlash?: boolean; // tắt flash cho symbol
-}
-
-const PriceCell = memo(function PriceCell({
-  symbol,
-  cellKey,
-  width,
-  snapshot,
-  disableFlash = false,
-}: PriceCellProps) {
-  const cellRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (disableFlash) return;
-    const el = cellRef.current;
-    if (el) {
-      registerVisibleCell(symbol, cellKey, el);
-    }
-    return () => {
-      unregisterVisibleCell(symbol, cellKey);
-    };
-  }, [symbol, cellKey, disableFlash]);
-
-  // === TÍNH MÀU ===
-  const colorClass = (() => {
-    if (cellKey === "ceil") return "c";
-    if (cellKey === "floor") return "f";
-    if (cellKey === "ref") return "r";
-
-    const tradeCmp = snapshot.trade?.[13] as PriceCompare | undefined;
-    const orderBook = snapshot.orderBook;
-
-    const getArr = (value: string | string[] | undefined): string[] => {
-      if (typeof value === "string") return value.split("|");
-      if (Array.isArray(value)) {
-        return value.every((v): v is string => typeof v === "string")
-          ? value
-          : [];
-      }
-      return [];
-    };
-
-    const bids = getArr(orderBook?.[22]);
-    const asks = getArr(orderBook?.[23]);
-
-    // SYMBOL: dùng màu trade
-    if (cellKey === "symbol") {
-      return tradeCmp ?? "";
-    }
-
-    // CÁC CỘT GIAO DỊCH
-    if (
-      ["lastPrice", "change", "changePercent", "lastVolume"].some((k) =>
-        cellKey.includes(k)
-      )
-    ) {
-      return tradeCmp ?? "";
-    }
-
-    // ORDERBOOK
-    if (orderBook) {
-      if (cellKey.startsWith("priceBuy") || cellKey.startsWith("volumeBuy")) {
-        const i = parseInt(cellKey.slice(-1), 10) - 1;
-        return (bids[i * 3 + 2] as PriceCompare) ?? "";
-      }
-      if (cellKey.startsWith("priceSell") || cellKey.startsWith("volumeSell")) {
-        const i = parseInt(cellKey.slice(-1), 10) - 1;
-        return (asks[i * 3 + 2] as PriceCompare) ?? "";
-      }
-      if (cellKey === "high")
-        return (orderBook[24]?.split("|")[1] as PriceCompare) ?? "";
-      if (cellKey === "low")
-        return (orderBook[25]?.split("|")[1] as PriceCompare) ?? "";
-      if (cellKey === "avg")
-        return (orderBook[28]?.split("|")[1] as PriceCompare) ?? "";
-    }
-
-    return "";
-  })();
-
-  // === TÍNH GIÁ TRỊ ===
-  const value = getColumnValueCompact(snapshot, cellKey);
-
-  const className = [
-    "flex items-center justify-center text-xs font-medium h-7 cell",
-    "transition-colors duration-75",
-    colorClass,
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  return (
-    <div
-      ref={cellRef}
-      data-symbol={symbol}
-      data-key={cellKey}
-      className={className}
-      style={{ minWidth: width }}
-    >
-      {cellKey !== "mark" ? (
-        value ?? ""
-      ) : (
-        <BsPinAngleFill className="cursor-pointer" />
-      )}
-    </div>
-  );
-});
+import { unregisterVisibleCell } from "../../../../../utils";
+import PriceCell from "./PriceCell";
 
 interface BodyTableProps {
   symbol: string;
   snapshot: SnapshotDataCompact;
   dragListeners?: DraggableSyntheticListeners;
   dragAttributes?: DraggableAttributes;
+  active?: string; // id của danh mục
 }
 
 function BodyTableFavorite({
@@ -141,7 +29,10 @@ function BodyTableFavorite({
   snapshot,
   dragListeners,
   dragAttributes,
+  active,
 }: BodyTableProps) {
+  const dispatch = useAppDispatch();
+
   const columns: Column[] = (() => {
     const saved = localStorage.getItem("clientConfig");
     try {
@@ -157,12 +48,35 @@ function BodyTableFavorite({
     };
   }, [symbol]);
 
+  // === Xóa stock ra khỏi danh mục yêu thích ===
+  const handleRemoveSymbol = (symbolToRemove: string) => {
+    const stored = localStorage.getItem("favorites");
+    if (!stored || !active) return;
+
+    const favorites = JSON.parse(stored) as Favorite[];
+    const favorite = favorites.find((f) => f.id === active);
+    if (!favorite) return;
+
+    // Lọc ra symbol cần xoá
+    const newSymbols = favorite.symbols.filter((s) => s !== symbolToRemove);
+    favorite.symbols = newSymbols;
+
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+
+    dispatch(setListStockByIdFromCache(active, newSymbols));
+
+    // Unsubscribe socket
+    socketClient.unsubscribe({
+      symbols: [symbolToRemove],
+    });
+  };
+
   return (
     <div className="flex border-x border-b border-border divide-x divide-border w-full">
       {columns.map((col) => {
         const hasChildren = !!col.children?.length;
 
-        if (col.key === "symbol" || col.key === "mark") {
+        if (col.key === "mark") {
           return (
             <div
               key={col.key}
@@ -178,7 +92,29 @@ function BodyTableFavorite({
                   symbol={symbol}
                   cellKey={col.key}
                   snapshot={snapshot}
-                  disableFlash={true} // TẮT FLASH CHO SYMBOL
+                />
+              </div>
+            </div>
+          );
+        }
+
+        if (col.key === "symbol") {
+          return (
+            <div
+              key={col.key}
+              className="h-7 grid place-items-center"
+              style={{ minWidth: col.width }}
+            >
+              <div className="relative w-full flex items-center justify-center h-7 group">
+                <PriceCell
+                  symbol={symbol}
+                  cellKey={col.key}
+                  snapshot={snapshot}
+                  disableFlash={true}
+                />
+                <IoClose
+                  className="absolute top-1.5 right-0 text-red-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                  onClick={() => handleRemoveSymbol(symbol)}
                 />
               </div>
             </div>

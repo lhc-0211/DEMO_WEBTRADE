@@ -160,7 +160,7 @@ export default function ChangeNicknameModal({
       {isOpen && (
         <Modal
           isOpen={isOpen}
-          contentLabel="Đăng nhập"
+          contentLabel="Thay đổi nickname"
           ariaHideApp={false}
           style={customStyles}
           closeTimeoutMS={350}
@@ -168,7 +168,7 @@ export default function ChangeNicknameModal({
           className="ReactModal__Content"
         >
           <motion.div
-            key="login-modal"
+            key="change-nickname-modal"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}

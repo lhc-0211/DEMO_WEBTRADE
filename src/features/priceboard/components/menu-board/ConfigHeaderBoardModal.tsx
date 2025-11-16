@@ -30,7 +30,7 @@ export default function CongfigHeaderBoardModal(props: Props) {
     <AnimatePresence>
       <Modal
         isOpen={isOpen}
-        contentLabel="Đăng nhập"
+        contentLabel="Cài đặt cột bảng giá"
         ariaHideApp={false}
         style={customStyles}
         closeTimeoutMS={350} // phải trùng với thời gian transition
@@ -38,7 +38,7 @@ export default function CongfigHeaderBoardModal(props: Props) {
         className="ReactModal__Content"
       >
         <motion.div
-          key="login-modal"
+          key="config-header-modal"
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
