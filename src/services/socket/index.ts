@@ -89,14 +89,10 @@ const parseMessage = (raw: string): void => {
     const { groupId, symbols } = msg;
     const cacheKey = `stocks_${groupId}`;
 
-    console.log("symbolList", msg);
-
     localStorage.setItem(cacheKey, JSON.stringify({ groupId, symbols }));
     store.dispatch(setListStockByIdFromCache(groupId, symbols));
 
     if (subscribedGroups.has(groupId)) {
-      console.log("snapshot connect", groupId);
-
       const sessionId = getOrCreateSessionId();
       send({ type: "subscribe", sessionId, groupId });
     }
@@ -134,8 +130,6 @@ const parseMessage = (raw: string): void => {
 
   if ("1" in msg && msg["1"] === "snapshot") {
     const m = msg as FullSnapshotMessage;
-
-    console.log("snapshot", m);
 
     const { symbol } = m;
     if (!symbol) return;
@@ -282,8 +276,6 @@ const closeSocket = () => {
 
 // ==================== SUBSCRIPTION ====================
 const send = (msg: SubscribeMessage): boolean => {
-  console.log("msg", msg);
-
   if (socket?.readyState === WebSocket.OPEN) {
     try {
       socket.send(JSON.stringify(msg));

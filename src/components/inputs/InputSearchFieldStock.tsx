@@ -18,6 +18,8 @@ type InputSearchFieldProps = {
   onChange: (value: OptionType | null) => void;
   placeholder?: string;
   className?: string;
+  typeInput?: string;
+  autoFocus?: boolean;
 };
 
 export default function InputSearchFieldStock({
@@ -25,84 +27,98 @@ export default function InputSearchFieldStock({
   onChange,
   placeholder = "Nhập mã tìm kiếm",
   className,
+  autoFocus,
 }: InputSearchFieldProps) {
   const listShareStock = useAppSelector(selectListShareStock);
-
-  const [stockOptions, setStockOptions] = useState<OptionType[]>([]);
-
   const preListShareStock = usePrevious(listShareStock);
 
-  useEffect(() => {
-    if (
-      !listShareStock ||
-      listShareStock.length < 0 ||
-      _.isEqual(listShareStock, preListShareStock)
-    )
-      return;
+  const [stockOptions, setStockOptions] = useState<OptionType[]>([]);
+  const [searchInput, setSearchInput] = useState<string>(""); // lưu input để highlight
 
-    const converListStock: OptionType[] = convertShareList(
-      listShareStock || []
-    );
-    setStockOptions(converListStock);
-  }, [listShareStock]);
-
-  const convertShareList = (data: FetchShareStockItem[]): OptionType[] => {
-    return data.map((item) => ({
+  // convert stock list
+  const convertShareList = (data: FetchShareStockItem[]): OptionType[] =>
+    data.map((item) => ({
       label: item.fullName,
       value: item.shareCode,
       post_to: item.tradeTable,
     }));
-  };
 
+  useEffect(() => {
+    if (!listShareStock || listShareStock.length === 0) return;
+    if (_.isEqual(listShareStock, preListShareStock)) return;
+
+    const converted = convertShareList(listShareStock);
+    setStockOptions(converted);
+  }, [listShareStock, preListShareStock]);
+
+  // Filter stock theo input
   const filterStocks = (inputValue: string) => {
     if (!inputValue) return stockOptions;
-    return stockOptions.filter((i) =>
-      i.value.toLowerCase().includes(inputValue.toLowerCase())
+    return stockOptions.filter(
+      (i) =>
+        i.value.toLowerCase().includes(inputValue.toLowerCase()) ||
+        i.label?.toLowerCase().includes(inputValue.toLowerCase())
     );
   };
 
   const promiseOptions = (inputValue: string) =>
     new Promise<OptionType[]>((resolve) => {
+      setSearchInput(inputValue);
       setTimeout(() => {
         resolve(filterStocks(inputValue));
-      }, 500);
+      }, 200);
     });
+
+  // Hàm highlight chữ match
+  const highlightMatch = (text: string, query: string) => {
+    if (!query) return text;
+    const regex = new RegExp(`(${_.escapeRegExp(query)})`, "gi");
+    const parts = text.split(regex);
+    return parts.map((part, i) =>
+      regex.test(part) ? (
+        <span key={i} className="bg-yellow-400 text-black">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
 
   return (
     <AsyncSelect
       value={value}
       onChange={onChange}
       cacheOptions
-      defaultOptions={value?.value ? [value] : []}
+      autoFocus={autoFocus}
+      defaultOptions={stockOptions}
       loadOptions={promiseOptions}
+      inputValue={searchInput}
+      onInputChange={(val) => setSearchInput(val)}
       placeholder={placeholder}
       noOptionsMessage={() => "Không có dữ liệu!"}
       loadingMessage={() => ""}
-      formatOptionLabel={(option, { context }) => {
-        // context === "menu" khi hiển thị trong danh sách
-        // context === "value" khi hiển thị sau khi chọn
-        if (context === "value") {
-          return (
-            <span className="font-semibold text-text-title uppercase">
-              {option.value}
-            </span>
-          );
-        }
-
-        return (
+      formatOptionLabel={(option, { context }) =>
+        context === "value" ? (
+          <span className="font-semibold text-text-title uppercase">
+            {option.value}
+          </span>
+        ) : (
           <div className="flex flex-col gap-1">
             <span className="font-semibold text-text-title uppercase">
-              {option.value}
+              {highlightMatch(option.value, searchInput)}
               {option.post_to && (
                 <span className="ml-1 text-text-subtitle font-medium">
                   {option.post_to}
                 </span>
               )}
             </span>
-            <span className="text-text-subtitle text-xs">{option.label}</span>
+            <span className="text-text-subtitle text-xs">
+              {option.label ? highlightMatch(option.label, searchInput) : ""}
+            </span>
           </div>
-        );
-      }}
+        )
+      }
       components={{
         DropdownIndicator: (props) => (
           <div

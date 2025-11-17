@@ -1,14 +1,16 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { IoClose } from "react-icons/io5";
 import Modal from "react-modal";
 import Button from "../../../../components/common/Button";
-import InputSearchField from "../../../../components/inputs/InputSearchField";
+import InputSearchFieldStock, {
+  type OptionType,
+} from "../../../../components/inputs/InputSearchFieldStock";
+import { socketClient } from "../../../../services/socket";
 import { useAppSelector } from "../../../../store/hook";
 import { selectListShareStock } from "../../../../store/slices/place-order/selector";
 import { selectSnapshotsBySymbols } from "../../../../store/slices/stock/selector";
-import type { FetchShareStockItem } from "../../../../types/placeOrder";
 import {
   formatPrice,
   formatVolPrice,
@@ -17,7 +19,7 @@ import {
 } from "../../../../utils";
 
 type FormSearchStockValues = {
-  stock: string;
+  stock: OptionType;
 };
 
 const customStyles = {
@@ -45,27 +47,71 @@ export default function StockDetailModal({
   onClose: () => void;
   symbol: string;
 }) {
-  const { control } = useForm<FormSearchStockValues>();
+  const { control, setValue, watch } = useForm<FormSearchStockValues>();
+  const stock = watch("stock");
 
   const listShareStock = useAppSelector(selectListShareStock);
+
+  const targetSymbols = stock?.value
+    ? `${stock.value}:G1:${stock.post_to}`
+    : symbol;
+
   const snapshots = useAppSelector((state) =>
-    selectSnapshotsBySymbols(state, symbol.split(","))
+    selectSnapshotsBySymbols(state, targetSymbols.split(",").filter(Boolean))
   );
 
-  const [detailStock, setDetailStock] = useState<FetchShareStockItem | null>(
-    null
-  );
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const prevSymbolKeyRef = useRef<string | null>(null);
+
+  const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false); // mở hiện input search
 
   useEffect(() => {
-    if (listShareStock) {
-      const detail = listShareStock.find(
-        (item) => item.shareCode === symbol?.split(":")[0]
-      );
-      if (detail) {
-        setDetailStock(detail);
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(event.target as Node)
+      ) {
+        setIsOpenSearch(false);
       }
     }
-  }, [listShareStock, symbol]);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [wrapperRef]);
+
+  useEffect(() => {
+    if (!stock && listShareStock && symbol) {
+      const code = symbol.split(":")[0];
+      const detail = listShareStock.find((item) => item.shareCode === code);
+
+      if (detail) {
+        setValue("stock", {
+          label: detail.fullName,
+          value: detail.shareCode,
+          post_to: detail.tradeTable,
+        });
+      }
+    }
+  }, [listShareStock, symbol, setValue, stock]);
+
+  useEffect(() => {
+    if (!stock?.value || !stock?.post_to) return;
+
+    const currentSymbolKey = `${stock.value}:G1:${stock.post_to}`;
+    const snapshot = snapshots[currentSymbolKey];
+
+    if (prevSymbolKeyRef.current !== currentSymbolKey) {
+      if (!snapshot) {
+        socketClient.subscribe({ symbols: [currentSymbolKey] });
+      }
+
+      // Cập nhật ref để lần sau so sánh
+      prevSymbolKeyRef.current = currentSymbolKey;
+      setIsOpenSearch(false);
+    }
+  }, [stock?.value, stock?.post_to]);
 
   return (
     <AnimatePresence>
@@ -91,32 +137,48 @@ export default function StockDetailModal({
               {/* === Header === */}
               <div className={`flex flex-row items-center justify-between `}>
                 <form className="h-full flex flex-row gap-4 items-center">
-                  <Controller
-                    name="stock"
-                    control={control}
-                    rules={{ required: "Vui lòng chọn mã chứng khoán" }}
-                    render={({ field }) => (
-                      <div>
-                        <InputSearchField
-                          name="stock"
-                          onChange={field.onChange}
-                          placeholder="Nhập mã tìm kiếm..."
-                          className="placeholder:text-xs!"
-                          value={field.value}
-                          typeTrans="left"
-                        />
-                      </div>
+                  <motion.div
+                    ref={wrapperRef}
+                    animate={{ width: isOpenSearch ? 160 : 40 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                  >
+                    {isOpenSearch && (
+                      <Controller
+                        name="stock"
+                        control={control}
+                        rules={{ required: "Vui lòng chọn mã chứng khoán" }}
+                        render={({ field }) => (
+                          <div>
+                            <InputSearchFieldStock
+                              value={field.value}
+                              onChange={field.onChange}
+                              placeholder="Tìm kiếm mã"
+                              className="w-40!"
+                              autoFocus
+                            />
+                          </div>
+                        )}
+                      />
                     )}
-                  />
+
+                    {!isOpenSearch && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsOpenSearch(!isOpenSearch);
+                        }}
+                        className="p-2 flex items-center justify-center bg-input rounded-md text-text-title hover:text-yellow-500 text-sm w-full"
+                      >
+                        {stock?.value}{" "}
+                      </button>
+                    )}
+                  </motion.div>
+
                   <div className="flex flex-row items-center justify-center gap-3">
                     <div className="flex flex-row items-center justify-center gap-1">
-                      <span className="text-sm font-medium text-text-title">
-                        {detailStock?.shareCode || symbol?.split(":")[0]}
-                      </span>
-                      {detailStock && (
+                      {stock && (
                         <span className="text-xs font-normal text-text-body">
-                          ( {detailStock?.tradeTable} ) |{" "}
-                          {detailStock?.fullName}
+                          ( {stock?.post_to} ) | {stock?.label}
                         </span>
                       )}
                     </div>
@@ -137,31 +199,33 @@ export default function StockDetailModal({
               <div className="w-1/2">
                 <div className="flex justify-between pb-1">
                   <div
-                    className={`text-color-down flex pr-3 w-44 ${snapshots[symbol]?.trade?.["13"]}`}
+                    className={`text-color-down flex pr-3 w-44 ${snapshots[targetSymbols]?.trade?.["13"]}`}
                   >
                     <div
                       className={`text-xl flex justify-center items-center p-1 rounded-lg ${getBgColorStock(
-                        snapshots[symbol]?.trade?.["13"] || "r"
+                        snapshots[targetSymbols]?.trade?.["13"] || "r"
                       )}`}
                     >
-                      <div> {formatPrice(snapshots[symbol]?.trade?.[8])}</div>
+                      <div>
+                        {" "}
+                        {formatPrice(snapshots[targetSymbols]?.trade?.[8])}
+                      </div>
                     </div>
                     <div className="flex flex-col items-end pl-2 justify-center text-sm">
                       <div>
                         {" "}
-                        {snapshots[symbol]?.trade?.["11"] &&
-                        snapshots[symbol]?.trade?.["11"] !== 0
-                          ? formatPrice(snapshots[symbol]?.trade?.["11"])
-                          : ""}
+                        {snapshots[targetSymbols]?.trade?.["11"]
+                          ? formatPrice(snapshots[targetSymbols]?.trade?.["11"])
+                          : "0"}
                       </div>
                       <div>
-                        {snapshots[symbol]?.trade?.["12"]
+                        {snapshots[targetSymbols]?.trade?.["12"]
                           ? numberFormat(
-                              snapshots[symbol]?.trade?.["12"],
+                              snapshots[targetSymbols]?.trade?.["12"],
                               2,
                               ""
                             ) + " %"
-                          : ""}
+                          : "0%"}
                       </div>
                     </div>
                   </div>
@@ -169,13 +233,13 @@ export default function StockDetailModal({
                     <div className="flex flex-col items-end flex-nowrap">
                       <div className="text-text-subtitle text-sm">Trần</div>
                       <div className="c text-xs">
-                        {formatPrice(snapshots[symbol]?.refPrices?.[5])}
+                        {formatPrice(snapshots[targetSymbols]?.refPrices?.[5])}
                       </div>
                     </div>
                     <div className="flex flex-col items-end pl-9 flex-nowrap">
                       <div className="text-text-subtitle text-sm">Sàn</div>
                       <div className="f text-xs">
-                        {formatPrice(snapshots[symbol]?.refPrices?.[6])}
+                        {formatPrice(snapshots[targetSymbols]?.refPrices?.[6])}
                       </div>
                     </div>
                     <div className="flex flex-col items-end pl-9 flex-nowrap">
@@ -183,7 +247,7 @@ export default function StockDetailModal({
                         Tham chiếu
                       </div>
                       <div className="r text-xs">
-                        {formatPrice(snapshots[symbol]?.refPrices?.[4])}
+                        {formatPrice(snapshots[targetSymbols]?.refPrices?.[4])}
                       </div>
                     </div>
                   </div>
@@ -199,13 +263,13 @@ export default function StockDetailModal({
                       <div
                         className={`text-color-down text-xs ${
                           String(
-                            snapshots[symbol]?.orderBook?.["28"] || ""
+                            snapshots[targetSymbols]?.orderBook?.["28"] || ""
                           ).split("|")[1]
                         }`}
                       >
                         {formatPrice(
                           String(
-                            snapshots[symbol]?.orderBook?.["28"] || ""
+                            snapshots[targetSymbols]?.orderBook?.["28"] || ""
                           ).split("|")[0]
                         )}
                       </div>
@@ -217,13 +281,13 @@ export default function StockDetailModal({
                       <div
                         className={`text-color-down text-xs ${
                           String(
-                            snapshots[symbol]?.orderBook?.["25"] || ""
+                            snapshots[targetSymbols]?.orderBook?.["25"] || ""
                           ).split("|")[1]
                         }`}
                       >
                         {formatPrice(
                           String(
-                            snapshots[symbol]?.orderBook?.["25"] || ""
+                            snapshots[targetSymbols]?.orderBook?.["25"] || ""
                           ).split("|")[0]
                         )}
                       </div>
@@ -231,13 +295,13 @@ export default function StockDetailModal({
                       <div
                         className={`text-color-down text-xs ${
                           String(
-                            snapshots[symbol]?.orderBook?.["24"] || ""
+                            snapshots[targetSymbols]?.orderBook?.["24"] || ""
                           ).split("|")[1]
                         }`}
                       >
                         {formatPrice(
                           String(
-                            snapshots[symbol]?.orderBook?.["24"] || ""
+                            snapshots[targetSymbols]?.orderBook?.["24"] || ""
                           ).split("|")[0]
                         )}
                       </div>
@@ -247,7 +311,7 @@ export default function StockDetailModal({
                     <div className="text-sm text-text-subtitle">Tổng KL:</div>
                     <div className="text-text-body pl-1 text-xs">
                       {formatVolPrice(
-                        snapshots[symbol]?.orderBook?.["26"] || 0
+                        snapshots[targetSymbols]?.orderBook?.["26"] || 0
                       )}
                     </div>
                   </div>
