@@ -5,7 +5,7 @@ import LoginModal from "../components/auth/LoginModal";
 import SessionExpiredModal from "../components/auth/SessionExpiredModal";
 import Header from "../components/header/Header";
 import Sidebar from "../components/sidebar/Sidebar";
-import { WindowContextProvider } from "../context/windowContext";
+import { WindowContextProvider } from "../context/WindowContext";
 import { useAppDispatch, useAppSelector } from "../store/hook";
 import { selectToken } from "../store/slices/auth/selector";
 import { fetchListShareStockRequest } from "../store/slices/place-order/slice";
