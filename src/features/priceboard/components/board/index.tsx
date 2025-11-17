@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef } from "react";
+import { DebugPanel } from "../../../../components/DebugPanel";
 import { useWindowActive } from "../../../../hooks/useWindowActive";
-import { socketClient } from "../../../../services/socket";
+import { socketClient, subscribedGroups } from "../../../../services/socket";
 import { useAppDispatch } from "../../../../store/hook";
 import { setListStockByIdFromCache } from "../../../../store/slices/priceboard/slice";
 import type { Favorite } from "../../../../types";
@@ -144,8 +145,8 @@ function Board({ id }: BoardProps) {
         }
       }
 
+      subscribedGroups.add(id);
       socketClient.getSymbolList({ groupId: id });
-      socketClient.subscribe({ groupId: id });
       groupIdRef.current = id;
     }
 
@@ -175,6 +176,8 @@ function Board({ id }: BoardProps) {
       )}
 
       {id?.startsWith("fav_") && <PriceBoardFavorite boardId={id} />}
+
+      <DebugPanel />
     </>
   );
 }

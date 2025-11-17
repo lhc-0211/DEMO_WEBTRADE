@@ -31,8 +31,6 @@ export default function EditOrderModal({
   data: OrderTable | undefined;
   onSubmit: () => void;
 }) {
-  console.log("data", data);
-
   return (
     <AnimatePresence>
       <Modal

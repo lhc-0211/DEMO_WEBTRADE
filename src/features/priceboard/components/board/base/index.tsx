@@ -222,11 +222,14 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
   const rowRenderer = ({ index, key, style }: ListRowProps) => {
     const symbol = symbols[index];
     if (!symbol) return null;
-    const snapshot = snapshots[symbol] ?? { symbol };
-
+    const snapshot = snapshots[symbol];
     return (
       <div key={key} style={style}>
-        <SortableRow symbol={symbol} snapshot={snapshot} index={index} />
+        <SortableRow
+          symbol={symbol}
+          snapshot={snapshot ?? { symbol }}
+          index={index}
+        />
       </div>
     );
   };

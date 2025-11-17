@@ -48,7 +48,7 @@ const snapshots = new Map<string, SnapshotDataCompact>();
 let pendingBatch: SnapshotDataCompact[] = [];
 let rafId: number | null = null;
 let offlineQueue: {
-  action: "subscribe" | "unsubscribe";
+  action: "subscribe" | "unsubscribe" | "getSymbolList";
   options: SubscribeOptions;
 }[] = [];
 
@@ -89,8 +89,17 @@ const parseMessage = (raw: string): void => {
     const { groupId, symbols } = msg;
     const cacheKey = `stocks_${groupId}`;
 
+    console.log("symbolList", msg);
+
     localStorage.setItem(cacheKey, JSON.stringify({ groupId, symbols }));
     store.dispatch(setListStockByIdFromCache(groupId, symbols));
+
+    if (subscribedGroups.has(groupId)) {
+      console.log("snapshot connect", groupId);
+
+      const sessionId = getOrCreateSessionId();
+      send({ type: "subscribe", sessionId, groupId });
+    }
     return;
   }
 
@@ -125,6 +134,9 @@ const parseMessage = (raw: string): void => {
 
   if ("1" in msg && msg["1"] === "snapshot") {
     const m = msg as FullSnapshotMessage;
+
+    console.log("snapshot", m);
+
     const { symbol } = m;
     if (!symbol) return;
 
@@ -270,6 +282,8 @@ const closeSocket = () => {
 
 // ==================== SUBSCRIPTION ====================
 const send = (msg: SubscribeMessage): boolean => {
+  console.log("msg", msg);
+
   if (socket?.readyState === WebSocket.OPEN) {
     try {
       socket.send(JSON.stringify(msg));
@@ -280,11 +294,14 @@ const send = (msg: SubscribeMessage): boolean => {
   }
   return false;
 };
-
 const processOfflineQueue = () => {
   while (offlineQueue.length) {
     const job = offlineQueue.shift()!;
-    sendSubscribeRequest(job.action, job.options);
+    if (job.action === "getSymbolList") {
+      socketClient.getSymbolList(job.options);
+    } else {
+      sendSubscribeRequest(job.action, job.options);
+    }
   }
 };
 
@@ -297,9 +314,14 @@ const reSubscribe = () => {
     send({ type: "subscribe", sessionId, symbols: [...subscribedSymbols] });
   }
 
-  // Resub groups
+  // Resub groups + getSymbolList nếu chưa có cache
   subscribedGroups.forEach((groupId) => {
     send({ type: "subscribe", sessionId, groupId });
+
+    const cacheKey = `stocks_${groupId}`;
+    if (!localStorage.getItem(cacheKey)) {
+      socketClient.getSymbolList({ groupId });
+    }
   });
 };
 
@@ -462,13 +484,28 @@ export const socketClient = {
     };
   },
 
-  getSnapshot: (symbol: string) => snapshots.get(symbol),
-  getAllSnapshots: () => [...snapshots.values()],
-
   getSymbolList: (options: SubscribeOptions) => {
-    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    if (!options.groupId) return;
+
+    const cacheKey = `stocks_${options.groupId}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const { symbols } = JSON.parse(cached);
+        if (Array.isArray(symbols) && symbols.length > 0) {
+          store.dispatch(setListStockByIdFromCache(options.groupId, symbols));
+        }
+      } catch {
+        console.warn("Invalid cache for", options.groupId);
+      }
+      return;
+    }
+
     const sessionId = getOrCreateSessionId();
-    send({ type: "getSymbolList", sessionId, groupId: options?.groupId });
+    const msg = { type: "getSymbolList", sessionId, groupId: options.groupId };
+    if (!send(msg as SubscribeMessage)) {
+      offlineQueue.push({ action: "getSymbolList", options });
+    }
   },
 
   setVisibleSymbols: (symbols: string[]) => {
@@ -492,5 +529,7 @@ export const socketClient = {
     closeSocket();
   },
 };
+
+export { subscribedGroups };
 
 connect();

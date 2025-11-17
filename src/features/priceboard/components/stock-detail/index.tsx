@@ -67,8 +67,6 @@ export default function StockDetailModal({
     }
   }, [listShareStock, symbol]);
 
-  console.log("snapshots", snapshots);
-
   return (
     <AnimatePresence>
       {isOpen && (
