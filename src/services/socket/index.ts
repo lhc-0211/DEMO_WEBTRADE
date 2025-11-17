@@ -509,6 +509,12 @@ export const socketClient = {
     } satisfies WorkerInputMessage);
   },
 
+  clearFlash: () => {
+    worker.postMessage({
+      type: "clearAll",
+    } satisfies WorkerInputMessage);
+  },
+
   close: () => {
     offlineQueue = [];
     subscribedSymbols.clear();

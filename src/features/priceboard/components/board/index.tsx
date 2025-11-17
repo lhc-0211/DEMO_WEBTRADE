@@ -23,7 +23,7 @@ function Board({ id }: BoardProps) {
 
   useEffect(() => {
     if (!windowIsActive) return;
-
+    socketClient.clearFlash();
     const needRefresh = shouldRefreshAfterInactive(60_000);
 
     if (needRefresh) {

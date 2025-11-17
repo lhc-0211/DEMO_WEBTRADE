@@ -38,8 +38,6 @@ function OrderHisDetail({ symbol }: { symbol: string }) {
     });
   }, [snapshotCurrent?.trade, preListOrderHis]);
 
-  console.log(datas);
-
   return (
     <div className="flex flex-col h-[calc(var(--app-height)-320px-36px-8px)]">
       <div className="flex flex-row p-1 px-2">
