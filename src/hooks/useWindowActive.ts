@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { WindowContext, type WindowContextValue } from "../types/WindowContext";
+import { WindowContext, type WindowContextValue } from "../types/windowContext";
 
 const SESSION_KEY = "priceboard_inactive_at";
 
