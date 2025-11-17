@@ -4,7 +4,11 @@ import { WindowContext, type WindowContextValue } from "../types/windowContext";
 const SESSION_KEY = "priceboard_inactive_at";
 
 export const useWindowActive = (): WindowContextValue & {
-  shouldRefreshData: (thresholdMs?: number) => boolean;
+  /** Kiểm tra có cần refresh dữ liệu sau khi tab inactive không */
+  shouldRefreshAfterInactive: (thresholdMs?: number) => boolean;
+
+  /** Xóa trạng thái inactive */
+  clearInactiveState: () => void;
 } => {
   const ctx = useContext(WindowContext);
   if (!ctx) {
@@ -13,16 +17,27 @@ export const useWindowActive = (): WindowContextValue & {
     );
   }
 
-  const { inactiveAt } = ctx;
+  const { windowIsActive, inactiveAt } = ctx;
 
-  const shouldRefreshData = (thresholdMs = 60_000) => {
-    // Ưu tiên state, nếu null thì đọc từ sessionStorage
-    const lastInactive =
-      inactiveAt ?? parseInt(sessionStorage.getItem(SESSION_KEY) ?? "0", 10);
-    if (!lastInactive) return false;
-    const elapsed = Date.now() - lastInactive;
-    return elapsed > thresholdMs;
+  const shouldRefreshAfterInactive = (thresholdMs = 60_000): boolean => {
+    // Nếu đang active và chưa từng inactive → không cần
+    if (windowIsActive && inactiveAt === null) return false;
+
+    const lastInactiveTime =
+      inactiveAt ?? Number(sessionStorage.getItem(SESSION_KEY) || "0");
+
+    if (!lastInactiveTime) return false;
+
+    return Date.now() - lastInactiveTime > thresholdMs;
   };
 
-  return { ...ctx, shouldRefreshData };
+  const clearInactiveState = () => {
+    sessionStorage.removeItem(SESSION_KEY);
+  };
+
+  return {
+    ...ctx,
+    shouldRefreshAfterInactive,
+    clearInactiveState,
+  };
 };

@@ -16,61 +16,71 @@ interface BoardProps {
 function Board({ id }: BoardProps) {
   const dispatch = useAppDispatch();
 
-  const { windowIsActive, shouldRefreshData } = useWindowActive();
+  const { windowIsActive, shouldRefreshAfterInactive, clearInactiveState } =
+    useWindowActive();
 
   const groupIdRef = useRef<string>("");
-  const prevActiveRef = useRef<boolean>(true);
 
   useEffect(() => {
-    if (windowIsActive && !prevActiveRef.current) {
-      const needRefresh = shouldRefreshData(60_000);
+    if (!windowIsActive) return;
 
-      if (needRefresh) {
-        // BỎ đăng ký cũ
-        socketClient.unsubscribeAll();
+    const needRefresh = shouldRefreshAfterInactive(60_000);
 
-        // ĐĂNG KÝ LẠI theo group hiện tại
-        if (groupIdRef.current.startsWith("fav_")) {
-          const favorites = JSON.parse(
-            localStorage.getItem("favorites") || "[]"
-          );
-          const fav = favorites.find(
-            (f: Favorite) => f.id === groupIdRef.current
-          );
+    if (needRefresh) {
+      socketClient.unsubscribeAll();
 
-          if (fav && Array.isArray(fav.symbols)) {
-            dispatch(
-              setListStockByIdFromCache(groupIdRef.current, fav.symbols)
-            );
-            socketClient.subscribe({ symbols: [...fav.symbols] });
-          }
-        } else if (
-          ["hsx_tt", "hnx_tt", "upcom_tt"].includes(groupIdRef.current)
-        ) {
-          let marketId = "";
-          switch (groupIdRef.current) {
-            case "hsx_tt":
-              marketId = "STO";
-              break;
-            case "hnx_tt":
-              marketId = "STX";
-              break;
-            case "upcom_tt":
-              marketId = "UPCOM";
-              break;
-          }
-          socketClient.requestNego(marketId);
+      if (groupIdRef.current?.startsWith("fav_")) {
+        const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+        const fav = favorites.find((f: Favorite) => f.id === id);
+        if (fav && Array.isArray(fav.symbols)) {
+          // Gửi symbols từ danh mục yêu thích lên redux
+          dispatch(setListStockByIdFromCache(id, fav.symbols));
+
+          socketClient.subscribe({
+            symbols: [...fav.symbols], //đăng ký theo danh sách mã
+          });
+
+          groupIdRef.current = id;
+          return;
         } else {
-          socketClient.subscribe({ groupId: groupIdRef.current });
+          console.warn(
+            "Không tìm thấy danh mục yêu thích hoặc danh mục trống:",
+            id
+          );
+          return;
         }
+      } else if (
+        ["hsx_tt", "hnx_tt", "upcom_tt"].includes(groupIdRef.current)
+      ) {
+        groupIdRef.current = id;
+        let marketId = "";
+
+        switch (id) {
+          case "hsx_tt":
+            marketId = "STO";
+            break;
+          case "hnx_tt":
+            marketId = "STX";
+            break;
+          case "upcom_tt":
+            marketId = "UPCOM";
+            break;
+        }
+
+        socketClient.requestNego(marketId);
+      } else {
+        socketClient.subscribe({ groupId: groupIdRef.current });
       }
 
-      // Sau refresh thì clear inactive session
-      sessionStorage.removeItem("priceboard_inactive_at");
+      clearInactiveState();
     }
-
-    prevActiveRef.current = windowIsActive;
-  }, [windowIsActive, shouldRefreshData, dispatch]);
+  }, [
+    id,
+    windowIsActive,
+    shouldRefreshAfterInactive,
+    clearInactiveState,
+    dispatch,
+  ]);
 
   useEffect(() => {
     if (!id) return;

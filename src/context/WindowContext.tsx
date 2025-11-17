@@ -13,20 +13,55 @@ export const WindowContextProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   React.useEffect(() => {
+    let isInactive = document.hidden;
+
+    const markInactive = () => {
+      if (isInactive) return;
+      isInactive = true;
+
+      const now = Date.now();
+      setWindowIsActive(false);
+      setInactiveAt(now);
+      sessionStorage.setItem(SESSION_KEY, now.toString());
+    };
+
+    const markActive = () => {
+      if (!isInactive) return;
+      isInactive = false;
+
+      setWindowIsActive(true);
+    };
+
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        const now = Date.now();
-        setWindowIsActive(false);
-        setInactiveAt(now);
-        sessionStorage.setItem(SESSION_KEY, now.toString());
+        markInactive();
       } else {
-        setWindowIsActive(true);
+        markActive();
       }
     };
 
+    const handleBlur = () => markInactive();
+    const handleFocus = () => markActive();
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) markActive(); // bfcache restore
+    };
+
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () =>
+    window.addEventListener("blur", handleBlur);
+    window.addEventListener("focus", handleFocus);
+    window.addEventListener("pageshow", handlePageShow);
+
+    // Khởi tạo đúng trạng thái ban đầu
+    if (document.hidden) {
+      markInactive();
+    }
+
+    return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
   }, []);
 
   return (

@@ -132,7 +132,7 @@ self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
     case "clearAll":
       queue = [];
       prevSnapshots.clear();
-      visibleSymbols.clear();
+      // visibleSymbols.clear();
       isProcessing = false;
       self.postMessage({
         type: "clearedAll",
