@@ -1,5 +1,4 @@
 import { memo, useEffect, useRef } from "react";
-import { DebugPanel } from "../../../../components/DebugPanel";
 import { useWindowActive } from "../../../../hooks/useWindowActive";
 import { socketClient, subscribedGroups } from "../../../../services/socket";
 import { useAppDispatch } from "../../../../store/hook";
@@ -177,7 +176,7 @@ function Board({ id }: BoardProps) {
 
       {id?.startsWith("fav_") && <PriceBoardFavorite boardId={id} />}
 
-      <DebugPanel />
+      {/* <DebugPanel /> */}
     </>
   );
 }
