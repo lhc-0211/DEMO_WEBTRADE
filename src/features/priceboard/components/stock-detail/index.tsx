@@ -7,6 +7,7 @@ import Button from "../../../../components/common/Button";
 import InputSearchFieldStock, {
   type OptionType,
 } from "../../../../components/inputs/InputSearchFieldStock";
+import OrderHisDetail from "../../../../components/stock/OrderHisDetail";
 import { socketClient } from "../../../../services/socket";
 import { useAppSelector } from "../../../../store/hook";
 import { selectListShareStock } from "../../../../store/slices/place-order/selector";
@@ -337,10 +338,11 @@ export default function StockDetailModal({
                     </h2>
                   </div>
                 </div>
-                <div className="col-span-1 bg-surface rounded-md p-2">
-                  <h2 className="text-sm font-medium text-text-title">
+                <div className="col-span-1 bg-surface rounded-md">
+                  <h2 className="text-sm font-medium text-text-title p-2">
                     Chi tiết khớp lệnh
                   </h2>
+                  <OrderHisDetail symbol={targetSymbols} />
                 </div>
               </div>
             </div>

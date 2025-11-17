@@ -36,11 +36,13 @@ export default function PriceBoard() {
       </div>
 
       {/* Chi tiết mã chứng khoán */}
-      <StockDetailModal
-        isOpen={detailSymbol ? true : false}
-        onClose={() => handleCloseModalDetailSym()}
-        symbol={detailSymbol || ""}
-      />
+      {detailSymbol && (
+        <StockDetailModal
+          isOpen={detailSymbol ? true : false}
+          onClose={() => handleCloseModalDetailSym()}
+          symbol={detailSymbol || ""}
+        />
+      )}
     </div>
   );
 }

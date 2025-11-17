@@ -42,6 +42,7 @@ export type TradeDataCompact = {
   1: "t";
   8: number;
   9: number;
+  10: string;
   11: number;
   12: number;
   13: PriceCompare;
@@ -73,6 +74,7 @@ type TradeMessage = {
   1: "t";
   8: number;
   9: number;
+  10: string;
   11: number;
   12: number;
   13: PriceCompare;

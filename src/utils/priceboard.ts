@@ -22,7 +22,7 @@ export const getColumnValueCompact = (
       case "lastPrice":
         return formatPrice(snapshot.trade["8"]);
       case "lastVolume":
-        return formatPrice(snapshot.trade["9"]);
+        return formatVolPrice(snapshot.trade["9"]);
       case "change":
         return snapshot.trade["11"] && snapshot.trade["11"] !== 0
           ? formatPrice(snapshot.trade["11"])
