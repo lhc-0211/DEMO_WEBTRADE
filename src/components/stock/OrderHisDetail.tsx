@@ -39,7 +39,7 @@ function OrderHisDetail({ symbol }: { symbol: string }) {
   }, [snapshotCurrent?.trade, preListOrderHis]);
 
   return (
-    <div className="flex flex-col h-[calc(var(--app-height)-320px-36px-8px)]">
+    <div className="flex flex-col h-full">
       <div className="flex flex-row p-1 px-2">
         <div className="grow flex flex-row items-center gap-2 text-text-body font-normal">
           <div className="flex-1 text-xs grid place-items-center">

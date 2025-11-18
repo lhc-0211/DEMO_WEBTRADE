@@ -12,7 +12,7 @@ import { getColumnValueCompact } from "../../../../../utils/priceboard";
 interface PriceCellProps {
   symbol: string;
   cellKey: string;
-  width?: number;
+  width?: string;
   snapshot: SnapshotDataCompact;
   disableFlash?: boolean; // tắt flash cho symbol
 }
@@ -113,7 +113,7 @@ const PriceCell = memo(function PriceCell({
       data-symbol={symbol}
       data-key={cellKey}
       className={className}
-      style={{ minWidth: width }}
+      style={{ width: width }}
       onClick={() => {
         if (cellKey === "symbol") {
           dispatch(setDetailSymbol(symbol + ""));

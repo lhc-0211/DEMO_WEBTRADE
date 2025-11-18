@@ -11,7 +11,7 @@ import { getColumnValueCompact } from "../../../../../utils/priceboard";
 interface PriceCellProps {
   symbol: string;
   cellKey: string;
-  width?: number;
+  width?: string;
   snapshot: SnapshotDataCompact;
   disableFlash?: boolean; // tắt flash cho symbol
 }

@@ -236,7 +236,7 @@ function PriceBoardBase({ boardId }: PriceBoardCWProps) {
       className="h-[calc(var(--app-height)-289px)] overflow-hidden"
       ref={containerRef}
     >
-      <div className="min-w-[1812px] flex flex-col">
+      <div className="min-w-[1408px] flex flex-col">
         <div style={{ height: HEADER_HEIGHT }}>
           <HeaderColumnsCW />
         </div>
@@ -255,7 +255,7 @@ function PriceBoardBase({ boardId }: PriceBoardCWProps) {
               rowCount={symbols.length}
               rowHeight={ROW_HEIGHT}
               rowRenderer={rowRenderer}
-              width={Math.max(containerWidth, 1812)}
+              width={Math.max(containerWidth, 1408)}
               onRowsRendered={updateVisibleSymbols}
               className="hide-scrollbar"
             />

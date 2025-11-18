@@ -26,46 +26,33 @@ export default function HeaderColumnsCW() {
             <div
               key={col.key}
               className={`h-14 grid place-items-center text-text-body text-xs font-medium select-none bg-gray-300/50`}
-              style={{ minWidth: col.width }}
+              style={{ width: col.width }}
             >
               <div className="flex flex-col w-full">
                 {/* Dòng 1: cột cha */}
                 <div
                   className={`flex items-center justify-center ${
-                    col.children ? "border-b border-border" : ""
-                  } ${col.children ? "h-7" : "h-14"}`}
-                  style={{ minWidth: col.width }}
+                    col.children ? "border-b border-border h-7" : "h-14"
+                  }`}
                 >
                   {col.label}
                 </div>
-
-                {/* Dòng 2: cột con */}
-                {col.children && (
-                  <div className="flex divide-x divide-border">
-                    {col.children.map((child) => (
-                      <div
-                        key={child.key}
-                        className={`flex-1 text-center h-7 grid place-items-center bg-gray-300/50`}
-                        style={{ minWidth: child.width }}
-                      >
-                        {child.label}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
           );
         }
 
         return (
-          <div key={col.key} className="flex flex-col w-full">
+          <div
+            key={col.key}
+            className="flex flex-col w-full"
+            style={{ width: col.width }}
+          >
             {/* --- Dòng 1: cha draggable riêng --- */}
             <div
               className={`flex items-center justify-center text-text-body text-xs font-medium select-none bg-gray-300/50 ${
-                hasChildren ? "border-b border-border" : ""
-              } ${hasChildren ? "h-7" : "h-14"}`}
-              style={{ minWidth: col.width }}
+                hasChildren ? "border-b border-border h-7" : "h-14"
+              }`}
               key={`${col.key}-parent`}
             >
               {col.label}
@@ -76,9 +63,11 @@ export default function HeaderColumnsCW() {
               <div className="flex divide-x divide-border text-text-body text-xs font-medium select-none ">
                 {col.children?.map((child: Column) => (
                   <div
-                    className="flex-1 text-center h-7 grid place-items-center bg-gray-300/50"
-                    style={{ minWidth: child.width }}
                     key={child.key}
+                    className="text-center h-7 grid place-items-center bg-gray-300/50"
+                    style={{
+                      width: `${100 / (col.children?.length || 1)}%`,
+                    }}
                   >
                     {child.label}
                   </div>

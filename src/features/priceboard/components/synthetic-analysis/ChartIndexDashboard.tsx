@@ -22,7 +22,9 @@ export default function ChartIndexDashboard() {
     pagination: { clickable: true },
     loop: true,
     breakpoints: {
-      0: { slidesPerView: 3 },
+      0: { slidesPerView: 1 },
+      1024: { slidesPerView: 2 },
+      1440: { slidesPerView: 3 },
     },
     className: "w-full h-full",
     noSwiping: true,

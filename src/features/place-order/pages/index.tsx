@@ -1,3 +1,4 @@
+import OrderHisDetail from "../../../components/stock/OrderHisDetail.tsx";
 import { usePerfectScrollbar } from "../../../hooks/usePerfectScrollbar.ts";
 import OrderForm from "../components/order-form/OrderForm.tsx";
 import OrderTable from "../components/order-table/OrderTable.tsx";
@@ -37,6 +38,9 @@ export default function PlaceOrder() {
                 <h2 className="text-sm font-medium text-text-title">
                   Chi tiết khớp lệnh
                 </h2>
+                <div className="h-[calc(var(--app-height)-320px-9px-8px-161px-161px)]">
+                  <OrderHisDetail symbol={"ACB:G1:STO"} />
+                </div>
               </div>
             </div>
           </div>

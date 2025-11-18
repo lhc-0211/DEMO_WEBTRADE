@@ -41,12 +41,13 @@ function BodyTableBase({
       {columns.map((col) => {
         const hasChildren = !!col.children?.length;
 
+        // Cột symbol đặc biệt: draggable
         if (col.key === "symbol") {
           return (
             <div
               key={col.key}
               className="h-7 grid place-items-center"
-              style={{ minWidth: col.width }}
+              style={{ width: col.width }}
             >
               <div
                 className="flex items-center justify-center h-7 cursor-grab active:cursor-grabbing"
@@ -57,31 +58,38 @@ function BodyTableBase({
                   symbol={symbol}
                   cellKey={col.key}
                   snapshot={snapshot}
-                  disableFlash={true} // TẮT FLASH CHO SYMBOL
+                  disableFlash={true} // Tắt flash cho symbol
                 />
               </div>
             </div>
           );
         }
 
+        // Các cột khác
         return (
-          <div key={col.key} className="flex flex-col w-full">
+          <div
+            key={col.key}
+            className="flex flex-col"
+            style={{ width: col.width }} // parent width
+          >
+            {/* Nếu không có children */}
             {!hasChildren ? (
               <PriceCell
                 symbol={symbol}
                 cellKey={col.key}
-                width={col.width}
+                width={"100%"}
                 snapshot={snapshot}
               />
             ) : (
-              <div className="flex divide-x divide-border text-xs font-medium">
+              // Nếu có children → chia đều width
+              <div className="flex divide-x divide-border text-xs font-medium w-full">
                 {col.children?.map((child) => (
                   <PriceCell
                     key={child.key}
                     cellKey={child.key}
                     symbol={symbol}
-                    width={child.width}
                     snapshot={snapshot}
+                    width={`${100 / (col.children?.length || 1)}%`}
                   />
                 ))}
               </div>

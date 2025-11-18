@@ -142,8 +142,8 @@ export default function Sidebar({ mode, width, changeModeSidebar }: Props) {
         onClick={() => {
           // Chuyển mode tuần tự: full -> mini -> hidden -> full
           if (mode === "full") changeModeSidebar("mini");
-          else if (mode === "mini") changeModeSidebar("hidden");
-          else if (mode === "hidden") changeModeSidebar("full");
+          else if (mode === "mini") changeModeSidebar("full");
+          // else if (mode === "hidden") changeModeSidebar("full");
         }}
       >
         <div>
