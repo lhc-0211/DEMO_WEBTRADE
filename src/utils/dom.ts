@@ -82,13 +82,6 @@ export function getStatusIndex(st: string | number, mc = "10") {
     }
     return "Đóng cửa";
   }
-  // if (st === 'K' || st === 'C' || st === 'J' || st === 'Undefined') {
-  //   return i18n.t('txt-closed');
-  // }
-  // if (st === 'I') {
-  //   return i18n.t('txt-intermission');
-  // }
-  // return i18n.t('txt-opened');
 }
 
 function isHoliday(date: Date): boolean {

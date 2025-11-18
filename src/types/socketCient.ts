@@ -27,6 +27,7 @@ export type IndexDataCompact = {
   35: string; // id
   36: number; //openIndex
   37: string; //indexCompare
+  41: string; // transsName
 };
 
 export type OrderBookDataCompact = {
@@ -136,6 +137,7 @@ export type IndexData = {
   totalAmountTraded?: number; //34
   indexCompare: string; //37
   openIndex?: number; //36
+  status: string; //41
 };
 
 export type OrderDeal = {

@@ -11,6 +11,8 @@ interface Props {
 export default function ChartIndexInfo(props: Props) {
   const { dataIndex } = props;
 
+  console.log("dataIndex", dataIndex);
+
   return (
     <div className="flex flex-col gap-2 w-2/5 p-1">
       {/* Name, change, changePC */}
@@ -78,7 +80,7 @@ export default function ChartIndexInfo(props: Props) {
         </div>
         <ul className="list-disc text-[10px] font-medium text-text-title ml-4">
           {/* <li className="">{getStatusIndex(dataIndex.tradingSessionId)}</li> */}
-          <li className="">{"-"}</li>
+          <li>{dataIndex?.status}</li>
         </ul>
       </div>
     </div>

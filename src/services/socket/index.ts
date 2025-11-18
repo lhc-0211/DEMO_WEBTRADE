@@ -122,6 +122,7 @@ const parseMessage = (raw: string): void => {
           totalAmountTraded: +msg[34],
           openIndex: +msg[36],
           indexCompare: msg[37],
+          status: msg[41],
         },
       ])
     );
