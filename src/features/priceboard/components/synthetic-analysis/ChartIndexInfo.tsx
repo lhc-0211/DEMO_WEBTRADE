@@ -11,8 +11,6 @@ interface Props {
 export default function ChartIndexInfo(props: Props) {
   const { dataIndex } = props;
 
-  console.log("dataIndex", dataIndex);
-
   return (
     <div className="flex flex-col gap-2 w-2/5 p-1">
       {/* Name, change, changePC */}

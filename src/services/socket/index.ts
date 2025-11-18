@@ -516,6 +516,12 @@ export const socketClient = {
     } satisfies WorkerInputMessage);
   },
 
+  clearQueue: () => {
+    worker.postMessage({
+      type: "clearQueue",
+    } satisfies WorkerInputMessage);
+  },
+
   setTabActive: (isActive: boolean) => {
     worker.postMessage({
       type: "active",

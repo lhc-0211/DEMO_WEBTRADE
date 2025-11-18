@@ -13,6 +13,7 @@ export type WorkerInputMessage =
   | { type: "visible"; data: string[] }
   | { type: "clear"; data: string[] }
   | { type: "clearAll"; data?: never }
+  | { type: "clearQueue"; data?: never }
   | { type: "active"; data: boolean };
 
 // === OUTPUT: worker -> main ===

@@ -1,4 +1,4 @@
-import { KEYS_COLOR } from "../configs/headerPriceBoard";
+import { KEYS_COLOR } from "../configs";
 import type {
   FlashResult,
   PriceCompare,
@@ -15,90 +15,101 @@ const prevSnapshots = new Map<string, SnapshotDataCompact>();
 
 let isTabActive = true;
 
-const BATCH_LIMIT = 100;
-const CACHE_LIMIT = 300;
+const BATCH_LIMIT = 600;
+const CACHE_LIMIT = 1500;
 
 const processQueue = (): void => {
   if (isProcessing || queue.length === 0) return;
   isProcessing = true;
 
-  const batch = queue.splice(0, BATCH_LIMIT);
-  const flashResults: FlashResult[] = [];
-  const colors: Record<string, Record<string, PriceCompare | "t">> = {};
+  const processBatch = () => {
+    const start = performance.now();
+    const batch = queue.splice(0, BATCH_LIMIT);
 
-  for (const snapshot of batch) {
-    const { symbol } = snapshot;
+    const flashResults: FlashResult[] = [];
+    const colors: Record<string, Record<string, PriceCompare | "t">> = {};
 
-    // Nếu không visible -> chỉ lưu prev, không xử lý
-    if (!visibleSymbols.has(symbol)) {
-      prevSnapshots.set(symbol, snapshot);
-      continue;
-    }
+    for (const snapshot of batch) {
+      const { symbol } = snapshot;
 
-    const prev = prevSnapshots.get(symbol);
-    if (!prev) {
-      prevSnapshots.set(symbol, snapshot);
-      continue;
-    }
+      // Nếu không visible -> chỉ lưu prev, không xử lý
+      if (!visibleSymbols.has(symbol)) {
+        prevSnapshots.set(symbol, snapshot);
+        continue;
+      }
 
-    // === FLASH LOGIC ===
-    const cacheNew: Record<string, string | null> = {};
-    const cacheOld: Record<string, string | null> = {};
+      const prev = prevSnapshots.get(symbol);
+      if (!prev) {
+        prevSnapshots.set(symbol, snapshot);
+        continue;
+      }
 
-    for (const key of KEYS_COLOR) {
-      cacheNew[key] = getColumnValueCompact(snapshot, key);
-      cacheOld[key] = getColumnValueCompact(prev, key);
-    }
+      // === FLASH LOGIC ===
+      const cacheNew: Record<string, string | null> = {};
+      const cacheOld: Record<string, string | null> = {};
 
-    for (const key of KEYS_COLOR) {
-      const newVal = cacheNew[key];
-      const oldVal = cacheOld[key];
-      if (!newVal || !oldVal || newVal === oldVal) continue;
+      for (const key of KEYS_COLOR) {
+        cacheNew[key] = getColumnValueCompact(snapshot, key);
+        cacheOld[key] = getColumnValueCompact(prev, key);
+      }
 
-      let flashClass: PriceCompare | null = null;
+      for (const key of KEYS_COLOR) {
+        const newVal = cacheNew[key];
+        const oldVal = cacheOld[key];
+        if (!newVal || !oldVal || newVal === oldVal) continue;
 
-      if (key.includes("price") || key.includes("Price")) {
-        flashClass = snapshot.trade?.[13] ?? prev.trade?.[13] ?? null;
-      } else if (key.includes("volume") || key.includes("Volume")) {
-        const n = parseInt(newVal.replace(/,/g, ""), 10);
-        const o = parseInt(oldVal.replace(/,/g, ""), 10);
-        if (!isNaN(n) && !isNaN(o)) {
-          flashClass = n > o ? "u" : "d";
+        let flashClass: PriceCompare | null = null;
+
+        if (key.includes("price") || key.includes("Price")) {
+          flashClass = snapshot.trade?.[13] ?? prev.trade?.[13] ?? null;
+        } else if (key.includes("volume") || key.includes("Volume")) {
+          const n = parseInt(newVal.replace(/,/g, ""), 10);
+          const o = parseInt(oldVal.replace(/,/g, ""), 10);
+          if (!isNaN(n) && !isNaN(o)) {
+            flashClass = n > o ? "u" : "d";
+          }
+        } else if (key === "high") {
+          flashClass =
+            (snapshot.orderBook?.[24]?.split("|")[1] as PriceCompare) ?? null;
+        } else if (key === "low") {
+          flashClass =
+            (snapshot.orderBook?.[25]?.split("|")[1] as PriceCompare) ?? null;
+        } else if (key === "avg") {
+          flashClass =
+            (snapshot.orderBook?.[28]?.split("|")[1] as PriceCompare) ?? null;
         }
-      } else if (key === "high") {
-        flashClass =
-          (snapshot.orderBook?.[24]?.split("|")[1] as PriceCompare) ?? null;
-      } else if (key === "low") {
-        flashClass =
-          (snapshot.orderBook?.[25]?.split("|")[1] as PriceCompare) ?? null;
-      } else if (key === "avg") {
-        flashClass =
-          (snapshot.orderBook?.[28]?.split("|")[1] as PriceCompare) ?? null;
+
+        // CHẶN FLASH KHI TAB KHÔNG ACTIVE
+        if (flashClass && isTabActive) {
+          flashResults.push({ symbol, key, flashClass });
+        }
       }
 
-      // CHẶN FLASH KHI TAB KHÔNG ACTIVE
-      if (flashClass && isTabActive) {
-        flashResults.push({ symbol, key, flashClass });
-      }
+      prevSnapshots.set(symbol, snapshot);
     }
 
-    prevSnapshots.set(symbol, snapshot);
-  }
+    // Gửi kết quả
+    if (flashResults.length > 0 || Object.keys(colors).length > 0) {
+      self.postMessage({
+        type: "update",
+        data: { flashes: flashResults, colors },
+      } satisfies WorkerOutputMessage);
+    }
 
-  // Gửi kết quả
-  if (flashResults.length > 0 || Object.keys(colors).length > 0) {
-    self.postMessage({
-      type: "update",
-      data: { flashes: flashResults, colors },
-    } satisfies WorkerOutputMessage);
-  }
+    isProcessing = false;
 
-  isProcessing = false;
+    // Nếu còn dữ liệu và chưa vượt 8-10ms thì xử lý tiếp luôn trong frame này
+    if (queue.length > 0 && performance.now() - start < 10) {
+      processBatch();
+    } else {
+      isProcessing = false;
+      if (queue.length > 0) {
+        requestAnimationFrame(processBatch); // chuyển sang frame tiếp theo
+      }
+    }
+  };
 
-  // Tiếp tục xử lý nếu còn
-  if (queue.length > 0) {
-    queueMicrotask(processQueue);
-  }
+  requestAnimationFrame(processBatch);
 };
 
 // === XỬ LÝ TIN NHẮN ===
@@ -140,15 +151,14 @@ self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
       });
       break;
 
+    case "clearQueue": {
+      queue = [];
+      isProcessing = false;
+      break;
+    }
+
     case "active":
       isTabActive = data;
-
-      console.log("test", isTabActive);
-
-      if (!isTabActive) {
-        // reset để không flash dồn khi tab mở lại
-        prevSnapshots.clear();
-      }
       break;
   }
 };

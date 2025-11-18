@@ -36,7 +36,7 @@ function Board({ id }: BoardProps) {
 
   useEffect(() => {
     if (!windowIsActive) return;
-    socketClient.clearFlash();
+    socketClient.clearQueue();
     const needRefresh = shouldRefreshAfterInactive(60_000);
 
     if (needRefresh) {
@@ -101,6 +101,7 @@ function Board({ id }: BoardProps) {
     // Unsubscribe nhóm trước đó nếu có
     if (groupIdRef.current) {
       socketClient.unsubscribeAll();
+      socketClient.clearQueue();
       groupIdRef.current = "";
     }
 
@@ -176,6 +177,7 @@ function Board({ id }: BoardProps) {
     return () => {
       if (groupIdRef.current) {
         socketClient.unsubscribeAll();
+        socketClient.clearQueue();
         groupIdRef.current = "";
       }
     };
