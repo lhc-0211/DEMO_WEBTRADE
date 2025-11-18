@@ -22,6 +22,19 @@ function Board({ id }: BoardProps) {
   const groupIdRef = useRef<string>("");
 
   useEffect(() => {
+    const handleVisibility = () => {
+      socketClient.setTabActive(!document.hidden);
+    };
+
+    window.addEventListener("visibilitychange", handleVisibility);
+
+    // Cleanup khi unmount
+    return () => {
+      window.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!windowIsActive) return;
     socketClient.clearFlash();
     const needRefresh = shouldRefreshAfterInactive(60_000);

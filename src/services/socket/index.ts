@@ -515,6 +515,13 @@ export const socketClient = {
     } satisfies WorkerInputMessage);
   },
 
+  setTabActive: (isActive: boolean) => {
+    worker.postMessage({
+      type: "active",
+      data: isActive,
+    } satisfies WorkerInputMessage);
+  },
+
   close: () => {
     offlineQueue = [];
     subscribedSymbols.clear();

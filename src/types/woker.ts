@@ -12,7 +12,8 @@ export type WorkerInputMessage =
   | { type: "batch"; data: SnapshotDataCompact[] }
   | { type: "visible"; data: string[] }
   | { type: "clear"; data: string[] }
-  | { type: "clearAll"; data?: never };
+  | { type: "clearAll"; data?: never }
+  | { type: "active"; data: boolean };
 
 // === OUTPUT: worker -> main ===
 export type WorkerOutputMessage =

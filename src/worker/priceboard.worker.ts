@@ -13,6 +13,8 @@ let isProcessing = false;
 let visibleSymbols = new Set<string>();
 const prevSnapshots = new Map<string, SnapshotDataCompact>();
 
+let isTabActive = true;
+
 const BATCH_LIMIT = 100;
 const CACHE_LIMIT = 300;
 
@@ -74,7 +76,8 @@ const processQueue = (): void => {
           (snapshot.orderBook?.[28]?.split("|")[1] as PriceCompare) ?? null;
       }
 
-      if (flashClass) {
+      // CHẶN FLASH KHI TAB KHÔNG ACTIVE
+      if (flashClass && isTabActive) {
         flashResults.push({ symbol, key, flashClass });
       }
     }
@@ -111,19 +114,18 @@ self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
       processQueue();
       break;
 
-    case "visible":
-      {
-        const oldVisible = visibleSymbols;
-        visibleSymbols = new Set(data);
+    case "visible": {
+      const oldVisible = visibleSymbols;
+      visibleSymbols = new Set(data);
 
-        // Xóa prev của symbol không còn visible
-        for (const sym of oldVisible) {
-          if (!visibleSymbols.has(sym)) {
-            prevSnapshots.delete(sym);
-          }
+      // Xóa prev của symbol không còn visible
+      for (const sym of oldVisible) {
+        if (!visibleSymbols.has(sym)) {
+          prevSnapshots.delete(sym);
         }
       }
       break;
+    }
 
     case "clear":
       data.forEach((sym) => prevSnapshots.delete(sym));
@@ -132,11 +134,21 @@ self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
     case "clearAll":
       queue = [];
       prevSnapshots.clear();
-      // visibleSymbols.clear();
       isProcessing = false;
       self.postMessage({
         type: "clearedAll",
-      } satisfies WorkerOutputMessage);
+      });
+      break;
+
+    case "active":
+      isTabActive = data;
+
+      console.log("test", isTabActive);
+
+      if (!isTabActive) {
+        // reset để không flash dồn khi tab mở lại
+        prevSnapshots.clear();
+      }
       break;
   }
 };
