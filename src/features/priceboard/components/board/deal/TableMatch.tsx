@@ -1,27 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getScrollbarSize, List, type RowComponentProps } from "react-window";
 import { HEADER_HEIGHT } from "../../../../../configs/headerPriceBoard.ts";
 import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts";
 import type { OrderDeal } from "../../../../../types/socketCient.ts";
-import { formatPrice, formatVolPrice } from "../../../../../utils/format.ts";
+import {
+  formatPrice,
+  formatVolPrice,
+  numberFormat,
+} from "../../../../../utils/format.ts";
 
 function TableMatch({ data }: { data: OrderDeal[] }) {
   const [size] = useState(getScrollbarSize);
   const { containerRef } = usePerfectScrollbar();
-  const [containerWidth, setContainerWidth] = useState(1200);
-  const [listHeight, setListHeight] = useState(500);
-
-  // === RESIZE ===
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const ro = new ResizeObserver((entries) => {
-      const rect = entries[0].contentRect;
-      setContainerWidth(rect.width);
-      setListHeight(rect.height - HEADER_HEIGHT);
-    });
-    ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, [containerRef]);
 
   return (
     <div
@@ -47,8 +37,6 @@ function TableMatch({ data }: { data: OrderDeal[] }) {
 
       <div className="overflow-hidden">
         <List
-          // height={listHeight}
-          // width={containerWidth}
           rowComponent={RowComponent}
           rowCount={data?.length || 0}
           rowHeight={25}
@@ -85,7 +73,9 @@ function RowComponent({
       <div className="w-1/6 grid place-items-center h-7">
         {formatVolPrice(data["9"])}
       </div>
-      <div className="w-1/6 grid place-items-center h-7"></div>
+      <div className="w-1/6 grid place-items-center h-7">
+        {numberFormat(data["29"])}
+      </div>
       <div className="w-1/6 grid place-items-center h-7">{data["10"]}</div>
     </div>
   );

@@ -145,6 +145,7 @@ export type OrderDeal = {
   "11": number; //changeAbs
   "12": number; //changePct
   "13": string; //priceCompare
+  "29": number; //Giá trị
   symbol: string;
 };
 

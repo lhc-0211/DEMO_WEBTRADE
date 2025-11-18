@@ -86,8 +86,7 @@ export const ALL_COLUMNS_BASE = [
 
 //Bảng giá chứng quyền
 export const ALL_COLUMNS_CW = [
-  { key: "symbol", label: "CK", default: true, width: 68 },
-  { key: "tcph", label: "TCPH", default: true, width: 78 },
+  { key: "symbol", label: "CK", default: true, width: 88 },
   { key: "gdcc", label: "GDCC", default: true, width: 98 },
   { key: "ceil", label: "Trần", default: true, width: 65 },
   { key: "floor", label: "Sàn", default: true, width: 65 },
@@ -138,7 +137,7 @@ export const ALL_COLUMNS_CW = [
     default: false,
     children: [
       { key: "symbolStock", label: "CK", default: true, width: 60 },
-      { key: "lastPrice", label: "Giá", default: true, width: 60 },
+      { key: "lastPriceStock", label: "Giá", default: true, width: 60 },
     ],
   },
   { key: "th", label: "TH", default: true, width: 80 },
