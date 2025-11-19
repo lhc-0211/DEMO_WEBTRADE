@@ -20,19 +20,22 @@ function RowComponentInday({
   const data = topStockTraded[index];
   return (
     <div
-      className={`flex flex-row items-center gap-2 px-2 text-xs font-medium text-text-body rounded ${
+      className={`grid grid-cols-4 items-center gap-2 px-2 text-xs font-medium text-text-body rounded ${
         index % 2 === 0 && "bg-input"
       }`}
       style={style}
     >
-      <div className={`w-20 ${data?.split("|")?.[2]}`}>
+      <div className={`col-span-1 ${data?.split("|")?.[2]}`}>
         {data?.split("|")?.[0].split(":")?.[0]}
       </div>
-      <div className="flex-1 text-right">
+      <div className="text-right col-span-1">
         {data?.split("|")?.[1] && formatVolPrice(+data?.split("|")?.[3])}
       </div>
-      <div className={`flex-1 text-right ${data?.split("|")?.[2]}`}>
-        {formatPrice(data?.split("|")?.[1])}
+      <div className={`text-right col-span-1 ${data?.split("|")?.[2]}`}>
+        {data?.split("|")?.[3]} / {data?.split("|")?.[4]}
+      </div>
+      <div className={`text-right col-span-1 ${data?.split("|")?.[2]}`}>
+        {data?.split("|")?.[5] && formatPrice(data?.split("|")?.[5])}
       </div>
     </div>
   );
@@ -100,6 +103,7 @@ export default function SynTheticTable() {
             <div className="grow flex flex-row items-center gap-2 text-xs font-medium text-text-body">
               <div className="w-20">Mã CK</div>
               <div className="flex-1 text-right">KL</div>
+              <div className="flex-1 text-right">Thay đổi</div>
               <div className="flex-1 text-right">Giá khớp</div>
             </div>
             <div className="shrink" style={{ width: size }} />
