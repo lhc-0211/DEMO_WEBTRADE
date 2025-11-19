@@ -6,7 +6,6 @@ import { selectTopVData } from "../../../../store/slices/stock/selector";
 import type {
   ModeTableSynThetic,
   topForeignTradedItem,
-  TradeMessage,
 } from "../../../../types";
 import { formatPrice, formatVolPrice, numberFormat } from "../../../../utils";
 import { SynTheticTableSkeleton } from "./SynTheticTableSkeleton";
@@ -16,7 +15,7 @@ function RowComponentInday({
   topStockTraded,
   style,
 }: RowComponentProps<{
-  topStockTraded: TradeMessage[];
+  topStockTraded: string[];
 }>) {
   const data = topStockTraded[index];
   return (
@@ -26,12 +25,14 @@ function RowComponentInday({
       }`}
       style={style}
     >
-      <div className={`w-20 ${data["13"]}`}>{data.symbol?.split(":")?.[0]}</div>
-      <div className="flex-1 text-right">
-        {data?.["33"] && formatVolPrice(data?.["33"])}
+      <div className={`w-20 ${data?.split("|")?.[2]}`}>
+        {data?.split("|")?.[0].split(":")?.[0]}
       </div>
-      <div className={`flex-1 text-right ${data["13"]}`}>
-        {formatPrice(data?.["8"])}
+      <div className="flex-1 text-right">
+        {data?.split("|")?.[1] && formatVolPrice(+data?.split("|")?.[3])}
+      </div>
+      <div className={`flex-1 text-right ${data?.split("|")?.[2]}`}>
+        {formatPrice(data?.split("|")?.[1])}
       </div>
     </div>
   );

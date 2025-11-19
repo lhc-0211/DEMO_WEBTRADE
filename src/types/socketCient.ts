@@ -160,7 +160,7 @@ export type DealData = {
 
 export type TopVData = {
   1: "topV";
-  29: TradeMessage[];
+  29: string[];
 };
 
 export type WebSocketMessageCompact =
