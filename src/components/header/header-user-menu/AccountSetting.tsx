@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { RiEdit2Fill } from "react-icons/ri";
 import { TbCameraPlus } from "react-icons/tb";
+import { ACCOUNT_SETTING } from "../../../configs/accountSetting";
 import { useAppSelector } from "../../../store/hook";
 import { selectAccountProfileStatus } from "../../../store/slices/client/selector";
-import type { AccountProfile } from "../../../types/client";
+import type {
+  AccountProfile,
+  AccountSettingTypes,
+} from "../../../types/client";
 import AccountHeaderSkeleton from "./account-info/AccountHeaderSkeleton";
 import AccountInfo from "./account-info/AccountInfo";
-import ChangeAccountInfoModal from "./account-info/ChangeAccountInfoModal";
 import ChangeNicknameModal from "./ChangeNicknamModal";
 
 export default function AccountSetting({
@@ -21,13 +24,11 @@ export default function AccountSetting({
 
   const [isOpenChangeNickname, setIsOpenChangeNickname] =
     useState<boolean>(false);
-
-  const [isOpenChangeAccountInfo, setIsOpenChangeAccountInfo] =
-    useState<boolean>(false);
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false); // check modal open
+  const [accountSettingType, setAccountSettingType] =
+    useState<AccountSettingTypes>("infor"); // Chức năng setting
 
   const refContainer = useRef<HTMLDivElement>(null);
-
-  const [typeChange, setTypeChange] = useState<"email" | "address">("email");
 
   useEffect(() => {
     const handlerCloseMenu = (e: MouseEvent) => {
@@ -35,7 +36,7 @@ export default function AccountSetting({
         refContainer.current &&
         !refContainer.current.contains(e.target as Node) &&
         !isOpenChangeNickname &&
-        !isOpenChangeAccountInfo
+        !isOpenModal
       ) {
         close();
       }
@@ -44,11 +45,10 @@ export default function AccountSetting({
     return () => {
       document.removeEventListener("mousedown", handlerCloseMenu);
     };
-  }, [close, isOpenChangeNickname, isOpenChangeAccountInfo]);
+  }, [close, isOpenChangeNickname, isOpenModal]);
 
-  const handleOpenModalChangeAccountInfo = (type: "email" | "address") => {
-    setTypeChange(type);
-    setIsOpenChangeAccountInfo(true);
+  const handleOpenModalChangeAccountInfo = () => {
+    setIsOpenModal(true);
   };
 
   return (
@@ -113,15 +113,30 @@ export default function AccountSetting({
       )}
 
       <div className="flex flex-col gap-4 mt-18">
-        <div className="text-xs text-yellow-400 p-[2px] border-b border-yellow-400 w-max">
-          Thông tin chung
+        <div className="flex flex-row gap-2">
+          {ACCOUNT_SETTING.map((item, index) => (
+            <div
+              key={index}
+              className={`text-xs text-text-subtitle p-0.5 border-b border-transparent hover:border-yellow-400 w-max cursor-pointer ${
+                accountSettingType === item.value &&
+                "border-yellow-400 text-yellow-400"
+              }`}
+              onClick={() => setAccountSettingType(item.value)}
+            >
+              {item.label}
+            </div>
+          ))}
         </div>
 
-        {/* Chức năng */}
-        <AccountInfo
-          accountProfile={accountProfile}
-          handleOpenModalChangeAccountInfo={handleOpenModalChangeAccountInfo}
-        />
+        {/*========= Chức năng ========== */}
+
+        {/* Thông tin chung */}
+        {accountSettingType === "infor" && (
+          <AccountInfo
+            accountProfile={accountProfile}
+            handleOpenModalChangeAccountInfo={handleOpenModalChangeAccountInfo}
+          />
+        )}
       </div>
 
       {/* modal change nickname */}
@@ -129,14 +144,6 @@ export default function AccountSetting({
         isOpen={isOpenChangeNickname}
         accountProfile={accountProfile}
         onClose={() => setIsOpenChangeNickname(false)}
-      />
-
-      {/* modal change account info */}
-      <ChangeAccountInfoModal
-        isOpen={isOpenChangeAccountInfo}
-        typeChange={typeChange}
-        accountProfile={accountProfile}
-        onClose={() => setIsOpenChangeAccountInfo(false)}
       />
     </div>
   );

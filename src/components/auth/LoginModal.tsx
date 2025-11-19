@@ -166,6 +166,7 @@ export default function LoginModal() {
                       error={errors.user}
                       registration={register("user")}
                       className="h-12!"
+                      autoFocus={true}
                     />
 
                     <InputField

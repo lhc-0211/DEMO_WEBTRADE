@@ -17,12 +17,14 @@ import {
 import type {
   AccountProfile,
   ChangeAccountInfoForm,
+  ChangeAccountInfoType,
 } from "../../../../types/client";
 import ConfirmOtpModal from "../../../auth/ConfirmOtpModal";
 import Button from "../../../common/Button";
 import InputField from "../../../inputs/InputField";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const phoneRegex = /^[0-9]{10}$/;
 
 const schema = yup.object({
   email: yup
@@ -30,6 +32,10 @@ const schema = yup.object({
     .required("Vui lòng nhập email mới")
     .matches(emailRegex, "Email không hợp lệ"),
   address: yup.string().required("Vui lòng nhập địa chỉ liên hệ mới"),
+  phoneNumber: yup
+    .string()
+    .required("Vui lòng nhập số điện thoại mới")
+    .matches(phoneRegex, "Số điện thoại không hợp lệ"),
 });
 
 const customStyles = {
@@ -55,7 +61,7 @@ export default function ChangeAccountInfoModal({
   onClose,
 }: {
   isOpen: boolean;
-  typeChange: "email" | "address";
+  typeChange: ChangeAccountInfoType;
   accountProfile: AccountProfile | null;
   onClose: () => void;
 }) {
@@ -85,7 +91,9 @@ export default function ChangeAccountInfoModal({
         toast(
           typeChange === "address"
             ? "Đổi địa chỉ liên hệ thành công!"
-            : "Đổi email thành công!",
+            : typeChange === "email"
+            ? "Đổi email thành công!"
+            : "Đổi số điện thoại thành công!",
           "success"
         );
         onCloseModal();
@@ -99,15 +107,23 @@ export default function ChangeAccountInfoModal({
     return () => {
       dispatch(resetFetchChangeAccountInfo());
     };
-  }, [success, dispatch]);
+  }, [success, typeChange, dispatch, toast]);
 
   useEffect(() => {
     if (accountProfile && typeChange) {
       reset({
-        email: typeChange === "address" ? accountProfile.cCustEmail || "" : "",
+        email:
+          typeChange === "address" || typeChange === "phoneNumber"
+            ? accountProfile.cCustEmail || ""
+            : "",
         address:
-          typeChange === "email" ? accountProfile.cResedenceAddress || "" : "",
-        phoneNumber: accountProfile.cCustMobile || "",
+          typeChange === "email" || typeChange === "phoneNumber"
+            ? accountProfile.cResedenceAddress || ""
+            : "",
+        phoneNumber:
+          typeChange === "address" || typeChange === "email"
+            ? accountProfile.cCustMobile || ""
+            : "",
       });
     }
   }, [accountProfile, reset, typeChange]);
@@ -204,13 +220,22 @@ export default function ChangeAccountInfoModal({
                         error={errors.email}
                         requied={true}
                       />
-                    ) : (
+                    ) : typeChange === "address" ? (
                       <InputField
                         label="Địa chỉ"
                         type="text"
                         placeholder="Nhập địa chỉ mới"
                         registration={register("address")}
                         error={errors.address}
+                        requied={true}
+                      />
+                    ) : (
+                      <InputField
+                        label="Số điện thoại"
+                        type="text"
+                        placeholder="Nhập số điện thoại"
+                        registration={register("phoneNumber")}
+                        error={errors.phoneNumber}
                         requied={true}
                       />
                     )}
