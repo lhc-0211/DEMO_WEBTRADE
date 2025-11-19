@@ -35,7 +35,7 @@ export default function MenuBoard({
           return (
             <button
               key={item.id}
-              className={`px-2 py-1 rounded-[26px] text-text-title text-sm flex items-center ${
+              className={`px-2 py-1 rounded-lg text-text-title text-sm flex items-center ${
                 active === item.id ? "bg-DTND-500" : ""
               }`}
               onClick={() => onChange(item.id)}

@@ -70,7 +70,7 @@ type RefMessage = {
   6: number;
   recv_ts: number;
 };
-type TradeMessage = {
+export type TradeMessage = {
   symbol: string;
   1: "t";
   8: number;
@@ -79,6 +79,7 @@ type TradeMessage = {
   11: number;
   12: number;
   13: PriceCompare;
+  33?: number;
   recv_ts: number;
 };
 type OrderBookMessage = {
@@ -157,6 +158,11 @@ export type DealData = {
   39: string[];
 };
 
+export type TopVData = {
+  1: "topV";
+  29: TradeMessage[];
+};
+
 export type WebSocketMessageCompact =
   | RefMessage
   | TradeMessage
@@ -166,4 +172,5 @@ export type WebSocketMessageCompact =
   | FullSnapshotMessage
   | IndexDataCompact
   | SymbolListMessage
-  | DealData;
+  | DealData
+  | TopVData;

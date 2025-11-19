@@ -5,6 +5,7 @@ import {
   clearSnapshotAll,
   resetSnapshots,
   setDealMessage,
+  setTopVMessage,
   updateIndex,
   updateSnapshots,
 } from "../../store/slices/stock/slice";
@@ -99,7 +100,7 @@ const parseMessage = (raw: string): void => {
     return;
   }
 
-  // INDEX: "1" === "nego"
+  // DEAL: "1" === "nego"
   if ("1" in msg && msg["1"] === "nego") {
     store.dispatch(setDealMessage(msg));
     return;
@@ -126,6 +127,12 @@ const parseMessage = (raw: string): void => {
         },
       ])
     );
+    return;
+  }
+
+  // TOPV: "1" === "topV"
+  if ("1" in msg && msg["1"] === "topV") {
+    store.dispatch(setTopVMessage(msg));
     return;
   }
 

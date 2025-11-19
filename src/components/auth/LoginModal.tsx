@@ -165,16 +165,17 @@ export default function LoginModal() {
                       placeholder="Nhập tên đăng nhập"
                       error={errors.user}
                       registration={register("user")}
-                      className="!h-12"
+                      className="h-12!"
                     />
 
                     <InputField
                       label="Mật khẩu"
                       type="password"
+                      typeInput="password"
                       placeholder="Nhập mật khẩu"
                       error={errors.password}
                       registration={register("password")}
-                      className="!h-12"
+                      className="h-12!"
                     />
                   </div>
 
@@ -197,7 +198,7 @@ export default function LoginModal() {
                     fullWidth
                     type="submit"
                     disabled={isSubmitting || loginStatus.loading}
-                    className="!h-10"
+                    className="h-10!"
                   >
                     {loginStatus.loading ? (
                       <ScaleLoader height={25} />

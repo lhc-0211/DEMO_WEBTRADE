@@ -1,6 +1,7 @@
 // src/store/slices/stock/selector.ts
 import { createSelector } from "@reduxjs/toolkit";
 import type { RootState } from "../..";
+import { ID_HNX, ID_HOSE, ID_UPCOM, ID_VN30 } from "../../../configs";
 import type { IndexData, SnapshotDataCompact } from "../../../types";
 
 // === STOCK SELECTORS (giữ nguyên) ===
@@ -67,10 +68,10 @@ export const selectMajorIndices = createSelector(
     hnxIndex?: IndexData;
     upcomIndex?: IndexData;
   } => ({
-    vnIndex: indices["1:001"],
-    vn30Index: indices["1:105"],
-    hnxIndex: indices["2:002"],
-    upcomIndex: indices["4:001"],
+    vnIndex: indices[ID_HOSE],
+    vn30Index: indices[ID_VN30],
+    hnxIndex: indices[ID_HNX],
+    upcomIndex: indices[ID_UPCOM],
   })
 );
 
@@ -80,3 +81,6 @@ export const selectDealData = (state: RootState) => state.stock.dealMessage;
 /**Lấy symbol detail */
 export const selectDetailSymbol = (state: RootState) =>
   state.stock.detailSymbol;
+
+/**Lấy data Top KL giao dịch trong ngày */
+export const selectTopVData = (state: RootState) => state.stock.topVMessage;

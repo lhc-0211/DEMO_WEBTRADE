@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { MdOutlineArrowLeft, MdOutlineArrowRight } from "react-icons/md";
-import { getScrollbarSize, type RowComponentProps } from "react-window";
-import { useAppDispatch } from "../../../../store/hook";
+import { getScrollbarSize, List, type RowComponentProps } from "react-window";
+import { useAppSelector } from "../../../../store/hook";
+import { selectTopVData } from "../../../../store/slices/stock/selector";
 import type {
   ModeTableSynThetic,
   topForeignTradedItem,
-  topStockTradedItem,
+  TradeMessage,
 } from "../../../../types";
-import { numberFormat } from "../../../../utils";
+import { formatPrice, formatVolPrice, numberFormat } from "../../../../utils";
 import { SynTheticTableSkeleton } from "./SynTheticTableSkeleton";
 
 function RowComponentInday({
@@ -15,7 +16,7 @@ function RowComponentInday({
   topStockTraded,
   style,
 }: RowComponentProps<{
-  topStockTraded: topStockTradedItem[];
+  topStockTraded: TradeMessage[];
 }>) {
   const data = topStockTraded[index];
   return (
@@ -25,12 +26,12 @@ function RowComponentInday({
       }`}
       style={style}
     >
-      <div className={`w-20 ${data.status}`}>{data.symbol}</div>
+      <div className={`w-20 ${data["13"]}`}>{data.symbol?.split(":")?.[0]}</div>
       <div className="flex-1 text-right">
-        {numberFormat(data.totalVolumeTraded)}
+        {data?.["33"] && formatVolPrice(data?.["33"])}
       </div>
-      <div className={`flex-1 text-right ${data.status}`}>
-        {numberFormat(data.lastPrice, 2)}
+      <div className={`flex-1 text-right ${data["13"]}`}>
+        {formatPrice(data?.["8"])}
       </div>
     </div>
   );
@@ -66,28 +67,10 @@ function RowComponentForeign({
 }
 
 export default function SynTheticTable() {
-  const disatch = useAppDispatch();
-
-  // const topStockTraded = useAppSelector(selectTopStockTraded);
-  // const { loading: loadingStock } = useAppSelector(selectTopStockTradedStatus);
-
-  // const topForeignTraded = useAppSelector(
-  //   (state) => state.priceBoard.data.topForeignTraded
-  // );
-  // const { loading: loadingForeign, error: errorForeign } = useAppSelector(
-  //   (state) => state.priceBoard.status.fetchTopForeignTraded
-  // );
+  const topStockTraded = useAppSelector(selectTopVData);
 
   const [size] = useState(getScrollbarSize);
   const [modeTable, setModeTable] = useState<ModeTableSynThetic>("INDAY");
-
-  // useEffect(() => {
-  //   if (modeTable === "INDAY") {
-  //     disatch(fetchTopStockTradedRequest("10"));
-  //   } else {
-  //     disatch(fetchTopForeignTradedRequest("10"));
-  //   }
-  // }, [modeTable, disatch]);
 
   return (
     <div className="bg-surface rounded pb-1 px-1">
@@ -121,16 +104,16 @@ export default function SynTheticTable() {
             <div className="shrink" style={{ width: size }} />
           </div>
           <div className="overflow-hidden h-[91px]">
-            {/* {loadingStock ? (
+            {!topStockTraded || !(topStockTraded?.["29"]?.length > 0) ? (
               <SynTheticTableSkeleton type="INDAY" />
             ) : (
               <List
                 rowComponent={RowComponentInday}
-                rowCount={topStockTraded.length}
+                rowCount={topStockTraded?.["29"]?.length}
                 rowHeight={20}
-                rowProps={{ topStockTraded }}
+                rowProps={{ topStockTraded: topStockTraded?.["29"] ?? [] }}
               />
-            )} */}
+            )}
             <SynTheticTableSkeleton type="INDAY" />
           </div>
         </div>

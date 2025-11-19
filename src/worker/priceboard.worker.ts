@@ -162,6 +162,7 @@ self.onmessage = (e: MessageEvent<WorkerInputMessage>) => {
         }
       }
       processQueue(); // có thể có flash mới khi symbol vừa được visible
+
       break;
     }
 

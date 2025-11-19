@@ -1,3 +1,4 @@
+import { ID_HNX, ID_HOSE, ID_UPCOM, ID_VN30 } from "../configs";
 import type { IErrMsg } from "../types";
 
 function pick<T>(...values: (T | undefined | null)[]): T | undefined {
@@ -50,14 +51,10 @@ export function numberFormat(
 
 export function mapIdToNameIndex(id: string) {
   const map: { [key: string]: string } = {
-    "001": "VN-Index",
-    "101": "VN30-Index",
-    "002": "HNX-Index",
-    "301": "UPCOM-Index",
-    "1:105": "VN30-Index",
-    "1:001": "VN-Index",
-    "2:002": "HNX-Index",
-    "4:001": "UPCOM-Index",
+    [ID_VN30]: "VN30-Index",
+    [ID_HOSE]: "VN-Index",
+    [ID_HNX]: "HNX-Index",
+    [ID_UPCOM]: "UPCOM-Index",
   };
 
   return map[id] || id;

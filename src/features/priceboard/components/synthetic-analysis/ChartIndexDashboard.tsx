@@ -1,5 +1,6 @@
 import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { ID_HNX, ID_HOSE, ID_UPCOM, ID_VN30 } from "../../../../configs";
 import { useAppSelector } from "../../../../store/hook";
 import { selectMajorIndices } from "../../../../store/slices/stock/selector";
 import ChartIndexDashboardSkeleton from "./ChartIndexDashboardSkeleton";
@@ -10,10 +11,10 @@ export default function ChartIndexDashboard() {
     useAppSelector(selectMajorIndices);
 
   const indicesList = [
-    { key: "1:001", label: "VN-Index", data: vnIndex },
-    { key: "1:105", label: "VN30", data: vn30Index },
-    { key: "2:002", label: "HNX", data: hnxIndex },
-    { key: "4:001", label: "UPCoM", data: upcomIndex },
+    { key: ID_VN30, label: "VN30", data: vn30Index },
+    { key: ID_HOSE, label: "VN-Index", data: vnIndex },
+    { key: ID_HNX, label: "HNX", data: hnxIndex },
+    { key: ID_UPCOM, label: "UPCOM", data: upcomIndex },
   ].filter((item) => !!item.data);
 
   const swiperProps = {
@@ -57,7 +58,7 @@ export default function ChartIndexDashboard() {
     <div className="w-full h-full">
       <Swiper {...swiperProps} className="w-full h-full ">
         {indicesList.length === 0
-          ? [...Array(4)].map((_, index) => (
+          ? [...Array(3)].map((_, index) => (
               <SwiperSlide key={index} className="h-full">
                 <ChartIndexDashboardSkeleton />
               </SwiperSlide>

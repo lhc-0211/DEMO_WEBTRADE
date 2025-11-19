@@ -69,3 +69,9 @@ export const PRICE_BOARD_MENU: PriceBoardMenuGroup[] = [
     ],
   },
 ];
+
+//TODO: ID chartIndex
+export const ID_VN30 = "1:100";
+export const ID_HOSE = "1:001";
+export const ID_HNX = "2:001";
+export const ID_UPCOM = "4:001";

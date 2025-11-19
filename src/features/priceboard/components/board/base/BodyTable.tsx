@@ -41,7 +41,6 @@ function BodyTableBase({
       {columns.map((col) => {
         const hasChildren = !!col.children?.length;
 
-        // Cột symbol đặc biệt: draggable
         if (col.key === "symbol") {
           return (
             <div
@@ -81,7 +80,7 @@ function BodyTableBase({
                 snapshot={snapshot}
               />
             ) : (
-              // Nếu có children → chia đều width
+              // Nếu có children
               <div className="flex divide-x divide-border text-xs font-medium w-full">
                 {col.children?.map((child) => (
                   <PriceCell
