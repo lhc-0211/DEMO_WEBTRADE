@@ -28,7 +28,7 @@ function RowComponentInday({
       <div className={`w-12 ${data?.split("|")?.[2]}`}>
         {data?.split("|")?.[0].split(":")?.[0]}
       </div>
-      <div className="w-20 text-right">
+      <div className={`text-right w-20  ${data?.split("|")?.[2]}`}>
         {data?.split("|")?.[1] && formatPrice(+data?.split("|")?.[1])}
       </div>
       <div className={`text-right flex-1  ${data?.split("|")?.[2]}`}>
@@ -40,7 +40,7 @@ function RowComponentInday({
           ? numberFormat(data?.split("|")?.[4], 2, "0") + " %"
           : "0"}
       </div>
-      <div className={`text-right flex-1  ${data?.split("|")?.[2]}`}>
+      <div className="text-right flex-1">
         {data?.split("|")?.[5] && formatVolPrice(+data?.split("|")?.[5])}
       </div>
     </div>
