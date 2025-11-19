@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { RiEdit2Fill } from "react-icons/ri";
-import { usePerfectScrollbar } from "../../../../hooks/usePerfectScrollbar.ts";
-import { useAppSelector } from "../../../../store/hook";
-import { selectAccountProfileStatus } from "../../../../store/slices/client/selector";
+import { usePerfectScrollbar } from "../../../../hooks/usePerfectScrollbar.ts.ts";
+import { useAppSelector } from "../../../../store/hook.ts";
+import { selectAccountProfileStatus } from "../../../../store/slices/client/selector.ts";
 import type {
   AccountProfile,
   ChangeAccountInfoType,
-} from "../../../../types/client";
-import AccountInfoSkeleton from "./AccountInfoSkeleton";
+} from "../../../../types/client.ts";
+import AccountInfoSkeleton from "./AccountInfoSkeleton.tsx";
 import ChangeAccountInfoModal from "./ChangeAccountInfoModal.tsx";
 
 export default function AccountInfo({
   accountProfile,
-  handleOpenModalChangeAccountInfo,
+  handleOpenModal,
 }: {
   accountProfile: AccountProfile | null;
-  handleOpenModalChangeAccountInfo: () => void;
+  handleOpenModal: () => void;
 }) {
   const { containerRef } = usePerfectScrollbar();
 
@@ -28,13 +28,13 @@ export default function AccountInfo({
   const handleOpenModalChange = (type: ChangeAccountInfoType) => {
     setTypeChange(type);
     setIsOpenChangeAccountInfo(true);
-    handleOpenModalChangeAccountInfo();
+    handleOpenModal();
   };
 
   return (
     <div
       ref={containerRef}
-      className="h-[calc(var(--app-height)-377px)] w-[360px] bg-sidebar-default overflow-hidden relative"
+      className="h-[calc(var(--app-height)-305px)] w-[360px] bg-sidebar-default overflow-hidden relative"
     >
       {" "}
       {loading ? (

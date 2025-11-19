@@ -100,7 +100,7 @@ export default function HeaderUserMenu({ token }: { token: Token }) {
             <Button
               onClick={() => alert("Thông báo của DTND!")}
               variant="close"
-              className="!p-2 !h-9"
+              className="p-2! h-9!"
             >
               <FaBell className="size-5 min-w-5" />
             </Button>
@@ -167,7 +167,7 @@ export default function HeaderUserMenu({ token }: { token: Token }) {
                 }}
               ></div>
               <div className="px-12 flex flex-col gap-4 relative">
-                <div className="flex flex-row gap-4 items-end absolute -top-[14px]">
+                <div className="flex flex-row gap-4 items-end absolute -top-3.5">
                   <div
                     className="w-16 h-16 rounded-full bg-DTND-400 bg-center bg-no-repeat bg-cover border border-yellow-500 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]"
                     style={{

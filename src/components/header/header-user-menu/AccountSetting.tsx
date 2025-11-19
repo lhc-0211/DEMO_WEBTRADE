@@ -9,8 +9,9 @@ import type {
   AccountProfile,
   AccountSettingTypes,
 } from "../../../types/client";
+import AccountBen from "./account-ben";
+import AccountInfo from "./account-info";
 import AccountHeaderSkeleton from "./account-info/AccountHeaderSkeleton";
-import AccountInfo from "./account-info/AccountInfo";
 import ChangeNicknameModal from "./ChangeNicknamModal";
 
 export default function AccountSetting({
@@ -47,7 +48,7 @@ export default function AccountSetting({
     };
   }, [close, isOpenChangeNickname, isOpenModal]);
 
-  const handleOpenModalChangeAccountInfo = () => {
+  const handleOpenModal = () => {
     setIsOpenModal(true);
   };
 
@@ -72,7 +73,7 @@ export default function AccountSetting({
       ) : (
         <>
           <div
-            className="h-[150px] w-full rounded-b-2xl relative bg-center bg-no-repeat bg-cover"
+            className="h-[100px] w-full rounded-b-2xl relative bg-center bg-no-repeat bg-cover"
             style={{
               backgroundImage: `url(${accountProfile?.cBackGroundImg})`,
             }}
@@ -85,9 +86,9 @@ export default function AccountSetting({
             </div>
           </div>
           <div className="relative px-6">
-            <div className="flex flex-row gap-4 items-center absolute -top-[14px]">
+            <div className="flex flex-row gap-4 items-center absolute -top-4.5">
               <div
-                className="w-16 h-16 rounded-full relative bg-white bg-center bg-no-repeat bg-cover border border-yellow-500 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]"
+                className="w-12 h-12 rounded-full relative bg-white bg-center bg-no-repeat bg-cover border border-yellow-500 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]"
                 style={{
                   backgroundImage: `url(${accountProfile?.cAvatarImg})`,
                 }}
@@ -96,7 +97,7 @@ export default function AccountSetting({
                   <TbCameraPlus className="text-text-title" />
                 </div>
               </div>
-              <div className="flex flex-row gap-1 items-center">
+              <div className="flex flex-row gap-1 items-center mt-3">
                 <span className="text-base font-medium text-text-title">
                   {accountProfile?.cUserName}
                 </span>
@@ -112,7 +113,7 @@ export default function AccountSetting({
         </>
       )}
 
-      <div className="flex flex-col gap-4 mt-18">
+      <div className="flex flex-col gap-4 mt-10">
         <div className="flex flex-row gap-2">
           {ACCOUNT_SETTING.map((item, index) => (
             <div
@@ -134,8 +135,13 @@ export default function AccountSetting({
         {accountSettingType === "infor" && (
           <AccountInfo
             accountProfile={accountProfile}
-            handleOpenModalChangeAccountInfo={handleOpenModalChangeAccountInfo}
+            handleOpenModal={handleOpenModal}
           />
+        )}
+
+        {/* Tài khoản thụ hưởng */}
+        {accountSettingType === "accBen" && (
+          <AccountBen handleOpenModal={handleOpenModal} />
         )}
       </div>
 
