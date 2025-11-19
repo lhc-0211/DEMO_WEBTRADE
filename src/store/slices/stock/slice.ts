@@ -4,6 +4,7 @@ import type {
   DealData,
   IndexData,
   SnapshotDataCompact,
+  TopFVData,
   TopVData,
 } from "../../../types";
 
@@ -13,6 +14,7 @@ interface StockState {
   indices: Record<string, IndexData>;
   dealMessage: DealData | null;
   topVMessage: TopVData | null;
+  topFVMessage: TopFVData | null;
   detailSymbol: string | null;
 }
 
@@ -22,6 +24,7 @@ const initialState: StockState = {
   indices: {},
   dealMessage: null,
   topVMessage: null,
+  topFVMessage: null,
   detailSymbol: null,
 };
 
@@ -67,6 +70,10 @@ const stockSlice = createSlice({
       state.topVMessage = action.payload;
     },
 
+    setTopFVMessage(state, action: PayloadAction<TopFVData>) {
+      state.topFVMessage = action.payload;
+    },
+
     setDetailSymbol(state, action: PayloadAction<string>) {
       state.detailSymbol = action.payload;
     },
@@ -82,6 +89,7 @@ export const {
   clearSnapshotAll,
   setDealMessage,
   setTopVMessage,
+  setTopFVMessage,
   setDetailSymbol,
 } = stockSlice.actions;
 

@@ -163,6 +163,11 @@ export type TopVData = {
   29: string[];
 };
 
+export type TopFVData = {
+  1: "topFV";
+  29: string[];
+};
+
 export type WebSocketMessageCompact =
   | RefMessage
   | TradeMessage
@@ -173,4 +178,5 @@ export type WebSocketMessageCompact =
   | IndexDataCompact
   | SymbolListMessage
   | DealData
-  | TopVData;
+  | TopVData
+  | TopFVData;

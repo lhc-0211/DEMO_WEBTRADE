@@ -2,11 +2,11 @@ import { useState } from "react";
 import { MdOutlineArrowLeft, MdOutlineArrowRight } from "react-icons/md";
 import { getScrollbarSize, List, type RowComponentProps } from "react-window";
 import { useAppSelector } from "../../../../store/hook";
-import { selectTopVData } from "../../../../store/slices/stock/selector";
-import type {
-  ModeTableSynThetic,
-  topForeignTradedItem,
-} from "../../../../types";
+import {
+  selectTopFVData,
+  selectTopVData,
+} from "../../../../store/slices/stock/selector";
+import type { ModeTableSynThetic } from "../../../../types";
 import { formatPrice, formatVolPrice, numberFormat } from "../../../../utils";
 import { SynTheticTableSkeleton } from "./SynTheticTableSkeleton";
 
@@ -52,7 +52,7 @@ function RowComponentForeign({
   topForeignTraded,
   style,
 }: RowComponentProps<{
-  topForeignTraded: topForeignTradedItem[];
+  topForeignTraded: string[];
 }>) {
   const data = topForeignTraded[index];
   return (
@@ -62,15 +62,17 @@ function RowComponentForeign({
       }`}
       style={style}
     >
-      <div className={`w-20 ${data.status}`}>{data.symbol}</div>
-      <div className={`flex-1 text-right ${data.status}`}>
-        {numberFormat(data.lastPrice, 2)}
+      <div className={`w-12 ${data?.split("|")?.[2]}`}>
+        {data?.split("|")?.[0].split(":")?.[0]}
       </div>
-      <div className="flex-1 text-right">
-        {numberFormat(data.sellVolumeTotal)}
+      <div className={`text-right w-20  ${data?.split("|")?.[2]}`}>
+        {data?.split("|")?.[1] && formatPrice(+data?.split("|")?.[1])}
       </div>
-      <div className="flex-1 text-right">
-        {numberFormat(data.buyVolumeTotal)}
+      <div className="text-right flex-1">
+        {data?.split("|")?.[3] && formatVolPrice(+data?.split("|")?.[3])}
+      </div>
+      <div className="text-right flex-1">
+        {data?.split("|")?.[4] && formatVolPrice(+data?.split("|")?.[4])}
       </div>
     </div>
   );
@@ -78,6 +80,7 @@ function RowComponentForeign({
 
 export default function SynTheticTable() {
   const topStockTraded = useAppSelector(selectTopVData);
+  const topForeignTraded = useAppSelector(selectTopFVData);
 
   const [size] = useState(getScrollbarSize);
   const [modeTable, setModeTable] = useState<ModeTableSynThetic>("INDAY");
@@ -132,28 +135,24 @@ export default function SynTheticTable() {
         <div className="h-full flex flex-col">
           <div className="flex flex-row px-2 h-5">
             <div className="grow flex flex-row items-center gap-2 text-xs font-medium text-text-body">
-              <div className="w-20">Mã CK</div>
-              <div className="flex-1 text-right">Giá</div>
+              <div className="w-12">Mã CK</div>
+              <div className="w-20 text-right">Giá</div>
               <div className="flex-1 text-right">KL mua</div>
               <div className="flex-1 text-right">KL bán</div>
             </div>
             <div className="shrink" style={{ width: size }} />
           </div>
           <div className="overflow-hidden h-[91px]">
-            {/* {loadingForeign ? (
+            {!topForeignTraded || !(topForeignTraded?.["29"]?.length > 0) ? (
               <SynTheticTableSkeleton type="FOREIGN" />
-            ) : errorForeign ? (
-              <div className="w-full h-full text-red-500">
-                Error:{errorForeign}
-              </div>
             ) : (
               <List
                 rowComponent={RowComponentForeign}
-                rowCount={topForeignTraded.length}
+                rowCount={topForeignTraded?.["29"]?.length}
                 rowHeight={20}
-                rowProps={{ topForeignTraded }}
+                rowProps={{ topForeignTraded: topForeignTraded?.["29"] ?? [] }}
               />
-            )} */}
+            )}
             <SynTheticTableSkeleton type="FOREIGN" />
           </div>
         </div>

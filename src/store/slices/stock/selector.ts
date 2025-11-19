@@ -84,3 +84,6 @@ export const selectDetailSymbol = (state: RootState) =>
 
 /**Lấy data Top KL giao dịch trong ngày */
 export const selectTopVData = (state: RootState) => state.stock.topVMessage;
+
+/**Lấy data Top KL mua bán nước ngoài */
+export const selectTopFVData = (state: RootState) => state.stock.topFVMessage;

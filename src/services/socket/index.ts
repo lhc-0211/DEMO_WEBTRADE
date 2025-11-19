@@ -5,6 +5,7 @@ import {
   clearSnapshotAll,
   resetSnapshots,
   setDealMessage,
+  setTopFVMessage,
   setTopVMessage,
   updateIndex,
   updateSnapshots,
@@ -133,6 +134,12 @@ const parseMessage = (raw: string): void => {
   // TOPV: "1" === "topV"
   if ("1" in msg && msg["1"] === "topV") {
     store.dispatch(setTopVMessage(msg));
+    return;
+  }
+
+  // TOPV: "1" === "topFV"
+  if ("1" in msg && msg["1"] === "topFV") {
+    store.dispatch(setTopFVMessage(msg));
     return;
   }
 
