@@ -243,7 +243,7 @@ const parseMessage = (raw: string): void => {
       changed = true;
       break;
     case "ft":
-      snapshot.foreignTrade = { 1: "ft", 15: msg[15], 17: msg[17] };
+      snapshot.foreignTrade = { 1: "ft", 14: msg[14], 15: msg[15] };
       changed = true;
       break;
     case "fr":
