@@ -144,8 +144,8 @@ export const ALL_COLUMNS_CW = [
     default: false,
     width: "8%",
     children: [
-      { key: "symbolStock", label: "CK", default: true },
-      { key: "lastPriceStock", label: "Giá", default: true },
+      { key: "symbolStockunderlyingSymbol", label: "CK", default: true },
+      { key: "lastPriceUnderlyingSymbol", label: "Giá", default: true },
     ],
   },
   { key: "th", label: "TH", default: true, width: "4%" },

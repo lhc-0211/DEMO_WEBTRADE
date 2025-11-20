@@ -13,6 +13,7 @@ interface PriceCellProps {
   cellKey: string;
   width?: string;
   snapshot: SnapshotDataCompact;
+  underlyingSnapshot: SnapshotDataCompact | undefined;
   disableFlash?: boolean; // tắt flash cho symbol
 }
 
@@ -21,6 +22,7 @@ const PriceCell = memo(function PriceCell({
   cellKey,
   width,
   snapshot,
+  underlyingSnapshot,
   disableFlash = false,
 }: PriceCellProps) {
   const dispatch = useAppDispatch();
@@ -47,6 +49,10 @@ const PriceCell = memo(function PriceCell({
     const tradeCmp = snapshot.trade?.[13] as PriceCompare | undefined;
     const orderBook = snapshot.orderBook;
 
+    const tradeCmpUnderlying = underlyingSnapshot?.trade?.[13] as
+      | PriceCompare
+      | undefined;
+
     const getArr = (value: string | string[] | undefined): string[] => {
       if (typeof value === "string") return value.split("|");
       if (Array.isArray(value)) {
@@ -63,6 +69,12 @@ const PriceCell = memo(function PriceCell({
     // SYMBOL: dùng màu trade
     if (cellKey === "symbol") {
       return `${tradeCmp} cursor-pointer`;
+    }
+    if (
+      cellKey === "symbolStockunderlyingSymbol" ||
+      cellKey === "lastPriceUnderlyingSymbol"
+    ) {
+      return tradeCmpUnderlying ?? "";
     }
 
     // CÁC CỘT GIAO DỊCH
@@ -96,7 +108,7 @@ const PriceCell = memo(function PriceCell({
   })();
 
   // === TÍNH GIÁ TRỊ ===
-  const value = getColumnValueCompact(snapshot, cellKey);
+  const value = getColumnValueCompact(snapshot, cellKey, underlyingSnapshot);
 
   const className = [
     "flex items-center justify-center text-xs font-medium h-7 cell",

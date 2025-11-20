@@ -6,9 +6,11 @@ import {
   StringToInt,
 } from "./format";
 
+//TODO: Fill data bảng giá
 export const getColumnValueCompact = (
   snapshot: SnapshotDataCompact,
-  key: string
+  key: string,
+  underlyingSnapshot?: SnapshotDataCompact | undefined
 ) => {
   if (!snapshot) return null;
 
@@ -90,10 +92,18 @@ export const getColumnValueCompact = (
         return snapshot.refPrices["40"];
       case "tcph":
         return snapshot.refPrices["45"];
-      case "symbolStock":
+      case "symbolStockunderlyingSymbol":
         return (snapshot.refPrices["42"] || "").split(":")[0];
       case "th":
         return formatPrice(snapshot.refPrices["44"]);
+    }
+  }
+
+  //--CK cơ sở
+  if (underlyingSnapshot && underlyingSnapshot.trade) {
+    switch (key) {
+      case "lastPriceUnderlyingSymbol":
+        return formatPrice(underlyingSnapshot.trade["8"]);
     }
   }
 

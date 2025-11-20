@@ -22,7 +22,10 @@ import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts
 import { socketClient } from "../../../../../services/socket";
 import { useAppSelector } from "../../../../../store/hook";
 import { selectSymbolsByBoardId } from "../../../../../store/slices/priceboard/selector.ts";
-import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
+import {
+  selectSnapshots,
+  selectSnapshotsBySymbols,
+} from "../../../../../store/slices/stock/selector";
 import type { SnapshotDataCompact } from "../../../../../types/socketCient.ts";
 import BodyTableCW from "./BodyTable";
 import HeaderColumnsCW from "./HeaderTable";
@@ -45,10 +48,16 @@ interface PriceBoardCWProps {
 interface SortableRowProps {
   symbol: string;
   snapshot: SnapshotDataCompact;
+  underlyingSnapshot: SnapshotDataCompact | undefined;
   index: number;
 }
 
-function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
+function SortableRow({
+  symbol,
+  snapshot,
+  index,
+  underlyingSnapshot,
+}: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging, isOver } =
     useSortable({ id: symbol });
 
@@ -89,6 +98,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
         snapshot={snapshot}
         dragListeners={listeners}
         dragAttributes={attributes}
+        underlyingSnapshot={underlyingSnapshot}
       />
     </div>
   );
@@ -107,6 +117,7 @@ function PriceBoardBase({ boardId }: PriceBoardCWProps) {
   const snapshots = useAppSelector((state) =>
     selectSnapshotsBySymbols(state, baseSymbols)
   );
+  const listSnapshots = useAppSelector(selectSnapshots);
 
   const [symbols, setSymbols] = useState<string[]>([]);
 
@@ -223,9 +234,20 @@ function PriceBoardBase({ boardId }: PriceBoardCWProps) {
     if (!symbol) return null;
     const snapshot = snapshots[symbol] ?? { symbol };
 
+    const underlyingSymbol = snapshot.refPrices?.["42"];
+
+    const underlyingSnapshot = underlyingSymbol
+      ? listSnapshots[underlyingSymbol]
+      : undefined;
+
     return (
       <div key={key} style={style}>
-        <SortableRow symbol={symbol} snapshot={snapshot} index={index} />
+        <SortableRow
+          symbol={symbol}
+          snapshot={snapshot}
+          index={index}
+          underlyingSnapshot={underlyingSnapshot}
+        />
       </div>
     );
   };

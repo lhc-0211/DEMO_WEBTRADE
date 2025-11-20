@@ -201,6 +201,14 @@ const parseMessage = (raw: string): void => {
         : undefined,
     };
 
+    // --- Lấy underlying ---
+    const underlying = m?.refPrices?.["42"];
+    if (underlying && !subscribedSymbols.has(underlying)) {
+      // Subscribe thêm mã cơ sở
+      socketClient.subscribe({ symbols: [underlying] });
+      subscribedSymbols.add(underlying);
+    }
+
     snapshots.set(symbol, snapshot);
     pendingBatch.push(snapshot);
     scheduleBatch();

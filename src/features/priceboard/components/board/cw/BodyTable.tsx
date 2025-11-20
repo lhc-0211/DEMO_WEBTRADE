@@ -11,6 +11,7 @@ import PriceCell from "./PriceCell";
 interface BodyTableProps {
   symbol: string;
   snapshot: SnapshotDataCompact;
+  underlyingSnapshot: SnapshotDataCompact | undefined;
   dragListeners?: DraggableSyntheticListeners;
   dragAttributes?: DraggableAttributes;
 }
@@ -18,6 +19,7 @@ interface BodyTableProps {
 function BodyTableCw({
   symbol,
   snapshot,
+  underlyingSnapshot,
   dragListeners,
   dragAttributes,
 }: BodyTableProps) {
@@ -57,6 +59,7 @@ function BodyTableCw({
                   symbol={symbol}
                   cellKey={col.key}
                   snapshot={snapshot}
+                  underlyingSnapshot={underlyingSnapshot}
                   disableFlash={true} // TẮT FLASH CHO SYMBOL
                 />
               </div>
@@ -76,6 +79,7 @@ function BodyTableCw({
                 cellKey={col.key}
                 width={"100%"}
                 snapshot={snapshot}
+                underlyingSnapshot={underlyingSnapshot}
               />
             ) : (
               <div className="flex divide-x divide-border text-xs font-medium">
@@ -85,6 +89,7 @@ function BodyTableCw({
                     cellKey={child.key}
                     symbol={symbol}
                     snapshot={snapshot}
+                    underlyingSnapshot={underlyingSnapshot}
                     width={`${100 / (col.children?.length || 1)}%`}
                   />
                 ))}
