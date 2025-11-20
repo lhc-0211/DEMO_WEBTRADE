@@ -57,6 +57,8 @@ export type RefPricesDataCompact = {
   6: number;
   40?: string;
   42?: string;
+  44?: number;
+  45?: string;
 };
 
 export type SnapshotDataCompact = {
@@ -77,6 +79,8 @@ type RefMessage = {
   6: number;
   40?: string;
   42?: string;
+  44?: number;
+  45?: string;
   recv_ts: number;
 };
 export type TradeMessage = {

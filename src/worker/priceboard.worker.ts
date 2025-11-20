@@ -47,8 +47,8 @@ const processQueue = (): void => {
 
         // === LUÔN tính flash nếu symbol đang visible ===
         if (visibleSymbols.has(symbol) && prev) {
-          const cacheNew: Record<string, string | null> = {};
-          const cacheOld: Record<string, string | null> = {};
+          const cacheNew: Record<string, string | null | undefined> = {};
+          const cacheOld: Record<string, string | null | undefined> = {};
 
           for (const key of KEYS_COLOR) {
             cacheNew[key] = getColumnValueCompact(snapshot, key);

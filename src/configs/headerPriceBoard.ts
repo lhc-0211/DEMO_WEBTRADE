@@ -90,6 +90,7 @@ export const ALL_COLUMNS_BASE = [
 //TODO: Bảng giá chứng quyền
 export const ALL_COLUMNS_CW = [
   { key: "symbol", label: "CK", default: true, width: "6%" },
+  { key: "tcph ", label: "TCPH", default: true, width: "6%" },
   { key: "gdcc", label: "GDCC", default: true, width: "6%" },
   { key: "ceil", label: "Trần", default: true, width: "3%" },
   { key: "floor", label: "Sàn", default: true, width: "3%" },
@@ -98,7 +99,7 @@ export const ALL_COLUMNS_CW = [
     key: "buy",
     label: "Bên mua",
     default: true,
-    width: "22.5%", // width parent, children không cần width
+    width: "22%", // width parent, children không cần width
     children: [
       { key: "priceBuy3", label: "Giá 3", default: true },
       { key: "volumeBuy3", label: "KL 3", default: true },
@@ -112,7 +113,7 @@ export const ALL_COLUMNS_CW = [
     key: "match",
     label: "Khớp lệnh",
     default: true,
-    width: "15%",
+    width: "14%",
     children: [
       { key: "lastPrice", label: "Khớp", default: true },
       { key: "lastVolume", label: "KL", default: true },
@@ -124,7 +125,7 @@ export const ALL_COLUMNS_CW = [
     key: "sell",
     label: "Bên bán",
     default: true,
-    width: "22.5%",
+    width: "22%",
     children: [
       { key: "priceSell1", label: "Giá 1", default: true },
       { key: "volumeSell1", label: "KL 1", default: true },
@@ -136,18 +137,18 @@ export const ALL_COLUMNS_CW = [
   },
   { key: "high", label: "Cao", default: false, width: "3%" },
   { key: "low", label: "Thấp", default: false, width: "3%" },
-  { key: "totalVol", label: "Tổng KL", default: true, width: "6%" },
+  { key: "totalVol", label: "Tổng KL", default: true, width: "5%" },
   {
     key: "stockBase",
     label: "CK cơ sở",
     default: false,
-    width: "10%",
+    width: "8%",
     children: [
       { key: "symbolStock", label: "CK", default: true },
       { key: "lastPriceStock", label: "Giá", default: true },
     ],
   },
-  { key: "th", label: "TH", default: true, width: "5%" },
+  { key: "th", label: "TH", default: true, width: "4%" },
 ];
 
 //TODO: Bảng giá danh mục yêu thích

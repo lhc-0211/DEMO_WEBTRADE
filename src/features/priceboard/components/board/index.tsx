@@ -40,6 +40,7 @@ function Board({ id }: BoardProps) {
     const needRefresh = shouldRefreshAfterInactive(60_000);
 
     if (needRefresh) {
+      socketClient.clearFlash();
       socketClient.unsubscribeAll();
 
       if (groupIdRef.current?.startsWith("fav_")) {
