@@ -91,7 +91,7 @@ export const getColumnValueCompact = (
       case "tcph":
         return snapshot.refPrices["45"];
       case "symbolStock":
-        return (snapshot.refPrices["42"] || "").split("|")[0];
+        return (snapshot.refPrices["42"] || "").split(":")[0];
       case "th":
         return formatPrice(snapshot.refPrices["44"]);
     }

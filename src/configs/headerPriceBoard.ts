@@ -90,7 +90,7 @@ export const ALL_COLUMNS_BASE = [
 //TODO: Bảng giá chứng quyền
 export const ALL_COLUMNS_CW = [
   { key: "symbol", label: "CK", default: true, width: "6%" },
-  { key: "tcph ", label: "TCPH", default: true, width: "6%" },
+  { key: "tcph", label: "TCPH", default: true, width: "6%" },
   { key: "gdcc", label: "GDCC", default: true, width: "6%" },
   { key: "ceil", label: "Trần", default: true, width: "3%" },
   { key: "floor", label: "Sàn", default: true, width: "3%" },
