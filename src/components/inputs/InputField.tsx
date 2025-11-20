@@ -12,6 +12,7 @@ type InputProps = {
   requied?: boolean;
   typeInput?: "text" | "password";
   autoFocus?: boolean;
+  disabled?: boolean;
 };
 
 export default function InputField({
@@ -24,6 +25,7 @@ export default function InputField({
   requied,
   typeInput,
   autoFocus,
+  disabled,
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -49,6 +51,7 @@ export default function InputField({
         {...registration}
         autoComplete="off"
         autoFocus={autoFocus}
+        disabled={disabled}
       />
 
       {/*  Icon toggle password */}

@@ -13,9 +13,11 @@ import ChangeAccountInfoModal from "./ChangeAccountInfoModal.tsx";
 export default function AccountInfo({
   accountProfile,
   handleOpenModal,
+  handleCloseModal,
 }: {
   accountProfile: AccountProfile | null;
   handleOpenModal: () => void;
+  handleCloseModal: () => void;
 }) {
   const { containerRef } = usePerfectScrollbar();
 
@@ -145,7 +147,10 @@ export default function AccountInfo({
         isOpen={isOpenChangeAccountInfo}
         typeChange={typeChange}
         accountProfile={accountProfile}
-        onClose={() => setIsOpenChangeAccountInfo(false)}
+        onClose={() => {
+          handleCloseModal();
+          setIsOpenChangeAccountInfo(false);
+        }}
       />
     </div>
   );

@@ -1,13 +1,20 @@
+import { useState } from "react";
 import { BsThreeDots } from "react-icons/bs";
 import { MdOutlineAdd } from "react-icons/md";
 import useDropdownAnimationMulti from "../../../../hooks/useDropdownAnimationMulti.ts";
 import { usePerfectScrollbar } from "../../../../hooks/usePerfectScrollbar.ts.ts";
+import type { AccountProfile } from "../../../../types/client.ts";
 import { getBankLogo } from "../../../../utils/dom.ts";
+import AccountBenAddModal from "./AccountBenAddModal.tsx";
 
 export default function AccountBen({
   handleOpenModal,
+  handleCloseModal,
+  accountProfile,
 }: {
   handleOpenModal: () => void;
+  handleCloseModal: () => void;
+  accountProfile: AccountProfile | null;
 }) {
   const { containerRef } = usePerfectScrollbar();
 
@@ -18,6 +25,8 @@ export default function AccountBen({
     handleMouseLeave,
     closeDropdown,
   } = useDropdownAnimationMulti();
+
+  const [openModalAdd, setOpenModalAdd] = useState<boolean>(false);
 
   const listBanks = [
     { id: 1, code: "MBB", acc: "999999999" },
@@ -32,7 +41,13 @@ export default function AccountBen({
     >
       <div className="flex flex-row items-center justify-between text-sm font-medium h-9 bg-gray-300 text-text-body px-5 sticky top-0 z-50">
         Tài khoản đã liên kết
-        <span className="text-xs font-medium text-DTND-300 flex flex-row gap-1 cursor-pointer hover:text-DTND-400">
+        <span
+          className="text-xs font-medium text-DTND-300 flex flex-row gap-1 cursor-pointer hover:text-DTND-400"
+          onClick={() => {
+            handleOpenModal();
+            setOpenModalAdd(true);
+          }}
+        >
           <MdOutlineAdd className="w-4 h-4" /> Thêm tài khoản
         </span>
       </div>
@@ -103,6 +118,14 @@ export default function AccountBen({
           </div>
         ))}
       </div>
+      <AccountBenAddModal
+        isOpen={openModalAdd}
+        onClose={() => {
+          setOpenModalAdd(false);
+          handleCloseModal();
+        }}
+        accountProfile={accountProfile}
+      />
     </div>
   );
 }

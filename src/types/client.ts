@@ -111,3 +111,9 @@ export type ChangeAccountInfoActionPayload = ChangeAccountInfoPayload & {
 export type ChangeAccountInfoType = "email" | "address" | "phoneNumber";
 
 export type AccountSettingTypes = "infor" | "accBen";
+
+export interface AccountBenAddForm {
+  accountName: string;
+  accountNumber: string;
+  bank: string;
+}

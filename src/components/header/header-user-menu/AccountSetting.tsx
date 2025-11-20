@@ -12,6 +12,7 @@ import type {
 import AccountBen from "./account-ben";
 import AccountInfo from "./account-info";
 import AccountHeaderSkeleton from "./account-info/AccountHeaderSkeleton";
+import ChangeAvaAccountModal from "./account-info/ChangeAvaAccountModal";
 import ChangeNicknameModal from "./ChangeNicknamModal";
 
 export default function AccountSetting({
@@ -28,6 +29,7 @@ export default function AccountSetting({
   const [isOpenModal, setIsOpenModal] = useState<boolean>(false); // check modal open
   const [accountSettingType, setAccountSettingType] =
     useState<AccountSettingTypes>("infor"); // Chức năng setting
+  const [isOpenChangeAva, setIsOpenChangeAva] = useState<boolean>(false);
 
   const refContainer = useRef<HTMLDivElement>(null);
 
@@ -50,6 +52,10 @@ export default function AccountSetting({
 
   const handleOpenModal = () => {
     setIsOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpenModal(false);
   };
 
   return (
@@ -93,7 +99,13 @@ export default function AccountSetting({
                   backgroundImage: `url(${accountProfile?.cAvatarImg})`,
                 }}
               >
-                <div className="bg-primary-darker w-6 h-6 rounded-full grid place-items-center absolute -bottom-2 right-0">
+                <div
+                  className="bg-primary-darker w-6 h-6 rounded-full grid place-items-center absolute -bottom-2 right-0 cursor-pointer"
+                  onClick={() => {
+                    setIsOpenChangeAva(true);
+                    handleOpenModal();
+                  }}
+                >
                   <TbCameraPlus className="text-text-title" />
                 </div>
               </div>
@@ -136,12 +148,17 @@ export default function AccountSetting({
           <AccountInfo
             accountProfile={accountProfile}
             handleOpenModal={handleOpenModal}
+            handleCloseModal={handleCloseModal}
           />
         )}
 
         {/* Tài khoản thụ hưởng */}
         {accountSettingType === "accBen" && (
-          <AccountBen handleOpenModal={handleOpenModal} />
+          <AccountBen
+            handleOpenModal={handleOpenModal}
+            handleCloseModal={handleCloseModal}
+            accountProfile={accountProfile}
+          />
         )}
       </div>
 
@@ -149,7 +166,20 @@ export default function AccountSetting({
       <ChangeNicknameModal
         isOpen={isOpenChangeNickname}
         accountProfile={accountProfile}
-        onClose={() => setIsOpenChangeNickname(false)}
+        onClose={() => {
+          setIsOpenChangeNickname(false);
+          handleCloseModal();
+        }}
+      />
+
+      {/* modal change ava */}
+      <ChangeAvaAccountModal
+        isOpen={isOpenChangeAva}
+        accountProfile={accountProfile}
+        onClose={() => {
+          setIsOpenChangeAva(false);
+          handleCloseModal();
+        }}
       />
     </div>
   );
