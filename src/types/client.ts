@@ -84,7 +84,7 @@ export type CheckNicknameDataResponse = ChangeNicknameResponse["data"];
 export interface ChangeAccountInfoForm {
   email: string;
   address: string;
-  phoneNumber?: string;
+  phoneNumber: string;
 }
 
 export interface ChangeAccountInfoResponse {
@@ -107,3 +107,13 @@ export interface ChangeAccountInfoPayload {
 export type ChangeAccountInfoActionPayload = ChangeAccountInfoPayload & {
   otp: string;
 };
+
+export type ChangeAccountInfoType = "email" | "address" | "phoneNumber";
+
+export type AccountSettingTypes = "infor" | "accBen";
+
+export interface AccountBenAddForm {
+  accountName: string;
+  accountNumber: string;
+  bank: string;
+}

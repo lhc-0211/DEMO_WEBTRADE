@@ -2,12 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { RiEdit2Fill } from "react-icons/ri";
 import { TbCameraPlus } from "react-icons/tb";
+import { ACCOUNT_SETTING } from "../../../configs/accountSetting";
 import { useAppSelector } from "../../../store/hook";
 import { selectAccountProfileStatus } from "../../../store/slices/client/selector";
-import type { AccountProfile } from "../../../types/client";
+import type {
+  AccountProfile,
+  AccountSettingTypes,
+} from "../../../types/client";
+import AccountBen from "./account-ben";
+import AccountInfo from "./account-info";
 import AccountHeaderSkeleton from "./account-info/AccountHeaderSkeleton";
-import AccountInfo from "./account-info/AccountInfo";
-import ChangeAccountInfoModal from "./account-info/ChangeAccountInfoModal";
+import ChangeAvaAccountModal from "./account-info/ChangeAvaAccountModal";
 import ChangeNicknameModal from "./ChangeNicknamModal";
 
 export default function AccountSetting({
@@ -21,13 +26,12 @@ export default function AccountSetting({
 
   const [isOpenChangeNickname, setIsOpenChangeNickname] =
     useState<boolean>(false);
-
-  const [isOpenChangeAccountInfo, setIsOpenChangeAccountInfo] =
-    useState<boolean>(false);
+  const [isOpenModal, setIsOpenModal] = useState<boolean>(false); // check modal open
+  const [accountSettingType, setAccountSettingType] =
+    useState<AccountSettingTypes>("infor"); // Chức năng setting
+  const [isOpenChangeAva, setIsOpenChangeAva] = useState<boolean>(false);
 
   const refContainer = useRef<HTMLDivElement>(null);
-
-  const [typeChange, setTypeChange] = useState<"email" | "address">("email");
 
   useEffect(() => {
     const handlerCloseMenu = (e: MouseEvent) => {
@@ -35,7 +39,7 @@ export default function AccountSetting({
         refContainer.current &&
         !refContainer.current.contains(e.target as Node) &&
         !isOpenChangeNickname &&
-        !isOpenChangeAccountInfo
+        !isOpenModal
       ) {
         close();
       }
@@ -44,11 +48,14 @@ export default function AccountSetting({
     return () => {
       document.removeEventListener("mousedown", handlerCloseMenu);
     };
-  }, [close, isOpenChangeNickname, isOpenChangeAccountInfo]);
+  }, [close, isOpenChangeNickname, isOpenModal]);
 
-  const handleOpenModalChangeAccountInfo = (type: "email" | "address") => {
-    setTypeChange(type);
-    setIsOpenChangeAccountInfo(true);
+  const handleOpenModal = () => {
+    setIsOpenModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsOpenModal(false);
   };
 
   return (
@@ -72,7 +79,7 @@ export default function AccountSetting({
       ) : (
         <>
           <div
-            className="h-[150px] w-full rounded-b-2xl relative bg-center bg-no-repeat bg-cover"
+            className="h-[100px] w-full rounded-b-2xl relative bg-center bg-no-repeat bg-cover"
             style={{
               backgroundImage: `url(${accountProfile?.cBackGroundImg})`,
             }}
@@ -85,18 +92,24 @@ export default function AccountSetting({
             </div>
           </div>
           <div className="relative px-6">
-            <div className="flex flex-row gap-4 items-center absolute -top-[14px]">
+            <div className="flex flex-row gap-4 items-center absolute -top-4.5">
               <div
-                className="w-16 h-16 rounded-full relative bg-white bg-center bg-no-repeat bg-cover border border-yellow-500 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]"
+                className="w-12 h-12 rounded-full relative bg-white bg-center bg-no-repeat bg-cover border border-yellow-500 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]"
                 style={{
                   backgroundImage: `url(${accountProfile?.cAvatarImg})`,
                 }}
               >
-                <div className="bg-primary-darker w-6 h-6 rounded-full grid place-items-center absolute -bottom-2 right-0">
+                <div
+                  className="bg-primary-darker w-6 h-6 rounded-full grid place-items-center absolute -bottom-2 right-0 cursor-pointer"
+                  onClick={() => {
+                    setIsOpenChangeAva(true);
+                    handleOpenModal();
+                  }}
+                >
                   <TbCameraPlus className="text-text-title" />
                 </div>
               </div>
-              <div className="flex flex-row gap-1 items-center">
+              <div className="flex flex-row gap-1 items-center mt-3">
                 <span className="text-base font-medium text-text-title">
                   {accountProfile?.cUserName}
                 </span>
@@ -112,31 +125,61 @@ export default function AccountSetting({
         </>
       )}
 
-      <div className="flex flex-col gap-4 mt-18">
-        <div className="text-xs text-yellow-400 p-[2px] border-b border-yellow-400 w-max">
-          Thông tin chung
+      <div className="flex flex-col gap-4 mt-10">
+        <div className="flex flex-row gap-2">
+          {ACCOUNT_SETTING.map((item, index) => (
+            <div
+              key={index}
+              className={`text-xs text-text-subtitle p-0.5 border-b border-transparent hover:border-yellow-400 w-max cursor-pointer ${
+                accountSettingType === item.value &&
+                "border-yellow-400 text-yellow-400"
+              }`}
+              onClick={() => setAccountSettingType(item.value)}
+            >
+              {item.label}
+            </div>
+          ))}
         </div>
 
-        {/* Chức năng */}
-        <AccountInfo
-          accountProfile={accountProfile}
-          handleOpenModalChangeAccountInfo={handleOpenModalChangeAccountInfo}
-        />
+        {/*========= Chức năng ========== */}
+
+        {/* Thông tin chung */}
+        {accountSettingType === "infor" && (
+          <AccountInfo
+            accountProfile={accountProfile}
+            handleOpenModal={handleOpenModal}
+            handleCloseModal={handleCloseModal}
+          />
+        )}
+
+        {/* Tài khoản thụ hưởng */}
+        {accountSettingType === "accBen" && (
+          <AccountBen
+            handleOpenModal={handleOpenModal}
+            handleCloseModal={handleCloseModal}
+            accountProfile={accountProfile}
+          />
+        )}
       </div>
 
       {/* modal change nickname */}
       <ChangeNicknameModal
         isOpen={isOpenChangeNickname}
         accountProfile={accountProfile}
-        onClose={() => setIsOpenChangeNickname(false)}
+        onClose={() => {
+          setIsOpenChangeNickname(false);
+          handleCloseModal();
+        }}
       />
 
-      {/* modal change account info */}
-      <ChangeAccountInfoModal
-        isOpen={isOpenChangeAccountInfo}
-        typeChange={typeChange}
+      {/* modal change ava */}
+      <ChangeAvaAccountModal
+        isOpen={isOpenChangeAva}
         accountProfile={accountProfile}
-        onClose={() => setIsOpenChangeAccountInfo(false)}
+        onClose={() => {
+          setIsOpenChangeAva(false);
+          handleCloseModal();
+        }}
       />
     </div>
   );

@@ -155,3 +155,13 @@ export function getBgColorStock(type: string) {
       return "bg-success-darker";
   }
 }
+
+const bankLogos = import.meta.glob(
+  "../assets/imgs/banks/*.{png,jpg,jpeg,svg}",
+  { eager: true }
+) as Record<string, { default: string }>;
+
+export function getBankLogo(name: string) {
+  const entry = Object.entries(bankLogos).find(([path]) => path.includes(name));
+  return entry ? entry[1].default : "";
+}

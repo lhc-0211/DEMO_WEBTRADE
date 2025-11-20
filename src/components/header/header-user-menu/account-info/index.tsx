@@ -1,25 +1,42 @@
+import { useState } from "react";
 import { RiEdit2Fill } from "react-icons/ri";
-import { usePerfectScrollbar } from "../../../../hooks/usePerfectScrollbar.ts";
-import { useAppSelector } from "../../../../store/hook";
-import { selectAccountProfileStatus } from "../../../../store/slices/client/selector";
-import type { AccountProfile } from "../../../../types/client";
-import AccountInfoSkeleton from "./AccountInfoSkeleton";
+import { usePerfectScrollbar } from "../../../../hooks/usePerfectScrollbar.ts.ts";
+import { useAppSelector } from "../../../../store/hook.ts";
+import { selectAccountProfileStatus } from "../../../../store/slices/client/selector.ts";
+import type {
+  AccountProfile,
+  ChangeAccountInfoType,
+} from "../../../../types/client.ts";
+import AccountInfoSkeleton from "./AccountInfoSkeleton.tsx";
+import ChangeAccountInfoModal from "./ChangeAccountInfoModal.tsx";
 
 export default function AccountInfo({
   accountProfile,
-  handleOpenModalChangeAccountInfo,
+  handleOpenModal,
+  handleCloseModal,
 }: {
   accountProfile: AccountProfile | null;
-  handleOpenModalChangeAccountInfo: (type: "email" | "address") => void;
+  handleOpenModal: () => void;
+  handleCloseModal: () => void;
 }) {
   const { containerRef } = usePerfectScrollbar();
 
+  const [typeChange, setTypeChange] = useState<ChangeAccountInfoType>("email");
+  const [isOpenChangeAccountInfo, setIsOpenChangeAccountInfo] =
+    useState<boolean>(false);
+
   const { loading } = useAppSelector(selectAccountProfileStatus);
+
+  const handleOpenModalChange = (type: ChangeAccountInfoType) => {
+    setTypeChange(type);
+    setIsOpenChangeAccountInfo(true);
+    handleOpenModal();
+  };
 
   return (
     <div
       ref={containerRef}
-      className="h-[calc(var(--app-height)-377px)] w-[360px] bg-sidebar-default overflow-hidden relative"
+      className="h-[calc(var(--app-height)-305px)] w-[360px] bg-sidebar-default overflow-hidden relative"
     >
       {" "}
       {loading ? (
@@ -71,15 +88,24 @@ export default function AccountInfo({
               </span>
             </div>
           </div>
-          <div className="flex flex-row items-center justify-between text-sm font-medium h-9 bg-gray-300 text-text-body px-[20px]">
+          <div className="flex flex-row items-center justify-between text-sm font-medium h-9 bg-gray-300 text-text-body px-5">
             Thông tin liên hệ
           </div>
-          <div className="grid grid-rows-1 gap-4 px-[20px] pt-[16px] pb-[32px]">
-            <div className="text-text-subtitle text-xs font-medium flex flex-col">
-              Số điện thoại
-              <span className="text-text-title text-sm uppercase">
-                {accountProfile?.cCustMobile}
-              </span>
+          <div className="grid grid-rows-1 gap-4 px-5 pt-4 pb-8">
+            {/* Sửa số điện thoại */}
+            <div className="w-full flex flex-row items-center justify-between">
+              <div className="text-text-subtitle text-xs font-medium flex flex-col">
+                Số điện thoại
+                <span className="text-text-title text-sm uppercase">
+                  {accountProfile?.cCustMobile}
+                </span>
+              </div>
+              <div
+                className="cursor-pointer p-1 hover:bg-gray-300 rounded-full"
+                onClick={() => handleOpenModalChange("phoneNumber")}
+              >
+                <RiEdit2Fill className="w-4 h-4 min-w-4" />
+              </div>
             </div>
 
             {/* Sửa email */}
@@ -92,7 +118,7 @@ export default function AccountInfo({
               </div>
               <div
                 className="cursor-pointer p-1 hover:bg-gray-300 rounded-full"
-                onClick={() => handleOpenModalChangeAccountInfo("email")}
+                onClick={() => handleOpenModalChange("email")}
               >
                 <RiEdit2Fill className="w-4 h-4 min-w-4" />
               </div>
@@ -108,7 +134,7 @@ export default function AccountInfo({
               </div>
               <div
                 className="cursor-pointer p-1 hover:bg-gray-300 rounded-full"
-                onClick={() => handleOpenModalChangeAccountInfo("address")}
+                onClick={() => handleOpenModalChange("address")}
               >
                 <RiEdit2Fill className="w-4 h-4 min-w-4" />
               </div>
@@ -116,6 +142,16 @@ export default function AccountInfo({
           </div>
         </div>
       )}
+      {/* modal change account info */}
+      <ChangeAccountInfoModal
+        isOpen={isOpenChangeAccountInfo}
+        typeChange={typeChange}
+        accountProfile={accountProfile}
+        onClose={() => {
+          handleCloseModal();
+          setIsOpenChangeAccountInfo(false);
+        }}
+      />
     </div>
   );
 }
