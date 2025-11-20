@@ -187,8 +187,8 @@ const parseMessage = (raw: string): void => {
       foreignTrade: m.foreignTrade
         ? {
             1: "ft",
+            14: m.foreignTrade[14],
             15: m.foreignTrade[15],
-            17: m.foreignTrade[17],
           }
         : undefined,
 

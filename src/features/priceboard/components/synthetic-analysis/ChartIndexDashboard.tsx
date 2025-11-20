@@ -54,8 +54,6 @@ export default function ChartIndexDashboard() {
   //   return dataFormat;
   // };
 
-  console.log("indicesList", indicesList);
-
   return (
     <div className="w-full h-full">
       <Swiper {...swiperProps} className="w-full h-full ">

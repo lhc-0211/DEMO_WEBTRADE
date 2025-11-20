@@ -48,7 +48,7 @@ export type TradeDataCompact = {
   12: number;
   13: PriceCompare;
 };
-export type ForeignTradeDataCompact = { 1: "ft"; 15: number; 17: number };
+export type ForeignTradeDataCompact = { 1: "ft"; 14: number; 15: number };
 export type ForeignRoomDataCompact = { 1: "fr"; 21: number };
 export type RefPricesDataCompact = { 1: "r"; 4: number; 5: number; 6: number };
 
@@ -96,8 +96,8 @@ type OrderBookMessage = {
 type ForeignTradeMessage = {
   symbol: string;
   1: "ft";
+  14: number;
   15: number;
-  17: number;
   recv_ts: number;
 };
 type ForeignRoomMessage = {

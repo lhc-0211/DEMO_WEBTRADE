@@ -93,9 +93,9 @@ export const getColumnValueCompact = (
   if (snapshot.foreignTrade) {
     switch (key) {
       case "foreignBuy":
-        return formatVolPrice(snapshot.foreignTrade["15"]);
+        return formatVolPrice(snapshot.foreignTrade["14"]);
       case "foreignSell":
-        return formatVolPrice(snapshot.foreignTrade["17"]);
+        return formatVolPrice(snapshot.foreignTrade["15"]);
     }
   }
 
