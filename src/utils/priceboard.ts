@@ -86,6 +86,10 @@ export const getColumnValueCompact = (
         return formatPrice(snapshot.refPrices["5"]);
       case "floor":
         return formatPrice(snapshot.refPrices["6"]);
+      case "gdcc":
+        return snapshot.refPrices["40"];
+      case "symbolStock":
+        return snapshot.refPrices["42"];
     }
   }
 

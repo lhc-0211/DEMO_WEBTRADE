@@ -74,7 +74,7 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
         ${
           isDragging
             ? "ring-2 ring-DTND-500 ring-opacity-50 border-t border-border"
-            : "hover:bg-gray-300/40"
+            : "hover:bg-gray-300"
         }
       `}
     >

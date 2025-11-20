@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { memo, useCallback, useEffect, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { List, type ListRowProps } from "react-virtualized";
 import type { RenderedRows } from "react-virtualized/dist/es/List";
 import {
@@ -24,8 +24,12 @@ import {
 } from "../../../../../configs/headerPriceBoard.ts";
 import { usePerfectScrollbar } from "../../../../../hooks/usePerfectScrollbar.ts";
 import { socketClient } from "../../../../../services/socket";
-import { useAppSelector } from "../../../../../store/hook";
-import { selectSymbolsByBoardId } from "../../../../../store/slices/priceboard/selector.ts";
+import { useAppDispatch, useAppSelector } from "../../../../../store/hook";
+import {
+  selectScrollToSymbol,
+  selectSymbolsByBoardId,
+} from "../../../../../store/slices/priceboard/selector.ts";
+import { setScrollToSymbol } from "../../../../../store/slices/priceboard/slice.ts";
 import { selectSnapshotsBySymbols } from "../../../../../store/slices/stock/selector";
 import type { SnapshotDataCompact } from "../../../../../types/socketCient.ts";
 import BodyTableBase from "./BodyTable";
@@ -47,9 +51,10 @@ interface SortableRowProps {
   symbol: string;
   snapshot: SnapshotDataCompact;
   index: number;
+  highlight: boolean;
 }
 
-function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
+function SortableRow({ symbol, snapshot, index, highlight }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, isDragging, isOver } =
     useSortable({ id: symbol });
 
@@ -66,17 +71,18 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
     scale: isDragging ? "0.98" : "1",
   };
 
+  const flashStyle = highlight ? "animate-[flash-highlight_0.7s_ease]" : "";
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={`
-        ${index % 2 === 1 ? "bg-gray-300/30" : ""}
-        ${
-          isDragging
-            ? "ring-2 ring-DTND-500 ring-opacity-50 border-t border-border"
-            : "hover:bg-gray-300/40"
-        }
+        ${index % 2 === 1 ? "bg-gray-300/30" : ""} ${
+        isDragging
+          ? "ring-2 ring-DTND-500 ring-opacity-50 border-t border-border"
+          : "hover:bg-gray-300"
+      } ${flashStyle}
       `}
     >
       {isOver && !isDragging && (
@@ -97,9 +103,14 @@ function SortableRow({ symbol, snapshot, index }: SortableRowProps) {
 
 // === MAIN COMPONENT ===
 function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
+  const dispatch = useAppDispatch();
+
   const { containerRef } = usePerfectScrollbar();
   const [containerWidth, setContainerWidth] = useState(1200);
   const [listHeight, setListHeight] = useState(500);
+  const [highlightSymbol, setHighlightSymbol] = useState<string | null>(null);
+
+  const listRef = useRef<List>(null);
 
   // Redux
   const baseSymbols = useAppSelector((state) =>
@@ -108,6 +119,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
   const snapshots = useAppSelector((state) =>
     selectSnapshotsBySymbols(state, baseSymbols)
   );
+  const scrollTarget = useAppSelector(selectScrollToSymbol);
 
   const [symbols, setSymbols] = useState<string[]>([]);
 
@@ -187,6 +199,28 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
     [symbols]
   );
 
+  // === SCROLL SYMBOL ===
+  useEffect(() => {
+    if (!scrollTarget) return;
+
+    const fullSymbol = symbols.find((s) => s.startsWith(scrollTarget));
+    if (!fullSymbol) return;
+
+    const index = symbols.indexOf(fullSymbol);
+
+    if (index !== -1) {
+      listRef.current?.scrollToRow(index);
+
+      //Highlight cho row này
+      setHighlightSymbol(fullSymbol);
+
+      // Tắt highlight sau 700ms
+      setTimeout(() => setHighlightSymbol(null), 700);
+    }
+
+    dispatch(setScrollToSymbol(null));
+  }, [scrollTarget, symbols]);
+
   // === DnD SENSORS ===
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -229,6 +263,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
           symbol={symbol}
           snapshot={snapshot ?? { symbol }}
           index={index}
+          highlight={highlightSymbol === symbol}
         />
       </div>
     );
@@ -255,6 +290,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
             strategy={verticalListSortingStrategy}
           >
             <List
+              ref={listRef}
               height={listHeight}
               rowCount={symbols.length}
               rowHeight={ROW_HEIGHT}
@@ -262,6 +298,7 @@ function PriceBoardBase({ boardId }: PriceBoardBaseProps) {
               width={Math.max(containerWidth, 1408)}
               onRowsRendered={updateVisibleSymbols}
               className="hide-scrollbar"
+              scrollToAlignment="start"
             />
           </SortableContext>
         </DndContext>

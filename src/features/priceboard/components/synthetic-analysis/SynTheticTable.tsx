@@ -119,7 +119,7 @@ export default function SynTheticTable() {
           </div>
           <div className="overflow-hidden h-[91px]">
             {!topStockTraded || !(topStockTraded?.["29"]?.length > 0) ? (
-              <SynTheticTableSkeleton type="INDAY" />
+              <SynTheticTableSkeleton />
             ) : (
               <List
                 rowComponent={RowComponentInday}
@@ -128,7 +128,6 @@ export default function SynTheticTable() {
                 rowProps={{ topStockTraded: topStockTraded?.["29"] ?? [] }}
               />
             )}
-            <SynTheticTableSkeleton type="INDAY" />
           </div>
         </div>
       ) : (
@@ -144,7 +143,7 @@ export default function SynTheticTable() {
           </div>
           <div className="overflow-hidden h-[91px]">
             {!topForeignTraded || !(topForeignTraded?.["29"]?.length > 0) ? (
-              <SynTheticTableSkeleton type="FOREIGN" />
+              <SynTheticTableSkeleton />
             ) : (
               <List
                 rowComponent={RowComponentForeign}
@@ -153,7 +152,6 @@ export default function SynTheticTable() {
                 rowProps={{ topForeignTraded: topForeignTraded?.["29"] ?? [] }}
               />
             )}
-            <SynTheticTableSkeleton type="FOREIGN" />
           </div>
         </div>
       )}

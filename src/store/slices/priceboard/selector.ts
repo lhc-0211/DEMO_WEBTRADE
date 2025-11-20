@@ -43,3 +43,7 @@ export const selectListStockStatus = createSelector(
     );
   }
 );
+
+// Mã chưng skhoasn tìm kiếm
+export const selectScrollToSymbol = (state: RootState) =>
+  state.priceBoard.data.scrollToSymbol;

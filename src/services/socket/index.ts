@@ -157,6 +157,8 @@ const parseMessage = (raw: string): void => {
             4: m.refPrices["4"],
             5: m.refPrices["5"],
             6: m.refPrices["6"],
+            40: m?.refPrices["40"],
+            42: m?.refPrices["42"],
           }
         : undefined,
 

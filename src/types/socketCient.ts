@@ -50,7 +50,14 @@ export type TradeDataCompact = {
 };
 export type ForeignTradeDataCompact = { 1: "ft"; 14: number; 15: number };
 export type ForeignRoomDataCompact = { 1: "fr"; 21: number };
-export type RefPricesDataCompact = { 1: "r"; 4: number; 5: number; 6: number };
+export type RefPricesDataCompact = {
+  1: "r";
+  4: number;
+  5: number;
+  6: number;
+  40?: string;
+  42?: string;
+};
 
 export type SnapshotDataCompact = {
   symbol: string;
@@ -68,6 +75,8 @@ type RefMessage = {
   4: number;
   5: number;
   6: number;
+  40?: string;
+  42?: string;
   recv_ts: number;
 };
 export type TradeMessage = {

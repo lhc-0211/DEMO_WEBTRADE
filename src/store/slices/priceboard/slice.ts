@@ -5,6 +5,7 @@ import { fetchListStockById } from "./thunks";
 export interface PriceBoardState {
   data: {
     lists: Record<string, string[]>;
+    scrollToSymbol: string | null;
   };
   status: {
     fetchListStockById: Record<string, ApiStatus>;
@@ -12,7 +13,7 @@ export interface PriceBoardState {
 }
 
 const initialState: PriceBoardState = {
-  data: { lists: {} },
+  data: { lists: {}, scrollToSymbol: null },
   status: { fetchListStockById: {} },
 };
 
@@ -35,6 +36,9 @@ const priceBoardSlice = createSlice({
           error: null,
         };
       },
+    },
+    setScrollToSymbol(state, action: PayloadAction<string | null>) {
+      state.data.scrollToSymbol = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -64,5 +68,6 @@ const priceBoardSlice = createSlice({
   },
 });
 
-export const { setListStockByIdFromCache } = priceBoardSlice.actions;
+export const { setListStockByIdFromCache, setScrollToSymbol } =
+  priceBoardSlice.actions;
 export default priceBoardSlice.reducer;

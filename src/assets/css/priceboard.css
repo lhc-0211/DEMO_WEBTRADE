@@ -123,3 +123,13 @@
 [data-key="totalVol"] {
   background-color: rgb(209 213 219 / 10%);
 }
+
+/* hightlight mã chứng khoán */
+@keyframes flash-highlight {
+  0% {
+    background-color: rgba(255, 255, 100, 0.8);
+  }
+  100% {
+    background-color: transparent;
+  }
+}

@@ -5,7 +5,10 @@ import InputSearchFieldStock from "../../../../components/inputs/InputSearchFiel
 import { usePrevious } from "../../../../hooks/usePrevious";
 import { socketClient } from "../../../../services/socket";
 import { useAppDispatch } from "../../../../store/hook";
-import { setListStockByIdFromCache } from "../../../../store/slices/priceboard/slice";
+import {
+  setListStockByIdFromCache,
+  setScrollToSymbol,
+} from "../../../../store/slices/priceboard/slice";
 import type { Favorite } from "../../../../types";
 
 type FormSearchStockValues = {
@@ -25,34 +28,39 @@ const FormSearchStock = ({ active }: { active: string }) => {
   const preStock = usePrevious(stock);
 
   useEffect(() => {
-    if (!stock || !active.startsWith("fav_") || _.isEqual(stock, preStock))
-      return;
+    if (stock && active.startsWith("fav_") && !_.isEqual(stock, preStock)) {
+      const stored = localStorage.getItem("favorites");
+      if (!stored) return;
 
-    const stored = localStorage.getItem("favorites");
-    if (!stored) return;
+      const favorites = JSON.parse(stored) as Favorite[];
+      const favorite = favorites.find((f) => f.id === active);
 
-    const favorites = JSON.parse(stored) as Favorite[];
-    const favorite = favorites.find((f) => f.id === active);
+      if (favorite) {
+        // Nếu symbol chưa có trong danh mục
+        if (!favorite.symbols.includes(stock.value)) {
+          const symbol = `${stock.value}:G1:${stock.post_to}`;
 
-    if (favorite) {
-      // Nếu symbol chưa có trong danh mục
-      if (!favorite.symbols.includes(stock.value)) {
-        const symbol = `${stock.value}:G1:${stock.post_to}`;
+          const newSymbols = [...favorite.symbols, symbol];
+          favorite.symbols = newSymbols;
 
-        const newSymbols = [...favorite.symbols, symbol];
-        favorite.symbols = newSymbols;
+          // Cập nhật lại localStorage
+          localStorage.setItem("favorites", JSON.stringify(favorites));
 
-        // Cập nhật lại localStorage
-        localStorage.setItem("favorites", JSON.stringify(favorites));
+          // Gửi symbols lên Redux
+          dispatch(setListStockByIdFromCache(active, newSymbols));
 
-        // Gửi symbols lên Redux
-        dispatch(setListStockByIdFromCache(active, newSymbols));
-
-        // Subscribe socket
-        socketClient.subscribe({
-          symbols: [symbol],
-        });
+          // Subscribe socket
+          socketClient.subscribe({
+            symbols: [symbol],
+          });
+        }
       }
+    }
+    if (stock) {
+      // Bắn thông báo cho bảng giá scroll
+      const symbol = `${stock.value}:G1:${stock.post_to}`;
+
+      dispatch(setScrollToSymbol(symbol));
     }
 
     setValue("stock", null);
