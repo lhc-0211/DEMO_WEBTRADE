@@ -10,6 +10,7 @@ import type {
 export interface ClientState {
   data: {
     loginModalOpen: boolean;
+    forgotAccountModalOpen: boolean;
     accountProfile: AccountProfile | null;
     sessionExpired: boolean;
     checkNickname: CheckNicknameDataResponse | null;
@@ -25,6 +26,7 @@ export interface ClientState {
 const initialState: ClientState = {
   data: {
     loginModalOpen: false,
+    forgotAccountModalOpen: false,
     accountProfile: null,
     sessionExpired: false,
     checkNickname: null,
@@ -46,6 +48,13 @@ const clientSlice = createSlice({
     },
     closeLoginModal: (state) => {
       state.data.loginModalOpen = false;
+    },
+
+    openForgotAccountModal: (state) => {
+      state.data.forgotAccountModalOpen = true;
+    },
+    closeForgotLoginModal: (state) => {
+      state.data.forgotAccountModalOpen = false;
     },
 
     //Hiện modal phiên đăng nhập
@@ -154,6 +163,8 @@ const clientSlice = createSlice({
 export const {
   openLoginModal,
   closeLoginModal,
+  openForgotAccountModal,
+  closeForgotLoginModal,
   setSessionExpired,
   fetchAccountProfileRequest,
   fetchAccountProfileSuccess,

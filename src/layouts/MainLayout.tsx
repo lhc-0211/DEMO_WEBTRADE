@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import { Tooltip } from "react-tooltip";
+import ForgotAccountModal from "../components/auth/ForgotAccountModal";
 import LoginModal from "../components/auth/LoginModal";
 import SessionExpiredModal from "../components/auth/SessionExpiredModal";
 import Header from "../components/header/Header";
@@ -86,6 +87,9 @@ export default function MainLayout({
 
           {/* Modal đăng nhập */}
           <LoginModal />
+
+          {/* Modal quên mật khẩu */}
+          <ForgotAccountModal />
 
           {/* Modal hết phiên */}
           <SessionExpiredModal />

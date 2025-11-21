@@ -13,6 +13,8 @@ type InputProps = {
   typeInput?: "text" | "password";
   autoFocus?: boolean;
   disabled?: boolean;
+  onFocus?: () => void;
+  onBlur?: () => void;
 };
 
 export default function InputField({
@@ -26,6 +28,8 @@ export default function InputField({
   typeInput,
   autoFocus,
   disabled,
+  onFocus,
+  onBlur,
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -52,13 +56,17 @@ export default function InputField({
         autoComplete="off"
         autoFocus={autoFocus}
         disabled={disabled}
+        onFocus={onFocus}
+        onBlur={onBlur}
       />
 
       {/*  Icon toggle password */}
       {typeInput === "password" && (
         <span
           onClick={() => setShowPassword((v) => !v)}
-          className="absolute top-2/3 right-3 -translate-y-1/2 cursor-pointer text-text-subtitle hover:text-text-body"
+          className={`absolute  right-3 -translate-y-1/2 cursor-pointer text-text-subtitle hover:text-text-body ${
+            error ? "top-[55%]" : "top-2/3"
+          }`}
         >
           {!showPassword ? <IoMdEyeOff size={22} /> : <IoMdEye size={22} />}
         </span>
