@@ -97,7 +97,7 @@ export default function ForgotAccountModal() {
           contentLabel="Quên mật khẩu"
           ariaHideApp={false}
           style={customStyles}
-          closeTimeoutMS={350} // phải trùng với thời gian transition
+          closeTimeoutMS={25} // phải trùng với thời gian transition
           overlayClassName="ReactModal__Overlay"
           className="ReactModal__Content"
         >
@@ -108,7 +108,7 @@ export default function ForgotAccountModal() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{
-              duration: 0.25,
+              duration: 0.1,
               ease: "easeOut",
               type: "spring",
               stiffness: 300,
