@@ -43,3 +43,10 @@ export interface FetchOtpResponse {
 }
 
 export type FetchOtpDataResponse = FetchOtpResponse["data"];
+
+export interface ForgotAccountForm {
+  accountCode: string;
+  cardId: string;
+  password: string;
+  passwordConfirm: string;
+}

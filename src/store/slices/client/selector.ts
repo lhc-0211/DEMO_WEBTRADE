@@ -8,6 +8,9 @@ import type {
 export const selectLoginModalOpen = (state: RootState): boolean =>
   state.client.data.loginModalOpen;
 
+export const selectForgotAccountModalOpen = (state: RootState): boolean =>
+  state.client.data.forgotAccountModalOpen;
+
 export const selectAccountProfile = (state: RootState): AccountProfile | null =>
   state.client.data.accountProfile;
 

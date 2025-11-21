@@ -17,7 +17,10 @@ import {
 } from "../../store/slices/auth/selector";
 import { loginFailure, loginRequest } from "../../store/slices/auth/slice";
 import { selectLoginModalOpen } from "../../store/slices/client/selector";
-import { closeLoginModal } from "../../store/slices/client/slice";
+import {
+  closeLoginModal,
+  openForgotAccountModal,
+} from "../../store/slices/client/slice";
 import type { LoginPayload } from "../../types";
 import Button from "../common/Button";
 import InputField from "../inputs/InputField";
@@ -83,6 +86,11 @@ export default function LoginModal() {
       return () => clearTimeout(timer);
     }
   }, [loginStatus.error, dispatch]);
+
+  const handleClickForgotAccount = () => {
+    onClose();
+    dispatch(openForgotAccountModal());
+  };
 
   const onClose = () => {
     dispatch(closeLoginModal());
@@ -189,9 +197,14 @@ export default function LoginModal() {
                         </span>
                       </div>
                     )}
-                    <span className="text-sm font-semibold text-DTND-200 text-right">
-                      Quên mật khẩu?
-                    </span>
+                    <div className="ml-auto">
+                      <span
+                        className="text-sm font-semibold text-DTND-200 hover:text-DTND-300 cursor-pointer hover:underline"
+                        onClick={handleClickForgotAccount}
+                      >
+                        Quên mật khẩu?
+                      </span>
+                    </div>
                   </div>
 
                   <Button
@@ -210,7 +223,7 @@ export default function LoginModal() {
                 </form>
                 <span className="text-sm font-medium text-text-title text-center">
                   Chưa có tài khoản?{" "}
-                  <span className="font-semibold text-DTND-200">
+                  <span className="text-sm font-semibold text-DTND-200 hover:text-DTND-300 cursor-pointer hover:underline">
                     Mở tài khoản
                   </span>
                 </span>
