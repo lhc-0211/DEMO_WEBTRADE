@@ -1,3 +1,4 @@
+import { BsCash } from "react-icons/bs";
 import type { SidebarItemGroup } from "../types/layout";
 
 import { HiCursorArrowRays } from "react-icons/hi2";
@@ -48,16 +49,16 @@ export const SIDE_BAR_GROUPS: SidebarItemGroup[] = [
       // },
     ],
   },
-  // {
-  //   id: "group_3",
-  //   items: [
-  //     {
-  //       id: "account_settings",
-  //       title: "Tài khoản",
-  //       path: "/account",
-  //       icon: AccountSettings,
-  //       requiresLogin: true,
-  //     },
-  //   ],
-  // },
+  {
+    id: "group_3",
+    items: [
+      {
+        id: "assets",
+        title: "Tài sản",
+        path: "/assets",
+        icon: BsCash,
+        requiresLogin: true,
+      },
+    ],
+  },
 ];

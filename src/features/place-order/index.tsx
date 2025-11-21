@@ -1,7 +1,7 @@
-import OrderHisDetail from "../../../components/stock/OrderHisDetail.tsx";
-import { usePerfectScrollbar } from "../../../hooks/usePerfectScrollbar.ts";
-import OrderForm from "../components/order-form/OrderForm.tsx";
-import OrderTable from "../components/order-table/OrderTable.tsx";
+import OrderHisDetail from "../../components/stock/OrderHisDetail.tsx";
+import { usePerfectScrollbar } from "../../hooks/usePerfectScrollbar.ts";
+import OrderForm from "./components/order-form/OrderForm.tsx";
+import OrderTable from "./components/order-table/OrderTable.tsx";
 
 export default function PlaceOrder() {
   const { containerRef } = usePerfectScrollbar();

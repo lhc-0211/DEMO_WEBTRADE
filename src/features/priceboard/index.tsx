@@ -1,12 +1,12 @@
 import { useState } from "react";
 
-import { useAppDispatch, useAppSelector } from "../../../store/hook";
-import { selectDetailSymbol } from "../../../store/slices/stock/selector";
-import { setDetailSymbol } from "../../../store/slices/stock/slice";
-import Board from "../components/board";
-import MenuDashboard from "../components/menu-board";
-import StockDetailModal from "../components/stock-detail";
-import SynAnalysisPriceBoard from "../components/synthetic-analysis";
+import { useAppDispatch, useAppSelector } from "../../store/hook";
+import { selectDetailSymbol } from "../../store/slices/stock/selector";
+import { setDetailSymbol } from "../../store/slices/stock/slice";
+import Board from "./components/board";
+import MenuDashboard from "./components/menu-board";
+import StockDetailModal from "./components/stock-detail";
+import SynAnalysisPriceBoard from "./components/synthetic-analysis";
 
 export default function PriceBoard() {
   const dispatch = useAppDispatch();

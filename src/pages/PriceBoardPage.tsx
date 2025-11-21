@@ -1,4 +1,4 @@
-import { PriceBoard } from "../features/priceboard";
+import PriceBoard from "../features/priceboard";
 
 export default function PriceBoardPage() {
   return <PriceBoard />;
