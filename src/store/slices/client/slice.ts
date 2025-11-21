@@ -2,6 +2,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ApiStatus } from "../../../types";
 import type {
   AccountProfile,
+  ChangeAccountAvaPayload,
   ChangeAccountInfoActionPayload,
   ChangeNicknamePayload,
   CheckNicknameDataResponse,
@@ -20,6 +21,7 @@ export interface ClientState {
     fetchChangeNickname: ApiStatus;
     fetchCheckNickname: ApiStatus;
     fetchChangeAccountInfo: ApiStatus;
+    fetchChangeAccountAva: ApiStatus;
   };
 }
 
@@ -36,6 +38,7 @@ const initialState: ClientState = {
     fetchChangeNickname: { loading: false, error: null, success: false },
     fetchCheckNickname: { loading: false, error: null },
     fetchChangeAccountInfo: { loading: false, error: null, success: false },
+    fetchChangeAccountAva: { loading: false, error: null, success: false },
   },
 };
 
@@ -157,6 +160,39 @@ const clientSlice = createSlice({
         error: null,
       };
     },
+
+    //Đổi thông ava tài khoản
+    fetchChangeAccountAvaRequest: (
+      state,
+      action: PayloadAction<ChangeAccountAvaPayload>
+    ) => {
+      state.status.fetchChangeAccountAva = {
+        loading: true,
+        error: null,
+        success: false,
+      };
+    },
+    fetchChangeAccountAvaSuccess: (state) => {
+      state.status.fetchChangeAccountAva = {
+        loading: false,
+        error: null,
+        success: true,
+      };
+    },
+    fetchChangeAccountAvaFailure: (state, action: PayloadAction<string>) => {
+      state.status.fetchChangeAccountAva = {
+        loading: false,
+        error: action.payload,
+        success: false,
+      };
+    },
+    resetFetchChangeAccountAva: (state) => {
+      state.status.fetchChangeAccountAva = {
+        loading: false,
+        success: false,
+        error: null,
+      };
+    },
   },
 });
 
@@ -180,5 +216,9 @@ export const {
   fetchChangeAccountInfoSuccess,
   fetchChangeAccountInfoFailure,
   resetFetchChangeAccountInfo,
+  fetchChangeAccountAvaRequest,
+  fetchChangeAccountAvaSuccess,
+  fetchChangeAccountAvaFailure,
+  resetFetchChangeAccountAva,
 } = clientSlice.actions;
 export default clientSlice.reducer;

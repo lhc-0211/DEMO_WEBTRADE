@@ -1,10 +1,19 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useRef, useState } from "react";
+import _ from "lodash";
+import { useEffect, useRef, useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { MdOutlineFileUpload } from "react-icons/md";
 import Modal from "react-modal";
 import ScaleLoader from "react-spinners/ScaleLoader";
+import { usePrevious } from "../../../../hooks/usePrevious";
 import { useToast } from "../../../../hooks/useToast";
+import { useAppDispatch, useAppSelector } from "../../../../store/hook";
+import { selectFectchAccountAvaStatus } from "../../../../store/slices/client/selector";
+import {
+  fetchAccountProfileRequest,
+  fetchChangeAccountAvaRequest,
+  resetFetchChangeAccountAva,
+} from "../../../../store/slices/client/slice";
 import type { AccountProfile } from "../../../../types/client";
 import Button from "../../../common/Button";
 
@@ -33,13 +42,40 @@ export default function ChangeAvaAccountModal({
   accountProfile: AccountProfile | null;
   onClose: () => void;
 }) {
+  const dispatch = useAppDispatch();
   const toast = useToast();
+
+  const { loading, success } = useAppSelector(selectFectchAccountAvaStatus);
+
   const inputFileRef = useRef<HTMLInputElement>(null);
 
   const [file, setFile] = useState<File | null>(null);
   const [preView, setPreView] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState<number>(0);
+
+  const preSuccess = usePrevious(success);
+
+  useEffect(() => {
+    if (!success || _.isEqual(preSuccess, success)) return;
+    const handleAfterSuccess = async () => {
+      try {
+        // Gọi lại API lấy thông tin tài khoản
+        await dispatch(fetchAccountProfileRequest());
+        toast("Đổi ava thành công!", "success");
+
+        handleClose();
+      } catch (err: unknown) {
+        toast(err + "", "error");
+      }
+    };
+
+    handleAfterSuccess();
+
+    return () => {
+      dispatch(resetFetchChangeAccountAva());
+    };
+  }, [success, dispatch, toast]);
 
   const handleChangeImg = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -68,28 +104,47 @@ export default function ChangeAvaAccountModal({
       const formData = new FormData();
       formData.append("avatar", file);
 
-      // Gọi API upload avatar
-      // await apiUploadAvatar(formData);
+      const sessionId = localStorage.getItem("sessionId");
 
-      // ví dụ giả lập
-      await new Promise<void>((resolve) => {
+      // Upload avatar
+      const uploadResponse = await new Promise<{
+        fileName: string;
+        url: string;
+      }>((resolve, reject) => {
         let percent = 0;
-
         const timer = setInterval(() => {
-          percent += Math.floor(Math.random() * 10) + 5; // tăng ngẫu nhiên 5–15%
-
-          if (percent >= 100) {
-            percent = 100;
-            clearInterval(timer);
-            resolve(); // hoàn tất giả lập
-          }
-
-          setProgress(percent); // cập nhật UI
-          console.log("Upload:", percent + "%");
+          percent += Math.floor(Math.random() * 10) + 5; // 5–15%
+          if (percent >= 90) percent = 90;
+          setProgress(percent);
         }, 150);
+
+        const headers: Record<string, string> = {};
+        if (sessionId) headers["X-Session-ID"] = sessionId;
+
+        fetch(`${import.meta.env.VITE_API_BASE_URL}/accounts/avatar`, {
+          method: "POST",
+          body: formData,
+          headers,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (!data.url) throw new Error("Upload thất bại");
+            setProgress(100);
+            resolve(data);
+          })
+          .catch(reject)
+          .finally(() => clearInterval(timer));
       });
 
-      handleClose();
+      // Chuẩn bị param để dispatch
+      const param = {
+        CHANNEL: "M",
+        BACK_GROUND_IMG: accountProfile?.cBackGroundImg || "",
+        AVATAR_IMG_DEFAULT: accountProfile?.cAvatarDefault || "",
+        AVATAR_IMG: uploadResponse.url || "", // gán URL mới
+      };
+
+      dispatch(fetchChangeAccountAvaRequest(param));
     } catch (err: unknown) {
       toast(err + "", "error");
     } finally {
@@ -173,7 +228,7 @@ export default function ChangeAvaAccountModal({
 
                   {/* Avatar */}
                   <div
-                    className="absolute inset-0 rounded-full w-22 h-22 bg-center bg-cover border border-yellow-500 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]"
+                    className="absolute inset-0 rounded-full w-22 h-22 bg-center bg-cover bg-no-repeat border border-yellow-500 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]"
                     style={{
                       backgroundImage: `url(${
                         preView || accountProfile?.cAvatarImg
@@ -208,17 +263,21 @@ export default function ChangeAvaAccountModal({
                   variant="primary"
                   fullWidth
                   onClick={() => submit()}
-                  disabled={isLoading}
+                  disabled={isLoading || loading}
                   className="h-10!"
                 >
-                  {isLoading ? <ScaleLoader height={25} /> : "Xác nhận"}
+                  {isLoading && loading ? (
+                    <ScaleLoader height={25} />
+                  ) : (
+                    "Xác nhận"
+                  )}
                 </Button>
                 <Button
                   variant="close"
                   fullWidth
                   className="h-10!"
                   type="button"
-                  disabled={isLoading}
+                  disabled={isLoading || loading}
                   onClick={handleClose}
                 >
                   Quay lại
