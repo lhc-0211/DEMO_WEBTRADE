@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { IoClose } from "react-icons/io5";
 import Modal from "react-modal";
+import { createSwapy, type Swapy } from "swapy";
 import Button from "../../../../components/common/Button";
 import InputSearchFieldStock, {
   type OptionType,
@@ -63,8 +64,31 @@ export default function StockDetailModal({
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const prevSymbolKeyRef = useRef<string | null>(null);
+  const swapyRef = useRef<Swapy | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const [isOpenSearch, setIsOpenSearch] = useState<boolean>(false); // mở hiện input search
+
+  useEffect(() => {
+    if (containerRef.current) {
+      swapyRef.current = createSwapy(containerRef.current, {
+        // animation: 'dynamic'
+        // swapMode: 'drop',
+        // autoScrollOnDrag: true,
+        // enabled: true,
+        // dragAxis: 'x',
+        // dragOnHold: true
+      });
+
+      swapyRef.current.onSwapEnd((e) => {
+        console.log("swap", e);
+      });
+    }
+
+    return () => {
+      swapyRef.current?.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -324,7 +348,7 @@ export default function StockDetailModal({
                 </h2>
               </div>
               <div className="col-span-2 grid grid-cols-2 max-xl:grid-cols-1 gap-1 overflow-hidden">
-                <div className="col-span-1 grid grid-rows-2 gap-1 rounded-md">
+                {/* <div className="col-span-1 grid grid-rows-2 gap-1 rounded-md">
                   <div className="w-full h-full bg-surface rounded-md p-2">
                     <h2 className="text-sm font-medium text-text-title h-[161px]">
                       Chờ mua / bán
@@ -335,7 +359,34 @@ export default function StockDetailModal({
                       Bước giá
                     </h2>
                   </div>
+                </div> */}
+                <div
+                  ref={containerRef}
+                  className="grid grid-rows-2 gap-1 rounded-md"
+                >
+                  <div
+                    data-swapy-slot="a"
+                    className="w-full h-full bg-surface rounded-md p-2"
+                  >
+                    <div data-swapy-item="a" className="block w-full h-full ">
+                      <h2 className="text-sm font-medium text-text-title">
+                        Chờ mua / bán
+                      </h2>
+                    </div>
+                  </div>
+
+                  <div
+                    data-swapy-slot="b"
+                    className="w-full h-full bg-surface rounded-md p-2"
+                  >
+                    <div data-swapy-item="b" className="block w-full h-full ">
+                      <h2 className="text-sm font-medium text-text-title">
+                        Bước giá
+                      </h2>
+                    </div>
+                  </div>
                 </div>
+
                 <div className="col-span-1 bg-surface rounded-md">
                   <h2 className="text-sm font-medium text-text-title p-2">
                     Chi tiết khớp lệnh
