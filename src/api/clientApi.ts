@@ -1,6 +1,8 @@
 import { apiClient } from "../services/apiClient";
 import type {
   AccountProfileResponse,
+  ChangeAccountAvaPayload,
+  ChangeAccountAvaResponse,
   ChangeAccountInfoPayload,
   ChangeAccountInfoResponse,
   ChangeNicknamePayload,
@@ -44,6 +46,17 @@ export const fetchChangeAccInfoApi = async (
         "X-Otp": otp,
       },
     }
+  );
+
+  return res.data;
+};
+
+export const fetchChangeAccAvaApi = async (
+  params: ChangeAccountAvaPayload
+): Promise<ChangeAccountAvaResponse> => {
+  const res = await apiClient.put<ChangeAccountAvaResponse>(
+    "/accounts/changeAvatar",
+    params
   );
 
   return res.data;

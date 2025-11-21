@@ -5,11 +5,14 @@ import {
   changeNicknameApi,
   checkNicknameApi,
   fetchAccountProfileAPI,
+  fetchChangeAccAvaApi,
   fetchChangeAccInfoApi,
 } from "../../../api/clientApi";
 import { showToast } from "../../../hooks/useToast";
 import type {
   AccountProfileResponse,
+  ChangeAccountAvaPayload,
+  ChangeAccountAvaResponse,
   ChangeAccountInfoActionPayload,
   ChangeAccountInfoResponse,
   ChangeNicknamePayload,
@@ -19,6 +22,9 @@ import {
   fetchAccountProfileFailure,
   fetchAccountProfileRequest,
   fetchAccountProfileSuccess,
+  fetchChangeAccountAvaFailure,
+  fetchChangeAccountAvaRequest,
+  fetchChangeAccountAvaSuccess,
   fetchChangeAccountInfoFailure,
   fetchChangeAccountInfoRequest,
   fetchChangeAccountInfoSuccess,
@@ -152,9 +158,40 @@ function* fetchChangeAccountInfoSaga(
   }
 }
 
+function* fetchChangeAccountAvaSaga(
+  action: PayloadAction<ChangeAccountAvaPayload>
+) {
+  try {
+    const res: ChangeAccountAvaResponse = yield call(
+      fetchChangeAccAvaApi,
+      action.payload
+    );
+
+    if (res.rc < 1) {
+      showToast(res.msg || "Thất bại", "error");
+      yield put(fetchChangeAccountAvaFailure(res.msg || "Thất bại"));
+      throw Error(res.msg || "Thất bại");
+    }
+    yield put(fetchChangeAccountAvaSuccess());
+  } catch (error: unknown) {
+    let errorMessage = "Failed to fetch info index";
+
+    if (axios.isAxiosError(error)) {
+      // Nếu server trả về JSON chứa msg
+      errorMessage = error.response?.data?.msg || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    showToast(errorMessage, "error");
+    yield put(fetchChangeAccountAvaFailure(errorMessage));
+  }
+}
+
 export default function* clientSaga() {
   yield takeLatest(fetchAccountProfileRequest, fetchAccountProfileSaga);
   yield takeLatest(fetchCheckNicknameRequest, fetchCheckNicknameSaga);
   yield takeLatest(fetchChangeNicknameRequest, fetchChangeNicknameSaga);
   yield takeLatest(fetchChangeAccountInfoRequest, fetchChangeAccountInfoSaga);
+  yield takeLatest(fetchChangeAccountAvaRequest, fetchChangeAccountAvaSaga);
 }

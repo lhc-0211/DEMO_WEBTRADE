@@ -1,11 +1,13 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AnimatePresence, motion } from "framer-motion";
+import _ from "lodash";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { IoClose } from "react-icons/io5";
 import Modal from "react-modal";
 import ScaleLoader from "react-spinners/ScaleLoader";
 import * as yup from "yup";
+import { usePrevious } from "../../../../hooks/usePrevious";
 import { useToast } from "../../../../hooks/useToast";
 import { useAppDispatch, useAppSelector } from "../../../../store/hook";
 import { selectFectchAccountInfoStatus } from "../../../../store/slices/client/selector";
@@ -82,8 +84,10 @@ export default function ChangeAccountInfoModal({
 
   const { loading, success } = useAppSelector(selectFectchAccountInfoStatus);
 
+  const preSuccess = usePrevious(success);
+
   useEffect(() => {
-    if (!success) return;
+    if (!success || _.isEqual(preSuccess, success)) return;
     const handleAfterSuccess = async () => {
       try {
         // Gọi lại API lấy thông tin tài khoản

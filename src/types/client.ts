@@ -108,6 +108,23 @@ export type ChangeAccountInfoActionPayload = ChangeAccountInfoPayload & {
   otp: string;
 };
 
+export interface ChangeAccountAvaPayload {
+  CHANNEL: string;
+  BACK_GROUND_IMG: string;
+  AVATAR_IMG_DEFAULT: string;
+  AVATAR_IMG: string;
+}
+
+export interface ChangeAccountAvaResponse {
+  rc: number;
+  msg: string | null;
+  data?: {
+    cAccountCode: string;
+    cAvatarImg: string;
+    cBackGroundImg: string;
+  };
+}
+
 export type ChangeAccountInfoType = "email" | "address" | "phoneNumber";
 
 export type AccountSettingTypes = "infor" | "accBen";
