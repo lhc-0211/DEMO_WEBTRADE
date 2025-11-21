@@ -180,7 +180,7 @@ export default function ChangeAccountInfoModal({
               contentLabel="Thay đổi thông tin tài khoản"
               ariaHideApp={false}
               style={customStyles}
-              closeTimeoutMS={350}
+              closeTimeoutMS={25}
               overlayClassName="ReactModal__Overlay"
               className="ReactModal__Content"
             >
@@ -189,7 +189,7 @@ export default function ChangeAccountInfoModal({
                 initial={{ opacity: 0, scale: 0.95, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+                transition={{ duration: 0.1, ease: "easeOut" }}
                 className="flex flex-col gap-4 rounded-xl"
               >
                 <div className="flex flex-col rounded-xl border border-border bg-background-primary">

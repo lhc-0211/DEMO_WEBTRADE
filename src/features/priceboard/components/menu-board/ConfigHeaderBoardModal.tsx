@@ -33,7 +33,7 @@ export default function CongfigHeaderBoardModal(props: Props) {
         contentLabel="Cài đặt cột bảng giá"
         ariaHideApp={false}
         style={customStyles}
-        closeTimeoutMS={350} // phải trùng với thời gian transition
+        closeTimeoutMS={25} // phải trùng với thời gian transition
         overlayClassName="ReactModal__Overlay"
         className="ReactModal__Content"
       >
@@ -42,7 +42,7 @@ export default function CongfigHeaderBoardModal(props: Props) {
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          transition={{ duration: 0.25, ease: "easeOut" }}
+          transition={{ duration: 0.1, ease: "easeOut" }}
           className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-2xl"
         >
           <div className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-xl border border-border bg-background-primary">

@@ -8,7 +8,7 @@
   background-color: rgba(0, 0, 0, 0.25) !important;
   backdrop-filter: blur(2px);
   opacity: 0;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.025s ease;
 }
 
 .ReactModal__Overlay--after-open {
@@ -34,7 +34,7 @@
   box-shadow: 0 20px 75px rgba(0, 0, 0, 0.23);
   transform: scale(0.95) translateY(-15px);
   opacity: 0;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.025s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ReactModal__Content--after-open {

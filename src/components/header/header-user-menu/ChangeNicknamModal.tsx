@@ -163,7 +163,7 @@ export default function ChangeNicknameModal({
           contentLabel="Thay đổi nickname"
           ariaHideApp={false}
           style={customStyles}
-          closeTimeoutMS={350}
+          closeTimeoutMS={25}
           overlayClassName="ReactModal__Overlay"
           className="ReactModal__Content"
         >
@@ -172,7 +172,7 @@ export default function ChangeNicknameModal({
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            transition={{ duration: 0.1, ease: "easeOut" }}
             className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-xl"
           >
             <div className="flex flex-col gap-4 p-4 rounded-xl border border-border bg-background-primary">
