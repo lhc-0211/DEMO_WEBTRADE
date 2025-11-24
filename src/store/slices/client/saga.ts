@@ -7,6 +7,10 @@ import {
   fetchAccountProfileAPI,
   fetchChangeAccAvaApi,
   fetchChangeAccInfoApi,
+  fetchDeleteBeneficiaryApi,
+  fetchListBankApi,
+  fetchListBeneficiaryApi,
+  fetchUpdateBeneficiaryApi,
 } from "../../../api/clientApi";
 import { showToast } from "../../../hooks/useToast";
 import type {
@@ -17,6 +21,12 @@ import type {
   ChangeAccountInfoResponse,
   ChangeNicknamePayload,
   ChangeNicknameResponse,
+  DeleteBeneficiaryActionPayload,
+  DeleteBeneficiaryResponse,
+  ListBank,
+  ListBeneficiary,
+  UpdateBeneficiaryActionPayload,
+  UpdateBeneficiaryResponse,
 } from "../../../types/client";
 import {
   fetchAccountProfileFailure,
@@ -34,6 +44,18 @@ import {
   fetchCheckNicknameFailure,
   fetchCheckNicknameRequest,
   fetchCheckNicknameSuccess,
+  fetchDeleteBeneficiaryFailure,
+  fetchDeleteBeneficiaryRequest,
+  fetchDeleteBeneficiarySuccess,
+  fetchListBankFailure,
+  fetchListBankRequest,
+  fetchListBankSuccess,
+  fetchListBeneficiaryFailure,
+  fetchListBeneficiaryRequest,
+  fetchListBeneficiarySuccess,
+  fetchUpdateBeneficiaryFailure,
+  fetchUpdateBeneficiaryRequest,
+  fetchUpdateBeneficiarySuccess,
 } from "./slice";
 
 function* fetchAccountProfileSaga() {
@@ -41,8 +63,6 @@ function* fetchAccountProfileSaga() {
     const res: AccountProfileResponse = yield call(fetchAccountProfileAPI);
 
     if (res.rc < 1) {
-      showToast(res.msg || "Thất bại", "error");
-
       put(fetchAccountProfileFailure(res.msg || "Thất bại"));
       throw Error(res.msg || "Thất bại");
     }
@@ -71,8 +91,6 @@ function* fetchCheckNicknameSaga(action: PayloadAction<string>) {
     );
 
     if (res.rc < 1) {
-      showToast(res.msg || "Thất bại", "error");
-
       put(fetchCheckNicknameFailure(res.msg || "Thất bại"));
       throw Error(res.msg || "Thất bại");
     }
@@ -103,8 +121,6 @@ function* fetchChangeNicknameSaga(
     );
 
     if (res.rc < 1) {
-      showToast(res.msg || "Thất bại", "error");
-
       yield put(fetchChangeNicknameFailure(res.msg || "Thất bại"));
       throw Error(res.msg || "Thất bại");
     }
@@ -138,7 +154,6 @@ function* fetchChangeAccountInfoSaga(
     );
 
     if (res.rc < 1) {
-      showToast(res.msg || "Thất bại", "error");
       yield put(fetchChangeAccountInfoFailure(res.msg || "Thất bại"));
       throw Error(res.msg || "Thất bại");
     }
@@ -168,7 +183,6 @@ function* fetchChangeAccountAvaSaga(
     );
 
     if (res.rc < 1) {
-      showToast(res.msg || "Thất bại", "error");
       yield put(fetchChangeAccountAvaFailure(res.msg || "Thất bại"));
       throw Error(res.msg || "Thất bại");
     }
@@ -188,10 +202,130 @@ function* fetchChangeAccountAvaSaga(
   }
 }
 
+function* fetchListBankSaga() {
+  try {
+    const res: ListBank = yield call(fetchListBankApi);
+
+    if (res.rc < 1) {
+      put(fetchListBankFailure(res.msg || "Thất bại"));
+      throw Error(res.msg || "Thất bại");
+    }
+
+    yield put(fetchListBankSuccess(res.data ?? []));
+  } catch (error: unknown) {
+    let errorMessage = "Failed to fetch info index";
+
+    if (axios.isAxiosError(error)) {
+      // Nếu server trả về JSON chứa msg
+      errorMessage = error.response?.data?.msg || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    showToast(errorMessage, "error");
+    yield put(fetchListBankFailure(errorMessage));
+  }
+}
+
+function* fetchUpdateBeneficiarySaga(
+  action: PayloadAction<UpdateBeneficiaryActionPayload>
+) {
+  try {
+    const { otp, params } = action.payload;
+
+    const res: UpdateBeneficiaryResponse = yield call(
+      fetchUpdateBeneficiaryApi,
+      params,
+      otp
+    );
+
+    if (res.rc < 1) {
+      yield put(fetchUpdateBeneficiaryFailure(res.msg || "Thất bại"));
+      throw Error(res.msg || "Thất bại");
+    }
+
+    yield put(fetchUpdateBeneficiarySuccess());
+  } catch (error: unknown) {
+    let errorMessage = "Failed to fetch info index";
+
+    if (axios.isAxiosError(error)) {
+      // Nếu server trả về JSON chứa msg
+      errorMessage = error.response?.data?.msg || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    showToast(errorMessage, "error");
+    yield put(fetchUpdateBeneficiaryFailure(errorMessage));
+  }
+}
+
+function* fetchListBeneficiarySaga() {
+  try {
+    const res: ListBeneficiary = yield call(fetchListBeneficiaryApi);
+
+    if (res.rc < 1) {
+      put(fetchListBeneficiaryFailure(res.msg || "Thất bại"));
+      throw Error(res.msg || "Thất bại");
+    }
+
+    yield put(fetchListBeneficiarySuccess(res.data ?? []));
+  } catch (error: unknown) {
+    let errorMessage = "Failed to fetch info index";
+
+    if (axios.isAxiosError(error)) {
+      // Nếu server trả về JSON chứa msg
+      errorMessage = error.response?.data?.msg || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    showToast(errorMessage, "error");
+    yield put(fetchListBeneficiaryFailure(errorMessage));
+  }
+}
+
+function* fetchDeleteBeneficiarySaga(
+  action: PayloadAction<DeleteBeneficiaryActionPayload>
+) {
+  try {
+    const { otp, params } = action.payload;
+
+    const res: DeleteBeneficiaryResponse = yield call(
+      fetchDeleteBeneficiaryApi,
+      params,
+      otp
+    );
+
+    if (res.rc < 1) {
+      yield put(fetchDeleteBeneficiaryFailure(res.msg || "Thất bại"));
+      throw Error(res.msg || "Thất bại");
+    }
+
+    yield put(fetchDeleteBeneficiarySuccess());
+  } catch (error: unknown) {
+    let errorMessage = "Failed to fetch info index";
+
+    if (axios.isAxiosError(error)) {
+      // Nếu server trả về JSON chứa msg
+      errorMessage = error.response?.data?.msg || error.message;
+    } else if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+
+    showToast(errorMessage, "error");
+    yield put(fetchDeleteBeneficiaryFailure(errorMessage));
+  }
+}
+
 export default function* clientSaga() {
   yield takeLatest(fetchAccountProfileRequest, fetchAccountProfileSaga);
   yield takeLatest(fetchCheckNicknameRequest, fetchCheckNicknameSaga);
   yield takeLatest(fetchChangeNicknameRequest, fetchChangeNicknameSaga);
   yield takeLatest(fetchChangeAccountInfoRequest, fetchChangeAccountInfoSaga);
   yield takeLatest(fetchChangeAccountAvaRequest, fetchChangeAccountAvaSaga);
+  yield takeLatest(fetchListBankRequest, fetchListBankSaga);
+  yield takeLatest(fetchUpdateBeneficiaryRequest, fetchUpdateBeneficiarySaga);
+  yield takeLatest(fetchListBeneficiaryRequest, fetchListBeneficiarySaga);
+  yield takeLatest(fetchDeleteBeneficiaryRequest, fetchDeleteBeneficiarySaga);
 }

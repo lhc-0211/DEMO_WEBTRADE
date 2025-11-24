@@ -84,7 +84,7 @@ export default function AccountSetting({
               backgroundImage: `url(${accountProfile?.cBackGroundImg})`,
             }}
           >
-            <div className="bg-primary-darker rounded-md p-1 flex flex-row gap-1 absolute top-1 right-1">
+            <div className="bg-primary-darker rounded-md p-1 flex flex-row gap-1 absolute top-1 right-2">
               <TbCameraPlus className="text-text-title" />
               <span className="text-xs font-normal text-text-title">
                 Thay ảnh bìa

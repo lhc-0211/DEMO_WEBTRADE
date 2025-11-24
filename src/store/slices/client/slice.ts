@@ -2,10 +2,14 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ApiStatus } from "../../../types";
 import type {
   AccountProfile,
+  BankDetail,
+  Beneficiary,
   ChangeAccountAvaPayload,
   ChangeAccountInfoActionPayload,
+  ChangeNicknameDataResponse,
   ChangeNicknamePayload,
-  CheckNicknameDataResponse,
+  DeleteBeneficiaryActionPayload,
+  UpdateBeneficiaryActionPayload,
 } from "../../../types/client";
 
 export interface ClientState {
@@ -14,7 +18,9 @@ export interface ClientState {
     forgotAccountModalOpen: boolean;
     accountProfile: AccountProfile | null;
     sessionExpired: boolean;
-    checkNickname: CheckNicknameDataResponse | null;
+    checkNickname: ChangeNicknameDataResponse | null;
+    listBank: BankDetail[];
+    listBeneficiary: Beneficiary[];
   };
   status: {
     fetchAccountProfile: ApiStatus;
@@ -22,6 +28,10 @@ export interface ClientState {
     fetchCheckNickname: ApiStatus;
     fetchChangeAccountInfo: ApiStatus;
     fetchChangeAccountAva: ApiStatus;
+    fetchListBank: ApiStatus;
+    fetchUpdateBeneficiary: ApiStatus;
+    fetchDeleteBeneficiary: ApiStatus;
+    fetchListBeneficiary: ApiStatus;
   };
 }
 
@@ -32,6 +42,8 @@ const initialState: ClientState = {
     accountProfile: null,
     sessionExpired: false,
     checkNickname: null,
+    listBank: [],
+    listBeneficiary: [],
   },
   status: {
     fetchAccountProfile: { loading: false, error: null },
@@ -39,6 +51,10 @@ const initialState: ClientState = {
     fetchCheckNickname: { loading: false, error: null },
     fetchChangeAccountInfo: { loading: false, error: null, success: false },
     fetchChangeAccountAva: { loading: false, error: null, success: false },
+    fetchListBank: { loading: false, error: null },
+    fetchUpdateBeneficiary: { loading: false, error: null, success: false },
+    fetchDeleteBeneficiary: { loading: false, error: null, success: false },
+    fetchListBeneficiary: { loading: false, error: null },
   },
 };
 
@@ -89,7 +105,7 @@ const clientSlice = createSlice({
     },
     fetchCheckNicknameSuccess(
       state,
-      action: PayloadAction<CheckNicknameDataResponse | null>
+      action: PayloadAction<ChangeNicknameDataResponse | null>
     ) {
       state.status.fetchCheckNickname = { loading: false, error: null };
       state.data.checkNickname = action.payload;
@@ -193,32 +209,162 @@ const clientSlice = createSlice({
         error: null,
       };
     },
+
+    // list ngân hàng
+    fetchListBankRequest: (state) => {
+      state.status.fetchListBank = { loading: true, error: null };
+      state.data.listBank = [];
+    },
+    fetchListBankSuccess: (state, action: PayloadAction<BankDetail[]>) => {
+      state.status.fetchListBank = { loading: false, error: null };
+      state.data.listBank = action.payload;
+    },
+    fetchListBankFailure: (state, action: PayloadAction<string>) => {
+      state.status.fetchListBank = {
+        loading: false,
+        error: action.payload,
+      };
+      state.data.listBank = [];
+    },
+
+    // list tài khoản thụ hưởng
+    fetchListBeneficiaryRequest: (state) => {
+      state.status.fetchListBeneficiary = { loading: true, error: null };
+      state.data.listBeneficiary = [];
+    },
+    fetchListBeneficiarySuccess: (
+      state,
+      action: PayloadAction<Beneficiary[]>
+    ) => {
+      state.status.fetchListBeneficiary = { loading: false, error: null };
+      state.data.listBeneficiary = action.payload;
+    },
+    fetchListBeneficiaryFailure: (state, action: PayloadAction<string>) => {
+      state.status.fetchListBeneficiary = {
+        loading: false,
+        error: action.payload,
+      };
+      state.data.listBeneficiary = [];
+    },
+
+    // thêm ngân hàng
+    fetchUpdateBeneficiaryRequest: (
+      state,
+      action: PayloadAction<UpdateBeneficiaryActionPayload>
+    ) => {
+      state.status.fetchUpdateBeneficiary = {
+        loading: true,
+        error: null,
+        success: false,
+      };
+    },
+    fetchUpdateBeneficiarySuccess: (state) => {
+      state.status.fetchUpdateBeneficiary = {
+        loading: false,
+        error: null,
+        success: true,
+      };
+    },
+    fetchUpdateBeneficiaryFailure: (state, action: PayloadAction<string>) => {
+      state.status.fetchUpdateBeneficiary = {
+        loading: false,
+        error: action.payload,
+        success: false,
+      };
+    },
+    resetFetchUpdateBeneficiary: (state) => {
+      state.status.fetchUpdateBeneficiary = {
+        loading: false,
+        success: false,
+        error: null,
+      };
+    },
+
+    // xóa ngân hàng
+    fetchDeleteBeneficiaryRequest: (
+      state,
+      action: PayloadAction<DeleteBeneficiaryActionPayload>
+    ) => {
+      state.status.fetchDeleteBeneficiary = {
+        loading: true,
+        error: null,
+        success: false,
+      };
+    },
+    fetchDeleteBeneficiarySuccess: (state) => {
+      state.status.fetchDeleteBeneficiary = {
+        loading: false,
+        error: null,
+        success: true,
+      };
+    },
+    fetchDeleteBeneficiaryFailure: (state, action: PayloadAction<string>) => {
+      state.status.fetchDeleteBeneficiary = {
+        loading: false,
+        error: action.payload,
+        success: false,
+      };
+    },
+    resetFetchDeleteAccountBen: (state) => {
+      state.status.fetchDeleteBeneficiary = {
+        loading: false,
+        success: false,
+        error: null,
+      };
+    },
   },
 });
 
 export const {
   openLoginModal,
+
   closeLoginModal,
+
   openForgotAccountModal,
+
   closeForgotLoginModal,
+
   setSessionExpired,
+
   fetchAccountProfileRequest,
   fetchAccountProfileSuccess,
   fetchAccountProfileFailure,
+
   fetchCheckNicknameRequest,
   fetchCheckNicknameSuccess,
   fetchCheckNicknameFailure,
+
   fetchChangeNicknameRequest,
   fetchChangeNicknameSuccess,
   fetchChangeNicknameFailure,
   resetFetchChangeNickname,
+
   fetchChangeAccountInfoRequest,
   fetchChangeAccountInfoSuccess,
   fetchChangeAccountInfoFailure,
   resetFetchChangeAccountInfo,
+
   fetchChangeAccountAvaRequest,
   fetchChangeAccountAvaSuccess,
   fetchChangeAccountAvaFailure,
   resetFetchChangeAccountAva,
+
+  fetchListBankRequest,
+  fetchListBankSuccess,
+  fetchListBankFailure,
+
+  fetchUpdateBeneficiaryRequest,
+  fetchUpdateBeneficiarySuccess,
+  fetchUpdateBeneficiaryFailure,
+  resetFetchUpdateBeneficiary,
+
+  fetchDeleteBeneficiaryRequest,
+  fetchDeleteBeneficiarySuccess,
+  fetchDeleteBeneficiaryFailure,
+  resetFetchDeleteAccountBen,
+
+  fetchListBeneficiaryRequest,
+  fetchListBeneficiarySuccess,
+  fetchListBeneficiaryFailure,
 } = clientSlice.actions;
 export default clientSlice.reducer;

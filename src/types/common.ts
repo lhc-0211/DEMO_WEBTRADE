@@ -24,3 +24,11 @@ export type ValueSelect = {
   value: string;
   label: string;
 };
+
+/* ==== Base API Response===== */
+
+export type ApiResponse<T> = {
+  rc: number;
+  msg: string | null;
+  data?: T;
+};

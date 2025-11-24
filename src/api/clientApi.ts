@@ -7,6 +7,11 @@ import type {
   ChangeAccountInfoResponse,
   ChangeNicknamePayload,
   ChangeNicknameResponse,
+  DeleteBeneficiaryPayload,
+  DeleteBeneficiaryResponse,
+  ListBank,
+  UpdateBeneficiaryPayload,
+  UpdateBeneficiaryResponse,
 } from "../types/client";
 
 export async function fetchAccountProfileAPI(): Promise<AccountProfileResponse> {
@@ -57,6 +62,54 @@ export const fetchChangeAccAvaApi = async (
   const res = await apiClient.put<ChangeAccountAvaResponse>(
     "/accounts/changeAvatar",
     params
+  );
+
+  return res.data;
+};
+
+// === List bank API ===
+export async function fetchListBankApi(): Promise<ListBank> {
+  const res = await apiClient.get("/accounts/listBank");
+
+  return res.data;
+}
+
+// === Thêm mới tài khoản thụ hưởng ===
+export const fetchUpdateBeneficiaryApi = async (
+  params: UpdateBeneficiaryPayload,
+  otp?: string
+): Promise<UpdateBeneficiaryResponse> => {
+  const headers = otp ? { "X-Otp": otp } : undefined;
+
+  const res = await apiClient.post<UpdateBeneficiaryResponse>(
+    "/accounts/updateBeneficiary",
+    params,
+    { headers }
+  );
+
+  return res.data;
+};
+
+// === List account ben ===
+export async function fetchListBeneficiaryApi(): Promise<UpdateBeneficiaryResponse> {
+  const res = await apiClient.get("/accounts/listBeneficiary");
+
+  return res.data;
+}
+
+// ==== Xóa tài khoản thụ hưởng =====
+export const fetchDeleteBeneficiaryApi = async (
+  params: DeleteBeneficiaryPayload,
+  otp?: string
+): Promise<DeleteBeneficiaryResponse> => {
+  const headers = otp ? { "X-Otp": otp } : undefined;
+
+  const res = await apiClient.delete<DeleteBeneficiaryResponse>(
+    "/accounts/deleteBeneficiary",
+    {
+      headers,
+      data: params,
+    }
   );
 
   return res.data;
