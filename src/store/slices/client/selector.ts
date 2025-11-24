@@ -2,8 +2,12 @@ import type { RootState } from "../..";
 import type { ApiStatus } from "../../../types";
 import type {
   AccountProfile,
-  CheckNicknameDataResponse,
+  BankDetail,
+  Beneficiary,
+  ChangeNicknameDataResponse,
 } from "../../../types/client";
+
+/** =============DATA============= */
 
 export const selectLoginModalOpen = (state: RootState): boolean =>
   state.client.data.loginModalOpen;
@@ -28,10 +32,30 @@ export const selectCheckNicknameStatus = (state: RootState): ApiStatus =>
 
 export const selectCheckNickname = (
   state: RootState
-): CheckNicknameDataResponse | null => state.client.data.checkNickname;
+): ChangeNicknameDataResponse | null => state.client.data.checkNickname;
+
+export const selectListBank = (state: RootState): BankDetail[] =>
+  state.client.data.listBank;
+
+export const selectListBeneficiary = (state: RootState): Beneficiary[] =>
+  state.client.data.listBeneficiary;
+
+/** =====================STATUS=================== */
 
 export const selectFectchAccountInfoStatus = (state: RootState): ApiStatus =>
   state.client.status.fetchChangeAccountInfo;
 
 export const selectFectchAccountAvaStatus = (state: RootState): ApiStatus =>
   state.client.status.fetchChangeAccountAva;
+
+export const selectListBankStatus = (state: RootState): ApiStatus =>
+  state.client.status.fetchListBank;
+
+export const selectUpdateBeneficiaryStatus = (state: RootState): ApiStatus =>
+  state.client.status.fetchUpdateBeneficiary;
+
+export const selectListBeneficiaryStatus = (state: RootState): ApiStatus =>
+  state.client.status.fetchListBeneficiary;
+
+export const selectDeleteBeneficiaryStatus = (state: RootState): ApiStatus =>
+  state.client.status.fetchDeleteBeneficiary;

@@ -1,10 +1,15 @@
-import { yupResolver } from "@hookform/resolvers/yup";
 import { AnimatePresence, motion } from "framer-motion";
+import _ from "lodash";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { IoClose } from "react-icons/io5";
 import Modal from "react-modal";
-import * as yup from "yup";
+import { usePrevious } from "../../../../hooks/usePrevious";
+import { useToast } from "../../../../hooks/useToast";
+import { useAppDispatch, useAppSelector } from "../../../../store/hook";
+import { selectToken } from "../../../../store/slices/auth/selector";
+import { selectUpdateBeneficiaryStatus } from "../../../../store/slices/client/selector";
+import { fetchUpdateBeneficiaryRequest } from "../../../../store/slices/client/slice";
 import type {
   AccountBenAddForm,
   AccountProfile,
@@ -12,12 +17,7 @@ import type {
 import ConfirmOtpModal from "../../../auth/ConfirmOtpModal";
 import Button from "../../../common/Button";
 import InputField from "../../../inputs/InputField";
-
-const schema = yup.object({
-  bank: yup.string().required("Vui lòng nhập ngân hàng"),
-  accountNumber: yup.string().required("Vui lòng nhập số tài khoản"),
-  accountName: yup.string().required("Vui lòng nhập tên tài khoản"),
-});
+import InputSearchFieldBank from "../../../inputs/InputSearchFieldBank";
 
 const customStyles = {
   content: {
@@ -44,6 +44,12 @@ export default function AccountBenAddModal({
   onClose: () => void;
   accountProfile: AccountProfile | null;
 }) {
+  const dispatch = useAppDispatch();
+  const token = useAppSelector(selectToken);
+  const { success, loading } = useAppSelector(selectUpdateBeneficiaryStatus);
+
+  const toast = useToast();
+
   const [step, setStep] = useState<1 | 2>(1);
 
   const {
@@ -51,10 +57,19 @@ export default function AccountBenAddModal({
     handleSubmit,
     reset,
     setValue,
+    getValues,
+    control,
     formState: { errors, isSubmitting },
-  } = useForm<AccountBenAddForm>({
-    resolver: yupResolver(schema),
-  });
+  } = useForm<AccountBenAddForm>();
+
+  const preSuccess = usePrevious(success);
+
+  useEffect(() => {
+    if (!success || _.isEqual(success, preSuccess)) return;
+
+    // toast("Đã thêm tài khoản thụ hưởng thành công!", "success");
+    onCloseModal();
+  }, [preSuccess, success, toast]);
 
   useEffect(() => {
     if (accountProfile && isOpen) {
@@ -87,7 +102,22 @@ export default function AccountBenAddModal({
     }
   };
 
-  const handleAddAccountBen = () => {};
+  const handleAddAccountBen = (otp: string) => {
+    const data = getValues();
+
+    const { bank, accountNumber } = data;
+
+    const params = {
+      accountAuthor: token?.cCustomerCode || "",
+      accountType: "BANK",
+      bankCode: bank?.bankCode || "",
+      bankAccountCode: accountNumber || "",
+      channel: "I",
+      defaultFlag: 0,
+    };
+
+    dispatch(fetchUpdateBeneficiaryRequest({ params, otp }));
+  };
 
   return (
     <AnimatePresence>
@@ -131,19 +161,56 @@ export default function AccountBenAddModal({
                     onSubmit={handleSubmit(onSubmit)}
                     className="flex flex-col gap-2 p-4"
                   >
-                    <InputField
+                    {/* <InputField
                       label="Ngân hàng"
                       type="bank"
                       placeholder="Nhập ngân hàng"
                       registration={register("bank")}
                       error={errors.bank}
                       requied={true}
-                    />
+                    /> */}
+                    <div className="flex flex-col gap-1">
+                      <label htmlFor="label-search-bank">
+                        <span className="font-medium text-sm text-text-title">
+                          Ngân hàng
+                        </span>
+                        <span className="text-red-500 text-xs font-medium">
+                          {" "}
+                          *
+                        </span>
+                      </label>
+                      <Controller
+                        name="bank"
+                        control={control}
+                        rules={{ required: "Vui lòng chọn ngân hàng" }}
+                        render={({ field, fieldState }) => (
+                          <div>
+                            <InputSearchFieldBank
+                              onChange={field.onChange}
+                              placeholder="Tìm kiếm ngân hàng"
+                              className={`h-11! ${
+                                fieldState.error
+                                  ? "border! border-red-500!"
+                                  : ""
+                              }`}
+                            />
+                            {fieldState.error && (
+                              <p className="text-red-500 text-xs mt-1">
+                                {fieldState.error.message}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      />
+                    </div>
+
                     <InputField
                       label="Số tài khoản"
                       type="text"
-                      placeholder="Nhập địa chỉ mới"
-                      registration={register("accountNumber")}
+                      placeholder="Nhập số tài khoản"
+                      registration={register("accountNumber", {
+                        required: "Vui lòng nhập số tài khoản",
+                      })}
                       error={errors.accountNumber}
                       requied={true}
                     />
@@ -190,6 +257,7 @@ export default function AccountBenAddModal({
               onClose={() => onCloseModal()}
               onPre={() => onPreModal()}
               onSubmit={handleAddAccountBen}
+              loading={loading}
             />
           )}
         </>

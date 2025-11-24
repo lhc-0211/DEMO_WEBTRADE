@@ -73,7 +73,7 @@ export default function Header() {
         />
 
         <MdZoomOutMap
-          className="text-lg"
+          className="text-lg cursor-pointer"
           onClick={() => handleToggleFullscreen()}
         />
 

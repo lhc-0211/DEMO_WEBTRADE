@@ -1,15 +1,17 @@
 import { useState } from "react";
 
 const useDropdownAnimationMulti = () => {
-  const [hoverId, setHoverId] = useState<number | null>(null);
-  const [animatingOutId, setAnimatingOutId] = useState<number | null>(null);
+  const [hoverId, setHoverId] = useState<number | string | null>(null);
+  const [animatingOutId, setAnimatingOutId] = useState<number | string | null>(
+    null
+  );
 
-  const handleMouseEnter = (id: number) => {
+  const handleMouseEnter = (id: number | string) => {
     setHoverId(id);
     setAnimatingOutId(null);
   };
 
-  const handleMouseLeave = (id: number) => {
+  const handleMouseLeave = (id: number | string) => {
     setAnimatingOutId(id);
 
     setTimeout(() => {
@@ -18,7 +20,7 @@ const useDropdownAnimationMulti = () => {
     }, 200);
   };
 
-  const closeDropdown = (id: number) => {
+  const closeDropdown = (id: number | string) => {
     if (hoverId === id) {
       setHoverId(null);
       setAnimatingOutId(null);

@@ -1,3 +1,8 @@
+/* ===== Account Profile===== */
+
+import type { OptionTypeBank } from "../components/inputs/InputSearchFieldBank";
+import type { ApiResponse } from "./common";
+
 export interface AccountProfileValue {
   pkCustCustomer: string;
   cBranchCode: string;
@@ -51,11 +56,9 @@ export interface AccountProfileValue {
 
 export type AccountProfile = Partial<AccountProfileValue>;
 
-export type AccountProfileResponse = {
-  rc: number;
-  msg: string | undefined;
-  data?: AccountProfile;
-};
+export type AccountProfileResponse = ApiResponse<AccountProfile>;
+
+/* ====Change Nickname===== */
 
 export interface ChangeNicknamePayload {
   ACTION_TYPE: string;
@@ -65,21 +68,19 @@ export interface ChangeNicknamePayload {
 
 export interface ChangeNicknameForm {
   actionType: string;
-  password: string | undefined;
+  password?: string;
   nickname: string;
 }
 
-export interface ChangeNicknameResponse {
-  rc: number;
-  msg: string | null;
-  data?: {
-    cAccountCode: string;
-    cNickName: string;
-    cChangeDate: string;
-  };
-}
+export type ChangeNicknameResponse = ApiResponse<{
+  cAccountCode: string;
+  cNickName: string;
+  cChangeDate: string;
+}>;
 
-export type CheckNicknameDataResponse = ChangeNicknameResponse["data"];
+export type ChangeNicknameDataResponse = ChangeNicknameResponse["data"];
+
+/* ====Change Account Info==== */
 
 export interface ChangeAccountInfoForm {
   email: string;
@@ -87,14 +88,10 @@ export interface ChangeAccountInfoForm {
   phoneNumber: string;
 }
 
-export interface ChangeAccountInfoResponse {
-  rc: number;
-  msg: string | null;
-  data?: {
-    C_ACCOUNT_CODE: string;
-    C_CHANGE_DATE: string;
-  };
-}
+export type ChangeAccountInfoResponse = ApiResponse<{
+  C_ACCOUNT_CODE: string;
+  C_CHANGE_DATE: string;
+}>;
 
 export type ChangeAccountInfoDataResponse = ChangeAccountInfoResponse["data"];
 
@@ -108,6 +105,10 @@ export type ChangeAccountInfoActionPayload = ChangeAccountInfoPayload & {
   otp: string;
 };
 
+export type ChangeAccountInfoType = "email" | "address" | "phoneNumber";
+
+/* ====Change Avatar==== */
+
 export interface ChangeAccountAvaPayload {
   CHANNEL: string;
   BACK_GROUND_IMG: string;
@@ -115,22 +116,94 @@ export interface ChangeAccountAvaPayload {
   AVATAR_IMG: string;
 }
 
-export interface ChangeAccountAvaResponse {
-  rc: number;
-  msg: string | null;
-  data?: {
-    cAccountCode: string;
-    cAvatarImg: string;
-    cBackGroundImg: string;
-  };
-}
+export type ChangeAccountAvaResponse = ApiResponse<{
+  cAccountCode: string;
+  cAvatarImg: string;
+  cBackGroundImg: string;
+}>;
 
-export type ChangeAccountInfoType = "email" | "address" | "phoneNumber";
+/* ===== Account Setting ===== */
 
 export type AccountSettingTypes = "infor" | "accBen";
+
+/* ===== Beneficiary Account ===== */
 
 export interface AccountBenAddForm {
   accountName: string;
   accountNumber: string;
-  bank: string;
+  bank: OptionTypeBank;
 }
+
+/* ==== Bank List ==== */
+
+export interface BankDetail {
+  pkBank: string;
+  bankCode: string;
+  bankName: string;
+  shortName: string;
+  englishBankName: string;
+  onlineVpb: string;
+  bankKey: string;
+  flagForeign: number;
+}
+
+export type ListBank = ApiResponse<BankDetail[]>;
+
+/** === List tài khoản thụ hưởng === */
+
+export type Beneficiary = {
+  pkBen: string;
+  customerCode: string;
+  customerName: string;
+  accountType: string;
+  accountTypeName: string;
+  bankCode: string | null;
+  bankName: string;
+  shortName: string;
+  bankAccountCode: string;
+  bankAccountName: string | null;
+  provinceCode: string | null;
+  provinceName: string | null;
+  bankBranchName: string | null;
+  content: string;
+  creatorCode: string;
+  createTime: string;
+  openDate: string;
+  status: string;
+  defaultFlag: number;
+  active: number;
+  approverCode: string | null;
+};
+
+export type ListBeneficiary = ApiResponse<Beneficiary[]>;
+
+/* ==== Update Beneficiary ==== */
+
+export type UpdateBeneficiaryPayload = {
+  accountAuthor: string;
+  accountType: string;
+  bankCode: string;
+  bankAccountCode: string;
+  channel: string;
+  defaultFlag: number;
+};
+
+export type UpdateBeneficiaryActionPayload = {
+  params: UpdateBeneficiaryPayload;
+  otp?: string;
+};
+
+export type UpdateBeneficiaryResponse = ApiResponse<null>;
+
+/** ==== Delete Beneficiary ==== */
+export type DeleteBeneficiaryPayload = {
+  id: string;
+  channel: string;
+};
+
+export type DeleteBeneficiaryActionPayload = {
+  params: DeleteBeneficiaryPayload;
+  otp?: string;
+};
+
+export type DeleteBeneficiaryResponse = ApiResponse<null>;

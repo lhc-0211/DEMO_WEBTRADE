@@ -110,9 +110,6 @@ export default function ForgotAccountModal() {
             transition={{
               duration: 0.1,
               ease: "easeOut",
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
             }}
             className="flex flex-col gap-4 bg-cover bg-no-repeat bg-center rounded-xl"
             style={{
