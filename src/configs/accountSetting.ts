@@ -10,4 +10,8 @@ export const ACCOUNT_SETTING: { label: string; value: AccountSettingTypes }[] =
       label: "Tài khoản thụ hưởng",
       value: "accBen",
     },
+    {
+      label: "Bảo mật",
+      value: "security",
+    },
   ];

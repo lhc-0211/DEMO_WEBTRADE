@@ -124,7 +124,7 @@ export type ChangeAccountAvaResponse = ApiResponse<{
 
 /* ===== Account Setting ===== */
 
-export type AccountSettingTypes = "infor" | "accBen";
+export type AccountSettingTypes = "infor" | "accBen" | "security";
 
 /* ===== Beneficiary Account ===== */
 
