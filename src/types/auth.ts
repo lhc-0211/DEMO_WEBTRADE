@@ -50,3 +50,9 @@ export interface ForgotAccountForm {
   password: string;
   passwordConfirm: string;
 }
+
+export interface ChangePassAccountForm {
+  passwordOld: string;
+  password: string;
+  passwordConfirm: string;
+}

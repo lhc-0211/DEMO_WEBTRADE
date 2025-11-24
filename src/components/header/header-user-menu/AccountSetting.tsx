@@ -13,6 +13,7 @@ import AccountBen from "./account-ben";
 import AccountInfo from "./account-info";
 import AccountHeaderSkeleton from "./account-info/AccountHeaderSkeleton";
 import ChangeAvaAccountModal from "./account-info/ChangeAvaAccountModal";
+import AccountSecurity from "./account-security";
 import ChangeNicknameModal from "./ChangeNicknamModal";
 
 export default function AccountSetting({
@@ -155,6 +156,15 @@ export default function AccountSetting({
         {/* Tài khoản thụ hưởng */}
         {accountSettingType === "accBen" && (
           <AccountBen
+            handleOpenModal={handleOpenModal}
+            handleCloseModal={handleCloseModal}
+            accountProfile={accountProfile}
+          />
+        )}
+
+        {/* Bảo mật */}
+        {accountSettingType === "security" && (
+          <AccountSecurity
             handleOpenModal={handleOpenModal}
             handleCloseModal={handleCloseModal}
             accountProfile={accountProfile}

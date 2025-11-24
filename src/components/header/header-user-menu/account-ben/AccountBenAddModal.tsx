@@ -8,7 +8,10 @@ import { usePrevious } from "../../../../hooks/usePrevious";
 import { useToast } from "../../../../hooks/useToast";
 import { useAppDispatch, useAppSelector } from "../../../../store/hook";
 import { selectToken } from "../../../../store/slices/auth/selector";
-import { selectUpdateBeneficiaryStatus } from "../../../../store/slices/client/selector";
+import {
+  selectListBeneficiary,
+  selectUpdateBeneficiaryStatus,
+} from "../../../../store/slices/client/selector";
 import { fetchUpdateBeneficiaryRequest } from "../../../../store/slices/client/slice";
 import type {
   AccountBenAddForm,
@@ -46,6 +49,7 @@ export default function AccountBenAddModal({
 }) {
   const dispatch = useAppDispatch();
   const token = useAppSelector(selectToken);
+  const listBeneficiary = useAppSelector(selectListBeneficiary);
   const { success, loading } = useAppSelector(selectUpdateBeneficiaryStatus);
 
   const toast = useToast();
@@ -113,7 +117,7 @@ export default function AccountBenAddModal({
       bankCode: bank?.bankCode || "",
       bankAccountCode: accountNumber || "",
       channel: "I",
-      defaultFlag: 0,
+      defaultFlag: listBeneficiary && listBeneficiary.length > 0 ? 0 : 1,
     };
 
     dispatch(fetchUpdateBeneficiaryRequest({ params, otp }));
