@@ -24,6 +24,7 @@ function Board({ id }: BoardProps) {
   useEffect(() => {
     const handleVisibility = () => {
       socketClient.setTabActive(!document.hidden);
+      socketClient.clearQueue();
     };
 
     window.addEventListener("visibilitychange", handleVisibility);
@@ -36,7 +37,6 @@ function Board({ id }: BoardProps) {
 
   useEffect(() => {
     if (!windowIsActive) return;
-    socketClient.clearQueue();
     const needRefresh = shouldRefreshAfterInactive(60_000);
 
     if (needRefresh) {

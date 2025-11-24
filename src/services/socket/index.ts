@@ -34,8 +34,7 @@ worker.onmessage = (e: MessageEvent<WorkerOutputMessage>) => {
 };
 
 // ==================== CONST ====================
-const BASE_URL =
-  import.meta.env.VITE_WS_BASE_URL || "wss://event.dtnd.vn/events";
+const BASE_URL = import.meta.env.VITE_WS_BASE_URL;
 const MAX_RECONNECT = 8;
 const BASE_DELAY = 1500;
 
@@ -211,6 +210,7 @@ const parseMessage = (raw: string): void => {
 
     snapshots.set(symbol, snapshot);
     pendingBatch.push(snapshot);
+
     scheduleBatch();
     messageHandlers.forEach((h) => h(snapshot));
 

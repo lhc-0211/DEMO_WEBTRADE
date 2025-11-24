@@ -21,7 +21,6 @@ const prevSnapshots = new Map<string, SnapshotDataCompact>();
 
 let isTabActive = true;
 
-// =====================================================
 const processQueue = (): void => {
   if (isProcessing) return;
   isProcessing = true;
@@ -58,17 +57,28 @@ const processQueue = (): void => {
           for (const key of KEYS_COLOR) {
             const newVal = cacheNew[key];
             const oldVal = cacheOld[key];
-            if (!newVal || !oldVal || newVal === oldVal) continue;
+            // if (!newVal || !oldVal || newVal === oldVal) continue;
+            if (newVal != null && oldVal != null && newVal === oldVal) continue;
 
             let flashClass: PriceCompare | "u" | "d" | "t" | null = null;
 
             if (key.includes("price") || key.includes("Price")) {
               flashClass = snapshot.trade?.[13] ?? prev.trade?.[13] ?? null;
             } else if (key.includes("volume") || key.includes("Volume")) {
-              const n = parseInt(newVal.replace(/,/g, ""), 10);
-              const o = parseInt(oldVal.replace(/,/g, ""), 10);
-              if (!isNaN(n) && !isNaN(o)) {
-                flashClass = n > o ? "u" : "d";
+              if (oldVal == null && newVal != null) {
+                flashClass = "u";
+              }
+              // Trường hợp từ có -> trống
+              else if (oldVal != null && newVal == null) {
+                flashClass = "d";
+              }
+              // Cả hai đều có giá trị -> so sánh số
+              else if (newVal != null && oldVal != null) {
+                const n = parseInt(newVal.replace(/,/g, ""), 10);
+                const o = parseInt(oldVal.replace(/,/g, ""), 10);
+                if (!isNaN(n) && !isNaN(o)) {
+                  flashClass = n > o ? "u" : n < o ? "d" : null;
+                }
               }
             } else if (key === "high") {
               flashClass =
